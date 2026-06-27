@@ -19,6 +19,8 @@ app.use(requestLogger)
 const cors = require('cors')
 app.use(cors())
 
+app.use(express.static('dist'))
+
 // 辅助函数
 const generateId = () => {
   const maxId = notes.length > 0
@@ -102,6 +104,6 @@ app.use(unknownEndpoint)
 // 启动服务器
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log('Server running on env:', process.env)
+  // console.log('Server running on env:', process.env)
   console.log(`Server running on port ${PORT}`)
 })
