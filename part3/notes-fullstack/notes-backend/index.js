@@ -1,3 +1,5 @@
+const Note = require('./models/note')
+
 const express = require('express')
 const app = express()
 
@@ -20,7 +22,7 @@ const cors = require('cors')
 app.use(cors())
 
 app.use(express.static('dist'))
-
+/*
 // 辅助函数
 const generateId = () => {
   const maxId = notes.length > 0
@@ -28,12 +30,13 @@ const generateId = () => {
     : 0
   return String(maxId + 1)
 }
-
+*/
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
 // 数据
+/*
 let notes = [
   {
     id: "1",
@@ -51,6 +54,7 @@ let notes = [
     important: true
   }
 ]
+*/
 
 // 路由
 app.get('/', (request, response) => {
@@ -58,18 +62,20 @@ app.get('/', (request, response) => {
 })
 
 app.get('/api/notes', (request, response) => {
-  response.json(notes)
+  Note.find({}).then(notes => {
+    response.json(notes.map(n => n.toJSON()))
+  })
 })
 
 app.get('/api/notes/:id', (request, response) => {
   const id = request.params.id
-  const note = notes.find(note => note.id === id)
-
-  if (note) {
-    response.json(note)
-  } else {
-    response.status(404).end()
-  }
+  Note.findById(id).then(note => {
+    if (note) {
+      response.json(note.toJSON())
+    } else {
+      response.status(404).end()
+    }
+  })
 })
 
 app.post('/api/notes', (request, response) => {
@@ -81,21 +87,21 @@ app.post('/api/notes', (request, response) => {
     })
   }
 
-  const note = {
+  const note = new Note({
     content: body.content,
     important: body.important || false,
-    id: generateId(),
-  }
+  })
 
-  notes = notes.concat(note)
-
-  response.json(note)
+  note.save().then(savedNote => {
+    response.status(201).json(savedNote.toJSON())
+  })
 })
 
 app.delete('/api/notes/:id', (request, response) => {
   const id = request.params.id
-  notes = notes.filter(note => note.id !== id)
-  response.status(204).end()
+  Note.findByIdAndDelete(id).then(() => {
+    response.status(204).end()
+  })
 })
 
 // 兜底中间件
