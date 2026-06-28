@@ -9,7 +9,7 @@ const App = () => {
   const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
-  const [errorMessage, setErrorMessage] = useState('some error happened...')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const hook = () => {
     console.log('effect')
@@ -84,7 +84,10 @@ const App = () => {
           <Note 
             key={note.id} 
             note={note} 
-            toggleImportance={() => toggleImportanceOf(note.id)} 
+            toggleImportance={() => toggleImportanceOf(note.id)}
+            deleteNote={() => notesService.deleteNote(note.id).then(() => {
+              setNotes(notes.filter(n => n.id !== note.id))
+            })}
           />
         )}
       </ul>
