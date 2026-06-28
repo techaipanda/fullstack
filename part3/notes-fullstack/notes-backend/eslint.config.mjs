@@ -8,6 +8,6 @@ export default defineConfig([
   { files: ["**/*.js"], languageOptions: { sourceType: "commonjs" } },
   { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
   { 
-    ignores: ['dist/**'], 
+    ignores: ['dist/**', 'package-lock.json', 'pnpm-lock.yaml'],
   },
 ]);
