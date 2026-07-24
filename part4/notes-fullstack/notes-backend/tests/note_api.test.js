@@ -38,7 +38,57 @@ test('a specific note is within the returned notes', async () => {
   assert(contents.includes('Browser can execute only JavaScript'))
 })
 
-test('a valid note can be added ', async () => {
+test('a specific note can be viewed', async () => {
+  const notesAtStart = await helper.notesInDb()
+  const noteToView = notesAtStart[0]
+
+  const response = await api
+    .get(`/api/notes/${noteToView.id}`)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  assert.strictEqual(response.body.content, noteToView.content)
+})
+
+test('a note with a malformed id returns 400', async () => {
+  await api
+    .get('/api/notes/1')
+    .expect(400)
+})
+
+test('a note with a valid but nonexistent id returns 404', async () => {
+  const nonexistentId = await helper.nonExistingId()
+
+  await api
+    .get(`/api/notes/${nonexistentId}`)
+    .expect(404)
+})
+
+test('a note can be deleted', async () => {
+  const notesAtStart = await helper.notesInDb()
+  const noteToDelete = notesAtStart[0]
+
+  await api
+    .delete(`/api/notes/${noteToDelete.id}`)
+    .expect(204)
+
+  const notesAtEnd = await helper.notesInDb()
+  assert.strictEqual(notesAtEnd.length, notesAtStart.length - 1)
+  assert(!notesAtEnd.some(note => note.id === noteToDelete.id))
+})
+
+test('deleting a nonexistent note succeeds with 204', async () => {
+  const nonexistentId = await helper.nonExistingId()
+
+  await api
+    .delete(`/api/notes/${nonexistentId}`)
+    .expect(204)
+
+  const notesAtEnd = await helper.notesInDb()
+  assert.strictEqual(notesAtEnd.length, helper.initialNotes.length)
+})
+
+test('a valid note can be added', async () => {
   const newNote = {
     content: 'async/await simplifies making async calls',
     important: true,
@@ -53,7 +103,7 @@ test('a valid note can be added ', async () => {
   const notesAtEnd = await helper.notesInDb()
   assert.strictEqual(notesAtEnd.length, helper.initialNotes.length + 1)
 
-  const contents = notesAtEnd.map(n => n.content)
+  const contents = notesAtEnd.map(note => note.content)
   assert(contents.includes('async/await simplifies making async calls'))
 })
 
