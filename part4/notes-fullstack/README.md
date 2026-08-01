@@ -53,6 +53,52 @@ npm run dev
 
 打开 `http://localhost:5173`。前端通过 Vite 代理把 `/api/*` 转发到 `http://localhost:3001`，因此本地无跨域问题。
 
+## 一键启动脚本（推荐）
+
+`scripts/` 目录里提供了开箱即用的启动 / 停止脚本，自动拉起 MongoDB、后端、前端，免去手动开两个终端并按顺序启动。核心逻辑在 `scripts/dev.js`，`*.sh` / `*.bat` 只是按平台转发。
+
+| 平台 | 启动 | 停止 |
+|---|---|---|
+| macOS / Linux | `scripts/start.sh` | `scripts/stop.sh` |
+| Windows | `scripts\start.bat` | `scripts\stop.bat` |
+
+### macOS 用法
+
+首次使用前先给两个 shell 脚本加执行权限（`start.sh` 已带 x 位，但 `stop.sh` 只有读权限）：
+
+```bash
+cd /path/to/notes-fullstack
+chmod +x scripts/start.sh scripts/stop.sh
+```
+
+启动：
+
+```bash
+./scripts/start.sh
+# 或显式指定 bash，避免受默认 shell 影响
+bash scripts/start.sh
+```
+
+脚本会按顺序：检查 MongoDB → 启动后端（`localhost:3001`）→ 启动前端（`localhost:5173`），完成后自动打开浏览器。
+
+停止：
+
+```bash
+./scripts/stop.sh
+```
+
+### 常见问题
+
+- **`ECONNREFUSED` / 保存笔记失败**：通常是后端没起或刚启动还没就绪。直接用上面的 `start.sh`，它会保证前后端顺序起来。
+- **MongoDB 未运行**：本项目默认连 `mongodb://127.0.0.1:27017/notes`（见 `notes-backend/.env`）。本机需要先有 MongoDB，可选：
+  ```bash
+  # Homebrew
+  brew services start mongodb-community
+  # 或 Docker
+  docker run -d --name mongo -p 27017:27017 mongo:7
+  ```
+- **端口被占**：`stop.sh` 会清理本脚本启动过的子进程；如手动 `node index.js` 起过残留进程，可执行 `lsof -nP -iTCP:3001 -sTCP:LISTEN | awk 'NR>1{print $2}' | xargs kill` 强杀。
+
 ## 一体化构建
 
 后端提供 `build:ui` 脚本，把前端构建产物拷到后端目录：
