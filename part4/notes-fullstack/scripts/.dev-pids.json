@@ -1,0 +1,10 @@
+{
+  "backend": {
+    "pid": 35696,
+    "logFile": "D:\\workspace\\fullstack_workspace\\fullstack\\part4\\notes-fullstack\\scripts\\backend.dev.log"
+  },
+  "frontend": {
+    "pid": 3192,
+    "logFile": "D:\\workspace\\fullstack_workspace\\fullstack\\part4\\notes-fullstack\\scripts\\frontend.dev.log"
+  }
+}
