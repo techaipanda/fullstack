@@ -1,6 +1,6 @@
 # Notes Fullstack
 
-Full Stack Open Part 4 课程练习 —— 整合部署的笔记应用。
+Full Stack Open Part 5 课程练习 —— 整合部署的笔记应用。
 
 一个全栈单页应用：React 前端 + Express 后端 + REST API，前端构建产物由后端统一提供静态服务，可作为整体部署到 Render 等 PaaS 平台。
 
