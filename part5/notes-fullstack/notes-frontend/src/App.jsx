@@ -1,26 +1,34 @@
-// part5 a — App.jsx
-// 课程章节: "a — Login in frontend"
+// part5 b — App.jsx
+// 课程章节: "b — props.children and component refs"
 //
-// 注意:本文件严格按 Full Stack Open 官网 part5 a 章节最终代码 1:1 复刻。
-// 章节里把登录表单写成 App 内部的 loginForm() helper,
-// 不抽成独立的 LoginForm 组件——这与原书一致。
-// 唯一改动是顶部这一段中文注释 + 行内 part5 a 标记,便于学习定位。
-import { useState, useEffect } from 'react'
+// 本文件相对 part5 a 的关键改动:
+// 1. 引入 LoginForm、NoteForm、Togglable 三个新组件
+// 2. loginForm() 用 Togglable 包 LoginForm
+// 3. noteForm() 用 Togglable 包 NoteForm,并通过 useImperativeHandle
+//    暴露的 ref 在 addNote 后自动收起表单
+// 4. newNote state 从 App 移到 NoteForm 内部,addNote 改为接收 noteObject
+// 5. 创建的笔记 important 字段硬编码为 true(去掉 Math.random)
+//
+// 保留: handleLogin / handleLogout / 两个 useEffect(localStorage + getAll) /
+// toggleImportanceOf / Notification / Footer / 笔记列表 JSX 渲染
+import { useState, useEffect, useRef } from 'react'
 import noteService from './services/notes'
 import loginService from './services/login'
 import Note from './components/Note'
 import Notification from './components/Notification'
 import Footer from './components/Footer'
+import LoginForm from './components/LoginForm'
+import Togglable from './components/Togglable'
+import NoteForm from './components/NoteForm'
 
 const App = () => {
   const [notes, setNotes] = useState([])
-  const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
   // part5 a — 登录表单的两个受控输入
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  // part5 a — 当前登录用户,未登录为 null,登录后为 { token, username, name }
+  // part5 a — 当前登录用户
   const [user, setUser] = useState(null)
 
   // part5 a — 启动时拉取全部笔记
@@ -30,15 +38,11 @@ const App = () => {
     })
   }, [])
 
-  // part5 a — 启动时尝试从 localStorage 读回 user,实现"刷新仍保持登录"
-  // 注意:localStorage 的键名是 'loggedNoteappUser' (a 小写),严格按官网示例
+  // part5 a — 启动时尝试从 localStorage 读回 user
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      // 严格按 Full Stack Open part5 a 章节官方代码 1:1 复刻:
-      // 课程原文在 useEffect 内 setUser,把 localStorage 的 user 写回 state。
-      // 这是 React 19 之前的官方推荐写法;新版 react-hooks 插件会报此规则。
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(user)
       noteService.setToken(user.token)
@@ -46,8 +50,6 @@ const App = () => {
   }, [])
 
   // part5 a — handleLogin
-  // 成功:写 localStorage + noteService.setToken + setUser + 清空输入
-  // 失败:在顶部 Notification 显示 "wrong credentials",5 秒后消失
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
@@ -65,63 +67,48 @@ const App = () => {
     }
   }
 
-  // part5 a — handleLogout:清 localStorage + setUser(null)
-  // 注:官方示例没有清 noteService 模块里的 token——下一次 handleLogin 会覆盖
+  // part5 a — handleLogout
   const handleLogout = () => {
     window.localStorage.removeItem('loggedNoteappUser')
     setUser(null)
   }
 
-  // part5 a — loginForm() helper
-  // 官网把登录表单写成 App 内部的函数,不抽成组件
+  // part5 b — useRef 给 noteForm 一个引用,addNote 完成后收起表单
+  // ① useRef() 创建一个"跨 render 持久、不触发渲染"的盒子 { current: undefined }
+  //    (类似电视遥控器的"接收器"——盒子本身没功能,等 Togglable 主动塞东西进去)
+  const noteFormRef = useRef()
+
+  // part5 b — loginForm() 用 Togglable 包 LoginForm
   const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        <label>
-          username
-          <input
-            type="text"
-            value={username}
-            onChange={({ target }) => setUsername(target.value)}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          password
-          <input
-            type="password"
-            value={password}
-            onChange={({ target }) => setPassword(target.value)}
-          />
-        </label>
-      </div>
-      <button type="submit">login</button>
-    </form>
+    <Togglable buttonLabel='login'>
+      <LoginForm
+        username={username}
+        password={password}
+        handleUsernameChange={({ target }) => setUsername(target.value)}
+        handlePasswordChange={({ target }) => setPassword(target.value)}
+        handleSubmit={handleLogin}
+      />
+    </Togglable>
   )
 
-  // part5 a — noteForm() helper
+  // part5 b — noteForm() 用 Togglable 包 NoteForm
+  // ② ref={noteFormRef}:把盒子递给 Togglable,告诉它:"你要给我什么能力,请放进这个盒子"
   const noteForm = () => (
-    <form onSubmit={addNote}>
-      <input value={newNote} onChange={handleNoteChange} />
-      <button type="submit">save</button>
-    </form>
+    <Togglable buttonLabel='new note' ref={noteFormRef}>
+      <NoteForm createNote={addNote} />
+    </Togglable>
   )
 
-  const addNote = (event) => {
-    event.preventDefault()
-    const noteObject = {
-      content: newNote,
-      important: Math.random() > 0.5,
-    }
-    noteService.create(noteObject).then(returnedNote => {
-      setNotes(notes.concat(returnedNote))
-      setNewNote('')
-    })
-  }
-
-  const handleNoteChange = (event) => {
-    setNewNote(event.target.value)
+  // part5 b — addNote 改为接收 noteObject 参数
+  // 注意:课程原文先调 toggleVisibility() 再发请求,顺序固定
+  const addNote = (noteObject) => {
+    // ③ 按"盒子里的开关" → 实际就是调 Togglable 内部那个 toggleVisibility
+    noteFormRef.current.toggleVisibility()
+    noteService
+      .create(noteObject)
+      .then(returnedNote => {
+        setNotes(notes.concat(returnedNote))
+      })
   }
 
   const toggleImportanceOf = (id) => {
@@ -136,15 +123,12 @@ const App = () => {
     ? notes
     : notes.filter(note => note.important === true)
 
-  // part5 a — 条件渲染:
-  // 未登录 → loginForm()
-  // 已登录 → user.name + logout 按钮 + noteForm()
-  // 笔记列表与切换 important/all 的按钮不论是否登录都显示
   return (
     <div>
       <h1>Notes</h1>
       <Notification message={errorMessage} />
 
+      {/* part5 a — 条件渲染 + part5 b — loginForm/noteForm 用 Togglable 包装 */}
       {!user && loginForm()}
       {user && (
         <div>
