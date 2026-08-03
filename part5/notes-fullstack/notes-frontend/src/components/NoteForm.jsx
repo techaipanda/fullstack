@@ -1,7 +1,8 @@
 // part5 b — NoteForm 组件(自管 newNote state)
 // 章节: "b — State of the forms"
-// 把原本属于 App 的 newNote state + handleNoteChange 移到 NoteForm 内部,
-// App 只传 createNote 回调。注意课程原文把 important 硬编码为 true(去掉 Math.random)。
+// part5 c — "About finding the elements" 阶段,给 input 加 placeholder,
+// 让测试用 getByPlaceholderText 唯一定位该输入框。
+// 课程原文把 important 硬编码为 true(去掉 Math.random)。
 import { useState } from 'react'
 
 const NoteForm = ({ createNote }) => {
@@ -25,6 +26,7 @@ const NoteForm = ({ createNote }) => {
         <input
           value={newNote}
           onChange={event => setNewNote(event.target.value)}
+          placeholder='write note content here'
         />
         <button type="submit">save</button>
       </form>
