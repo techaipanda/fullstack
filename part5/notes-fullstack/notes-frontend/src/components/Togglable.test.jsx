@@ -32,12 +32,12 @@ describe('<Togglable />', () => {
 
   test('renders its children', () => {
     screen.getByText('togglable content')
-    screen.debug()
+    //screen.debug()
   })
 
   test('at start the children are not displayed', () => {
     const element = screen.getByText('togglable content')
-    screen.debug(element)
+    //screen.debug(element)
     expect(element).not.toBeVisible()
   })
 
@@ -47,7 +47,7 @@ describe('<Togglable />', () => {
     await user.click(button)
 
     const element = screen.getByText('togglable content')
-    screen.debug()
+    //screen.debug()
     expect(element).toBeVisible()
   })
 
