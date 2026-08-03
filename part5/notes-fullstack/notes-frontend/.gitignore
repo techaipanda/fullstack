@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# part5 c — Test coverage 生成的 HTML 报告目录
+coverage/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
