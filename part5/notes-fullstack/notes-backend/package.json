@@ -10,6 +10,7 @@
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development node --watch index.js",
     "test": "cross-env NODE_ENV=test node --test --test-concurrency=1",
+    "start:test": "cross-env NODE_ENV=test node --watch index.js",
     "build:ui": "npm install && rm -rf dist && cd ../notes-frontend && npm install && npm run build && cp -r dist ../notes-backend",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
     "lint": "eslint ."
