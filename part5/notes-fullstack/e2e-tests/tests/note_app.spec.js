@@ -1,10 +1,22 @@
-// part5d — Testing our own code
-const { test, describe, expect } = require('@playwright/test')
+// ===== part5d — Test initialization(课程 1:1)=====
+// 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#test-initialization
+// 课程原文(代码块 1)逐字 1:1 复刻:
+//   1. require 多解构出 beforeEach
+//   2. describe 顶层加 beforeEach({ page }) => page.goto('http://localhost:5173')
+//   3. 各 test 内部不再各自 page.goto(共享 beforeEach)
+//
+// 课程 d.5 在此节做的事:把"打开浏览器 → 访问首页"抽到 beforeEach,
+// 让后续每个 test 不重复写 page.goto。
+// 这是 Playwright 的标准实践——按 test isolation,每个 test 独立 page,
+// 但"准备新页面"是公用步骤。
+const { test, describe, expect, beforeEach } = require('@playwright/test')
 
 describe('Note app', () => {
-  test('front page can be opened', async ({ page }) => {
+  beforeEach(async ({ page }) => {
     await page.goto('http://localhost:5173')
+  })
 
+  test('front page can be opened', async ({ page }) => {
     const locator = page.getByText('Notes')
     await expect(locator).toBeVisible()
     await expect(page.getByText('Note app, Department of Computer Science, University of Helsinki 2025')).toBeVisible()
@@ -26,8 +38,6 @@ describe('Note app', () => {
   // 用户 mluukkai/salainen / name 'Matti Luukkainen' 按课程原文 1:1 复刻,
   // 由 test_helper.js 在 backend 启动时 seed(与现有 root/sekret 共存)。
   test('user can log in', async ({ page }) => {
-    await page.goto('http://localhost:5173')
-
     await page.getByRole('button', { name: 'login' }).click()
     await page.getByLabel('username').fill('mluukkai')
     await page.getByLabel('password').fill('salainen')
