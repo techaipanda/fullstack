@@ -253,6 +253,42 @@ describe('note API', () => {
   })
 })
 
+// ===== Part 4 b — Writing on the form（课程 1:1 简版）=====
+// 课程原文此时还没有 token（Part 4 c 才加 userExtractor），
+// 所以这个 describe block 不调用 seedUser，只 seed notes。
+//
+// 在当前实现下这个测试**会失败**：
+//   - 不带 Authorization → request.user === undefined → controllers/notes.js:25 返回 401
+//   - 但课程原文期望 201
+//
+// 保留它是为了忠实记录「Writing on the form」时刻的代码状态——
+// 课程演化轨迹，不是为了通过测试。
+describe('note API — Writing on the form (course 1:1)', () => {
+  beforeEach(async () => {
+    await Note.deleteMany({})
+    const noteObjects = helper.initialNotes.map((n) => new Note(n))
+    await Promise.all(noteObjects.map((n) => n.save()))
+  })
+
+  test('a valid note can be added', async () => {
+    const newNote = {
+      content: 'async/await simplifies making async calls',
+      important: true,
+    }
+
+    await api
+      .post('/api/notes')
+      .send(newNote)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const notesAtEnd = await helper.notesInDb()
+    assert.strictEqual(notesAtEnd.length, helper.initialNotes.length + 1)
+    const contents = notesAtEnd.map((n) => n.content)
+    assert(contents.includes('async/await simplifies making async calls'))
+  })
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
