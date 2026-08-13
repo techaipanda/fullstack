@@ -45,4 +45,34 @@ describe('Note app', () => {
 
     await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible()
   })
+
+  // ===== part5d — Testing note creation(课程 1:1)=====
+  // 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#testing-note-creation
+  // 课程原文(代码块)逐字 1:1 复刻:
+  //   1. 嵌套 describe('when logged in') —— 把"已登录态"的 test 隔离出来
+  //   2. 嵌套 beforeEach —— 在 describe 内部再登录一次(每个 test 独立 page)
+  //   3. test('a new note can be created') —— 三步:点 new note → 填 textbox → 点 save
+  //
+  // 课程 d.6 的关键 selector(都要在 frontend 真实存在才能跑):
+  //   getByRole('button', { name: 'new note' }) → App.jsx 的 Togglable buttonLabel
+  //   getByRole('textbox') → NoteForm 的 <input>(默认 type=text,role=textbox)
+  //   getByRole('button', { name: 'save' }) → NoteForm 的 <button type="submit">save</button>
+  //
+  // Playwright beforeEach 嵌套语义:每个 test 跑前,先跑外层 beforeEach(page.goto),
+  // 再跑内层 beforeEach(login)。所以 nested describe 内的 test 起步已是"已登录态"。
+  describe('when logged in', () => {
+    beforeEach(async ({ page }) => {
+      await page.getByRole('button', { name: 'login' }).click()
+      await page.getByLabel('username').fill('mluukkai')
+      await page.getByLabel('password').fill('salainen')
+      await page.getByRole('button', { name: 'login' }).click()
+    })
+
+    test('a new note can be created', async ({ page }) => {
+      await page.getByRole('button', { name: 'new note' }).click()
+      await page.getByRole('textbox').fill('a note created by playwright')
+      await page.getByRole('button', { name: 'save' }).click()
+      await expect(page.getByText('a note created by playwright')).toBeVisible()
+    })
+  })
 })
