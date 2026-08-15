@@ -1,3 +1,21 @@
+// ===== part5d — Controlling the state of the database(课程 1:1)=====
+// 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#controlling-the-state-of-the-database
+// 课程原文(代码块)逐字 1:1 复刻:
+//   1. 顶层 beforeEach 参数加 request fixture(Playwright 内置,无需 require)
+//   2. request.post('/api/testing/reset') → 清空 noteApp-test DB(Note + User 全删)
+//   3. request.post('/api/users', { data: {...} }) → 重建 mluukkai(之前用 mongosh 手工 seed,
+//      现在改用 API 自建,e2e 测试不再依赖 DB 预存状态)
+//   4. page.goto → 跳到前端(每个 test 拿一个新 page)
+//
+// 关键依赖(后端必须存在):
+//   POST /api/testing/reset  → controllers/testing.js
+//   该路由只在 NODE_ENV=test 时由 app.js 挂上,所以 e2e 测试必须跑 start:test backend,
+//   不能跑 npm run dev(后者 NODE_ENV=development,没挂 testingRouter)
+//
+// 副作用:
+//   - 之前 test_helper.js 的 initialE2EUser 不再被 e2e 用到(只 backend test 仍可能用,保留)
+//   - 之前手工 mongosh 插入的 mluukkai 用户也不再需要
+
 // ===== part5d — Test initialization(课程 1:1)=====
 // 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#test-initialization
 // 课程原文(代码块 1)逐字 1:1 复刻:
@@ -12,7 +30,15 @@
 const { test, describe, expect, beforeEach } = require('@playwright/test')
 
 describe('Note app', () => {
-  beforeEach(async ({ page }) => {
+  beforeEach(async ({ page, request }) => {
+    await request.post('http://localhost:3001/api/testing/reset')
+    await request.post('http://localhost:3001/api/users', {
+      data: {
+        name: 'Matti Luukkainen',
+        username: 'mluukkai',
+        password: 'salainen'
+      }
+    })
     await page.goto('http://localhost:5173')
   })
 
