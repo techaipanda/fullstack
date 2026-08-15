@@ -72,6 +72,37 @@ describe('Note app', () => {
     await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible()
   })
 
+  // ===== part5d — Test for failed login(课程 1:1)=====
+  // 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#test-for-failed-login
+  // 课程原文(完整最终态)逐字 1:1 复刻:
+  //   1. 错的密码 'wrong' 提交(用户名仍正确)
+  //   2. 定位 .error 容器 → toContainText('wrong credentials')
+  //      课程从 getByText('wrong credentials') 演进到 locator('.error') + toContainText,
+  //      因为 getByText 无法重复利用 locator 做后续 CSS 断言
+  //   3. CSS 断言:border-style=solid + color=rgb(255,0,0)
+  //      (这俩来自 index.css 的 .error 规则,前端已经写好,这里 verbatim 断言)
+  //   4. not.toBeVisible('Matti Luukkainen logged in') → 确认没意外登录成功
+  //
+  // 跑测依赖(d.7 之前需要):
+  //   - 顶层 beforeEach 已 reset DB + 创建 mluukkai(密码 salainen)
+  //   - 填 'wrong' 必然密码错误 → 后端 handleLogin catch 分支 → setErrorMessage('wrong credentials')
+  //   - Notification 组件(<div className='error'>)渲染 → 测试断言
+  //
+  // 位置:顶层 describe 内、'when logged in' 之外(因为本 test 期望"未登录")
+  test('login fails with wrong password', async ({ page }) => {
+    await page.getByRole('button', { name: 'login' }).click()
+    await page.getByLabel('username').fill('mluukkai')
+    await page.getByLabel('password').fill('wrong')
+    await page.getByRole('button', { name: 'login' }).click()
+
+    const errorDiv = page.locator('.error')
+    await expect(errorDiv).toContainText('wrong credentials')
+    await expect(errorDiv).toHaveCSS('border-style', 'solid')
+    await expect(errorDiv).toHaveCSS('color', 'rgb(255, 0, 0)')
+
+    await expect(page.getByText('Matti Luukkainen logged in')).not.toBeVisible()
+  })
+
   // ===== part5d — Testing note creation(课程 1:1)=====
   // 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#testing-note-creation
   // 课程原文(代码块)逐字 1:1 复刻:
