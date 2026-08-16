@@ -1,12 +1,13 @@
-// ===== part6a — ### More components and functionality(课程 1:1)=====
-// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#more-components-and-functionality
-// 课程原文 verbatim:part6a.md L692-L707 — NoteList 组件。
+// ===== part6b — ### More complex state(课程 1:1)=====
+// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#more-complex-state
+// 课程原文 verbatim:part6b.md L173-L189 — NoteList 终态(不知道 filter 存在)。
 //
-// verbatim 1:1 对照(L692-L707):
-//   import { useNotes } from '../store'      // highlight-line
+// verbatim 1:1 对照(L173-L189):
+//   import { useNotes } from '../store'
 //   import Note from './Note'
 //
 //   const NoteList = () => {
+//     // component gets always the properly filtered set of notes
 //     const notes = useNotes()
 //
 //     return (
@@ -18,28 +19,26 @@
 //     )
 //   }
 //
-// 课程 L709 强调:"The component fetches the list of notes from the store and
-// creates a corresponding Note component for each, passing the note's data
-// as props" — 这是经典的 "list + item" 拆分:
-//   - NoteList 负责列表容器 + 数据 fetch(useNotes)
-//   - Note 负责单条渲染 + 交互(toggle importance)
+// 课程 L171 强调:"The function useNotes thus always returns a list of notes
+// filtered in the desired way. The consumer of the function, the NoteList
+// component, doesn't even need to be aware of the filter's existence"
+// 这是把 filter 逻辑搬到 store.js 的核心收益 — NoteList 完全不知道 filter,
+// 只调 useNotes() 拿到的就是已经过滤好的 notes。
 //
-// 关键设计点:
-//   1. `key={note.id}` 放在 list 渲染处(L702),不在 Note 内部 — 这是 React
-//      的规则:key 必须出现在调用 map 的父组件的 JSX 里,用于 React diff 算法。
-//      把 key 写在 Note 内部是错的。
-//   2. `note={note}` 作为 prop 传给 Note — 单值对象,Note 用解构接 `{ note }`。
-//   3. NoteList 不消费 useNoteActions — 它只读不写。toggle 是 Note 自己的事
-//      (L725),不是 list 的事。这是关注点分离。
+// 关键变化 vs 上一节(part6a L673-L773):
+//   1. 不再 import `useFilter` — filter 状态不在 NoteList 关心范围
+//   2. 不再有 `const notesToShow = notes.filter(...)` — filter 在 useNotes 内部
+//   3. 不再有 filter 三元逻辑 — 全在 store.js 处理
+//   4. 跟上一节 L692-L707 的代码几乎一样(只是少了一行 notesToShow 提取)
 //
-// 路径注意:
-//   `'../store'` — store 在 src/store.js,组件在 src/components/
-//   `'./Note'` — Note 是 NoteList 的 sibling,在同一目录
+// 这是 verbatim 1:1 推进的典型案例:课程前半部分(L123-L147)的 NoteList 比
+// 终态多几行 filter 逻辑,课程最终砍掉。直接实现终态 L173-L189。
 
-import { useNotes } from '../store'      // highlight-line
+import { useNotes } from '../store'
 import Note from './Note'
 
 const NoteList = () => {
+  // component gets always the properly filtered set of notes
   const notes = useNotes()
 
   return (

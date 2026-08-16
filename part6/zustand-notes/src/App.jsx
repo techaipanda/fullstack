@@ -1,39 +1,36 @@
-// ===== part6a — ### More components and functionality(课程 1:1)=====
-// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#more-components-and-functionality
-// 课程原文 verbatim:part6a.md L679-L686 — App 简化到极致,只组合子组件。
+// ===== part6b — ### More complex state(课程 1:1)=====
+// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#more-complex-state
+// 课程原文 verbatim:part6b.md L111-L119 — App 加 VisibilityFilter。
 //
-// verbatim 1:1 对照(L679-L686):
+// verbatim 1:1 对照(L111-L119):
 //   const App = () => (
 //     <div>
 //       <NoteForm />
+//       <VisibilityFilter /> // highlight-line
 //       <NoteList />
 //     </div>
 //   )
 //
-//   export default App
+// 课程 L109 强调:"The App component renders the filter" — App 仍然是
+// 纯容器组件,只是多了一层子组件组合:
+//   NoteForm        — 创建 note
+//   VisibilityFilter — 选择 filter
+//   NoteList        — 渲染 notes(已过滤)
 //
-// 课程 L677 强调:"The App component after the change is simple" — 拆完组件后
-// App 变成纯容器组件(presentational container),所有业务逻辑下沉到 2 个子组件:
-//
-//   NoteForm  (src/components/NoteForm.jsx)  — 处理 form 提交 + add action
-//   NoteList  (src/components/NoteList.jsx)  — 渲染 notes list
-//     └── Note (src/components/Note.jsx)    — 单条 note + toggle importance
-//
-// App 自己不再:
-//   - 直接 import store(useNotes/useNoteActions 都不在 App 里)
-//   - 持有任何 state
-//   - 处理任何事件
-//
-// 这就是 React "container component vs presentational component" 的经典拆分:
-//   - App = container(组合)
-//   - NoteForm / NoteList / Note = presentational(各自管各自的 concern)
+// 关键设计点:
+//   1. VisibilityFilter 插在 NoteForm 和 NoteList 之间 — UI 顺序跟用户
+//      交互流程一致(先创建,再选择显示模式,再看到结果)。
+//   2. App 自己依然不知道 store — 不知道 filter 是什么,不知道 notes 是什么。
+//   3. 仍然 export default App — main.jsx 不变。
 
 import NoteForm from './components/NoteForm'
+import VisibilityFilter from './components/VisibilityFilter'
 import NoteList from './components/NoteList'
 
 const App = () => (
   <div>
     <NoteForm />
+    <VisibilityFilter />
     <NoteList />
   </div>
 )
