@@ -89,6 +89,24 @@ describe('Note app', () => {
   //   - Notification 组件(<div className='error'>)渲染 → 测试断言
   //
   // 位置:顶层 describe 内、'when logged in' 之外(因为本 test 期望"未登录")
+  // ===== part5d — Running tests one by one(课程 1:1,纯技术演示)=====
+  // 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#running-tests-one-by-one
+  // 课程原文 verbatim:d.9 演示 2 种"只跑单个 test"的方式(本节**不**要求持久的代码变更,
+  // 课程原话:"When the test is ready, only can and should be deleted."):
+  //
+  //   方式 1 — test.only:把 test('xxx', ...) 改为 test.only('xxx', ...),
+  //            Playwright 只跑这一个,其他全 skip。
+  //   方式 2 — CLI grep:不动源码,跑 npm test -- -g "pattern"
+  //            Playwright 只跑 test 标题匹配 pattern 的子集。
+  //
+  // 实测验证:
+  //   改 test.only → 跑 → "Running 1 test using 1 worker",其他 3 个 skip ✅
+  //   还原 → 跑 npm test -- -g "login fails with wrong password"
+  //       → "Running 1 test using 1 worker" ✅
+  //   还原 → 跑 npm test → "Running 4 tests using 1 worker" ✅
+  //
+  // 实战建议:开发中调试某个 test → 用 CLI -g(不污染源码);标记「想跑的 test」
+  //         用 test.only(开发完必须删掉,否则 CI 会漏测)。
   test('login fails with wrong password', async ({ page }) => {
     await page.getByRole('button', { name: 'login' }).click()
     await page.getByLabel('username').fill('mluukkai')
