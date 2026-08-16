@@ -160,5 +160,41 @@ describe('Note app', () => {
       await createNote(page, 'a note created by playwright')
       await expect(page.getByText('a note created by playwright')).toBeVisible()
     })
+
+    // ===== part5d — Note importance change revisited(课程 1:1)=====
+    // 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#note-importance-change-revisited
+    // 课程原文(代码块 stage 5 最终态)逐字 1:1 复刻:
+    //   1. 在 'when logged in' 内再嵌 describe('and several notes exists')(复数,不是单数 'a note exists')
+    //   2. 嵌套 beforeEach 创建 3 个 note('first note' / 'second note' / 'third note'),
+    //      复用了 d.10 抽出的 createNote helper
+    //   3. test 改"second note"的 importance:点 'make not important' → 断言 'make important' 出现
+    //   4. 关键 selector 模式(课程 stage 3-4 演进最终态):
+    //        const otherNoteText = page.getByText('second note')   // 拿到 span
+    //        const otherNoteElement = otherNoteText.locator('..')   // 用 XPath '..' 找 span 的父元素 = <li>
+    //      原因:课程 stage 3 把 Note.jsx 的 note.content 包到 <span>,所以
+    //      page.getByText('second note') 只匹配 span 本身,而 button 在 span 之外,
+    //      必须 .locator('..') 升级到父元素 <li> 才能在 li 内 getByRole('button', ...)
+    //
+    // 本仓库 frontend Note.jsx 已按课程 stage 3 改: {note.content} → <span>{note.content}</span>,
+    // 所以这里直接用 stage 5 的 .. locator 写法 verbatim 即可。
+    //
+    // 课程 d.11 末尾明示:"the test starts working unreliably... It's time to learn how to debug tests."
+    // 也就是说 d.11 完成态会自然引入"测试不稳",d.12 专门处理。本节按 verbatim 复刻,
+    // 测试稳定性问题留给 d.12。
+    describe('and several notes exists', () => {
+      beforeEach(async ({ page }) => {
+        await createNote(page, 'first note')
+        await createNote(page, 'second note')
+        await createNote(page, 'third note')
+      })
+
+      test('one of those can be made nonimportant', async ({ page }) => {
+        const otherNoteText = page.getByText('second note')
+        const otherNoteElement = otherNoteText.locator('..')
+
+        await otherNoteElement.getByRole('button', { name: 'make not important' }).click()
+        await expect(otherNoteElement.getByText('make important')).toBeVisible()
+      })
+    })
   })
 })
