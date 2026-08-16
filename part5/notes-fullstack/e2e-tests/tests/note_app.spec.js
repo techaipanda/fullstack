@@ -87,7 +87,36 @@ describe('Note app', () => {
   //   - Notification 组件(<div className='error'>)渲染 → 测试断言
   //
   // 位置:顶层 describe 内、'when logged in' 之外(因为本 test 期望"未登录")
-  // ===== part5d — Helper functions for tests(课程 1:1)=====
+  // ===== part5d — Test development and debugging(课程 1:1,纯技术演示 + 修复)=====
+// 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#test-development-and-debugging
+// 课程原文 verbatim:d.12 教 3 类 Playwright 调试/诊断工具:
+//
+//   A. Inspector(交互式单步调试)
+//      npm test -- "-g" "one of those can be made nonimportant" --debug
+//      → Playwright Inspector 窗口弹出,Step Over / Resume / Pause 按钮
+//      → 在 test 中插入 await page.pause() 作为"代码内断点",
+//        Inspector 直接跳到那一行,不必从头单步走完。
+//
+//   B. waitFor 修复(课程 stage 修复,本仓库已 1:1 落地在 helper.js)
+//      课程原文 verbatim:
+//        const createNote = async (page, content) => {
+//          await page.getByRole('button', { name: 'new note' }).click()
+//          await page.getByRole('textbox').fill(content)
+//          await page.getByRole('button', { name: 'save' }).click()
+//          await page.getByText(content).waitFor()  // ← 新增
+//        }
+//      解决了 d.11 末尾的"测试有时过有时不过"。
+//
+//   C. 其他工具(课程列举,本节按"一次只推进一小节"未持久化):
+//      - npm run test -- --ui           (UI mode, 浏览器里看每一步)
+//      - npm run test -- --trace on     (生成可视化 trace, npx playwright show-report)
+//      - npx playwright codegen http://localhost:5173/  (录制生成 test)
+//      - VS Code Playwright 插件(代码内断点 + UI 集成)
+//
+// 本节在 spec 里**未**插入 await page.pause() — 因为那是"调试时手动加"的,
+// 留作事故定位时再临时加,提交前必须删(同 d.9 的 test.only 纪律)。
+
+// ===== part5d — Helper functions for tests(课程 1:1)=====
 // 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#helper-functions-for-tests
 // 课程原文 verbatim:把 spec 里"点击+填表+提交"这类重复步骤抽成 helper function,
 // 放到 tests/helper.js(本仓库已 1:1 复刻 — ESM 改 CommonJS 适配现有 package.json)。

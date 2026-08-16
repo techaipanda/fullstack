@@ -33,6 +33,24 @@ const createNote = async (page, content) => {
   await page.getByRole('button', { name: 'new note' }).click()
   await page.getByRole('textbox').fill(content)
   await page.getByRole('button', { name: 'save' }).click()
+
+  // ===== part5d — Test development and debugging(课程 1:1,waitFor 修复)=====
+  // 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#test-development-and-debugging
+  // 课程原文 verbatim(代码块 stage 修复):createNote 末尾加
+  //   await page.getByText(content).waitFor()
+  //
+  // 原因:之前 d.11 末尾说"测试有时过有时不过"。真因是连续调 3 次 createNote 时,
+  // 第二次的 POST /api/notes 还没等 server 响应就发起第三次;server 响应时基于"响应时
+  // 的 DB 状态"重渲染,导致中间那次被覆盖 — 第二次的 note 在页面上"消失"。
+  //
+  // 修复:在 createNote 末尾加 waitFor — 必须等到这条 note 真的渲染到 DOM 才算完成,
+  // 再调下一次 createNote 才会基于"包含前几次"的正确状态发起请求。
+  //
+  // 这是一个**非常普适的 e2e 反模式**:"我点完 save 就接着干下一件事",
+  // 但 save 只是触发了请求,响应还没回来,DOM 还没更新。waitFor 是 Playwright 的
+  // "软同步"机制 — 比 page.waitForTimeout(500) 这种死等更稳,因为它会在条件
+  // 满足时立即放行。
+  await page.getByText(content).waitFor()
 }
 
 module.exports = { loginWith, createNote }
