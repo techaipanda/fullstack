@@ -1,0 +1,1169 @@
+- generic [ref=e4]:
+  - link "Skip to content" [ref=e5] [cursor=pointer]:
+    - /url: "#course-main-content"
+  - banner [ref=e6]:
+    - generic [ref=e7]:
+      - 'link "{() => fs}" [ref=e8] [cursor=pointer]':
+        - /url: /en/
+        - generic [ref=e10]: "{() => fs}"
+      - generic:
+        - button "Navigation menu" [ref=e11] [cursor=pointer]
+        - navigation
+  - region "Next.js course notice" [ref=e13]:
+    - generic [ref=e14]:
+      - text: "A new course part has been released:"
+      - link "https://courses.mooc.fi/org/uh-cs/courses/full-stack-open-nextjs" [ref=e15] [cursor=pointer]:
+        - /url: https://courses.mooc.fi/org/uh-cs/courses/full-stack-open-nextjs
+    - button "Close notice" [ref=e16] [cursor=pointer]: x
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e22]:
+        - link "Fullstack" [ref=e25] [cursor=pointer]:
+          - /url: /en/#course-contents
+        - link "Part 5" [ref=e29] [cursor=pointer]:
+          - /url: /en/part5
+        - generic [ref=e32]: End to end testing
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - link "a Login in frontend" [ref=e36] [cursor=pointer]:
+            - /url: /en/part5/login_in_frontend
+          - link "b props.children and component refs" [ref=e37] [cursor=pointer]:
+            - /url: /en/part5/props_children_and_component_refs
+          - link "c Testing React apps" [ref=e38] [cursor=pointer]:
+            - /url: /en/part5/testing_react_apps
+          - generic [ref=e39]:
+            - button "d End to end testing" [expanded] [ref=e40] [cursor=pointer]
+            - list [ref=e42]:
+              - listitem [ref=e43]:
+                - text: "-"
+                - link "Initializing tests" [ref=e44] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#initializing-tests
+              - listitem [ref=e45]:
+                - text: "-"
+                - link "Testing our own code" [ref=e46] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#testing-our-own-code
+              - listitem [ref=e47]:
+                - text: "-"
+                - link "Writing on the form" [ref=e48] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#writing-on-the-form
+              - listitem [ref=e49]:
+                - text: "-"
+                - link "Test Initialization" [ref=e50] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#test-initialization
+              - listitem [ref=e51]:
+                - text: "-"
+                - link "Testing note creation" [ref=e52] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#testing-note-creation
+              - listitem [ref=e53]:
+                - text: "-"
+                - link "Controlling the state of the database" [ref=e54] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#controlling-the-state-of-the-database
+              - listitem [ref=e55]:
+                - text: "-"
+                - link "Test for failed login" [ref=e56] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#test-for-failed-login
+              - listitem [ref=e57]:
+                - text: "-"
+                - link "Running tests one by one" [ref=e58] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#running-tests-one-by-one
+              - listitem [ref=e59]:
+                - text: "-"
+                - link "Helper functions for tests" [ref=e60] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#helper-functions-for-tests
+              - listitem [ref=e61]:
+                - text: "-"
+                - link "Note importance change revisited" [ref=e62] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#note-importance-change-revisited
+              - listitem [ref=e63]:
+                - text: "-"
+                - link "Test development and debugging" [ref=e64] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#test-development-and-debugging
+              - listitem [ref=e65]:
+                - text: "-"
+                - link "Exercises 5.17.-5.23." [ref=e66] [cursor=pointer]:
+                  - /url: /en/part5/end_to_end_testing#exercises-5-17-5-23
+          - link "e React Router, UI frameworks" [ref=e67] [cursor=pointer]:
+            - /url: /en/part5/react_router_ui_frameworks
+        - generic [ref=e68]:
+          - generic [ref=e70]:
+            - paragraph [ref=e71]: d
+            - heading "End to end testing" [level=1] [ref=e72]
+          - generic [ref=e74]:
+            - paragraph [ref=e75]: So far we have tested the backend as a whole on an API level using integration tests and tested some frontend components using unit tests.
+            - paragraph [ref=e76]:
+              - text: Next, we will look into one way to test the
+              - link "system as a whole" [ref=e77] [cursor=pointer]:
+                - /url: https://en.wikipedia.org/wiki/System_testing
+              - text: using End to End (E2E) tests.
+            - paragraph [ref=e78]:
+              - text: We can do E2E testing of a web application using a browser and a testing library. There are multiple libraries available. One example is
+              - link "Selenium" [ref=e79] [cursor=pointer]:
+                - /url: http://www.seleniumhq.org/
+              - text: ", which can be used with almost any browser. Another browser option is so-called"
+              - link "headless browsers" [ref=e80] [cursor=pointer]:
+                - /url: https://en.wikipedia.org/wiki/Headless_browser
+              - text: ", which are browsers with no graphical user interface. For example, Chrome can be used in headless mode."
+            - paragraph [ref=e81]: E2E tests are potentially the most useful category of tests because they test the system through the same interface as real users use.
+            - paragraph [ref=e82]:
+              - text: They do have some drawbacks too. Configuring E2E tests is more challenging than unit or integration tests. They also tend to be quite slow, and with a large system, their execution time can be minutes or even hours. This is bad for development because during coding it is beneficial to be able to run tests as often as possible in case of code
+              - link "regressions" [ref=e83] [cursor=pointer]:
+                - /url: https://en.wikipedia.org/wiki/Regression_testing
+              - text: .
+            - paragraph [ref=e84]:
+              - text: E2E tests can also be
+              - link "flaky" [ref=e85] [cursor=pointer]:
+                - /url: https://hackernoon.com/flaky-tests-a-war-that-never-ends-9aa32fdef359
+              - text: . Some tests might pass one time and fail another, even if the code does not change at all.
+            - paragraph [ref=e86]:
+              - text: Perhaps the two easiest libraries for End to End testing at the moment are
+              - link "Playwright" [ref=e87] [cursor=pointer]:
+                - /url: https://playwright.dev/
+              - text: and
+              - link "Cypress" [ref=e88] [cursor=pointer]:
+                - /url: https://www.cypress.io/
+              - text: .
+            - paragraph [ref=e89]:
+              - text: From the statistics on
+              - link "npmtrends.com" [ref=e90] [cursor=pointer]:
+                - /url: https://npmtrends.com/cypress-vs-playwright
+              - text: "we can see that Playwright surpassed Cypress in download numbers during 2024, and its popularity continues to grow:"
+            - img "cypress vs playwright in npm trends" [ref=e92]
+            - paragraph [ref=e93]: This course has been using Cypress for years. Now our choice is Playwright.
+            - paragraph [ref=e94]:
+              - text: So
+              - link "Playwright" [ref=e95] [cursor=pointer]:
+                - /url: https://playwright.dev/
+              - text: is a newcomer to the End to End tests, which started to explode in popularity towards the end of 2023. Playwright is roughly on a par with Cypress in terms of ease of use. The libraries are slightly different in terms of how they work. Cypress is radically different from most libraries suitable for E2E testing, as Cypress tests are run entirely within the browser. Playwright's tests, on the other hand, are executed in the Node process, which is connected to the browser via programming interfaces.
+            - paragraph [ref=e96]: Now let's explore Playwright.
+            - heading "Initializing tests" [level=3] [ref=e97]
+            - paragraph [ref=e98]:
+              - text: Unlike the backend tests or unit tests done on the React front-end, End to End tests do not need to be located in the same npm project where the code is. Let's make a completely separate project for the E2E tests with the
+              - emphasis [ref=e99]: npm init
+              - text: "command. Then install Playwright by running in the new project directory the command:"
+            - generic [ref=e101]:
+              - code [ref=e102]: npm init playwright@latest
+              - button "copy" [ref=e103] [cursor=pointer]
+            - paragraph [ref=e104]: "The installation script will ask a few questions, answer them as follows:"
+            - 'img "answer: javascript, tests, false, true" [ref=e106]'
+            - paragraph [ref=e107]: "Note that when installing Playwright your operating system may not support all of the browsers Playwright offers and you may see an error message like below:"
+            - generic [ref=e109]:
+              - code [ref=e110]: "Webkit 18.0 (playwright build v2070) downloaded to /home/user/.cache/ms-playwright/webkit-2070 Playwright Host validation warning: ╔══════════════════════════════════════════════════════╗ ║ Host system is missing dependencies to run browsers. ║ ║ Missing libraries: ║ ║ libicudata.so.66 ║ ║ libicui18n.so.66 ║ ║ libicuuc.so.66 ║ ║ libjpeg.so.8 ║ ║ libwebp.so.6 ║ ║ libpcre.so.3 ║ ║ libffi.so.7 ║ ╚══════════════════════════════════════════════════════╝"
+              - button "copy" [ref=e111] [cursor=pointer]
+            - paragraph [ref=e112]:
+              - text: If this is the case you can either specify specific browsers to test with
+              - code [ref=e113]: "--project="
+              - text: in your
+              - emphasis [ref=e114]: package.json
+              - text: ":"
+            - generic [ref=e116]:
+              - code [ref=e117]: "\"test\": \"playwright test --project=chromium --project=firefox\","
+              - button "copy" [ref=e118] [cursor=pointer]
+            - paragraph [ref=e119]:
+              - text: or remove the entry for any problematic browsers from your
+              - emphasis [ref=e120]: playwright.config.js
+              - text: "file:"
+            - generic [ref=e122]:
+              - code [ref=e123]: "projects: [ // ... //{ // name: 'webkit', // use: { ...devices['Desktop Safari'] }, //}, // ... ]"
+              - button "copy" [ref=e124] [cursor=pointer]
+            - paragraph [ref=e125]:
+              - text: Let's define an npm script for running tests and test reports in
+              - emphasis [ref=e126]: package.json
+              - text: ":"
+            - generic [ref=e128]:
+              - code [ref=e129]: "{ // ... \"scripts\": { \"test\": \"playwright test\", \"test:report\": \"playwright show-report\" }, // ... }"
+              - button "copy" [ref=e130] [cursor=pointer]
+            - paragraph [ref=e131]: "During installation, the following is printed to the console:"
+            - generic [ref=e133]:
+              - code [ref=e134]: "And check out the following files: - ./tests/example.spec.js - Example end-to-end test - ./tests-examples/demo-todo-app.spec.js - Demo Todo App end-to-end tests - ./playwright.config.js - Playwright Test configuration"
+              - button "copy" [ref=e135] [cursor=pointer]
+            - paragraph [ref=e136]: that is, the location of a few example tests for the project that the installation has created.
+            - paragraph [ref=e137]: "Let's run the tests:"
+            - generic [ref=e139]:
+              - code [ref=e140]: "$ npm test > notes-e2e@1.0.0 test > playwright test Running 6 tests using 5 workers 6 passed (3.9s) To open last HTML report run: npx playwright show-report"
+              - button "copy" [ref=e141] [cursor=pointer]
+            - paragraph [ref=e142]: "The tests pass. A more detailed test report can be opened either with the command suggested by the output, or with the npm script we just defined:"
+            - generic [ref=e144]:
+              - code [ref=e145]: npm run test:report
+              - button "copy" [ref=e146] [cursor=pointer]
+            - paragraph [ref=e147]: "Tests can also be run via the graphical UI with the command:"
+            - generic [ref=e149]:
+              - code [ref=e150]: npm run test -- --ui
+              - button "copy" [ref=e151] [cursor=pointer]
+            - paragraph [ref=e152]: "Sample tests in the file tests/example.spec.js look like this:"
+            - generic [ref=e154]:
+              - code [ref=e155]:
+                - text: "// @ts-check import { test, expect } from '@playwright/test'; test('has title', async ("
+                - generic [ref=e156]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e157]: await page.goto('https://playwright.dev/');
+                - text: // Expect a title "to contain" a substring. await expect(page).toHaveTitle(
+                - generic [ref=e158]: /Playwright/
+                - text: "); }); test('get started link', async ("
+                - generic [ref=e159]: "{ page }"
+                - text: ") => { await page.goto('https://playwright.dev/'); // Click the get started link. await page.getByRole('link', { name: 'Get started' }).click(); // Expects page to have a heading with the name of Installation. await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible(); });"
+              - button "copy" [ref=e160] [cursor=pointer]
+            - paragraph [ref=e161]:
+              - text: The first line of the test functions says that the tests are testing the page at
+              - link "https://playwright.dev/" [ref=e162] [cursor=pointer]:
+                - /url: https://playwright.dev/
+              - text: .
+            - heading "Testing our own code" [level=3] [ref=e163]
+            - paragraph [ref=e164]: Now let's remove the sample tests and start testing our own application.
+            - paragraph [ref=e165]: Playwright tests assume that the system under test is running when the tests are executed. Unlike, for example, backend integration tests, Playwright tests do not start the system under test during testing.
+            - paragraph [ref=e166]: Let's make an npm script for the backend, which will enable it to be started in testing mode, i.e. so that NODE_ENV gets the value test.
+            - generic [ref=e168]:
+              - code [ref=e169]:
+                - text: "{ // ... \"scripts\": { \"start\": \"cross-env NODE_ENV=production node index.js\", \"dev\": \"cross-env NODE_ENV=development node --watch index.js\", \"test\": \"cross-env NODE_ENV=test node --test\", \"lint\": \"eslint .\", // ..."
+                - generic [ref=e170]: "\"start:test\": \"cross-env NODE_ENV=test node --watch index.js\""
+                - text: "}, // ... }"
+              - button "copy" [ref=e171] [cursor=pointer]
+            - paragraph [ref=e172]:
+              - text: Let's start the frontend and backend, and create the first test file for the application
+              - code [ref=e173]: tests/note_app.spec.js
+              - text: ":"
+            - generic [ref=e175]:
+              - code [ref=e176]:
+                - text: "const { test, expect } = require('@playwright/test') test('front page can be opened', async ("
+                - generic [ref=e177]: "{ page }"
+                - text: ") => { await page.goto('http://localhost:5173') const locator = page.getByText('Notes') await expect(locator).toBeVisible() await expect(page.getByText('Note app, Department of Computer Science, University of Helsinki 2024')).toBeVisible() })"
+              - button "copy" [ref=e178] [cursor=pointer]
+            - paragraph [ref=e179]:
+              - text: First, the test opens the application with the method
+              - link "page.goto" [ref=e180] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/writing-tests#navigation
+              - text: . After this, it uses the
+              - link "page.getByText" [ref=e181] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-page#page-get-by-text
+              - text: to get a
+              - link "locator" [ref=e182] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/locators
+              - text: that corresponds to the element where the text Notes is found.
+            - paragraph [ref=e183]:
+              - text: The method
+              - link "toBeVisible" [ref=e184] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-visible
+              - text: ensures that the element corresponding to the locator is visible at the page.
+            - paragraph [ref=e185]: The second check is done without using the auxiliary variable.
+            - paragraph [ref=e186]: "The test fails because an old year ended up in the test. Playwright opens the test report in the browser and it becomes clear that Playwright has actually performed the tests with three different browsers: Chrome, Firefox and Webkit, i.e. the browser engine used by Safari:"
+            - img "test report showing the test failing in three different browsers" [ref=e188]
+            - paragraph [ref=e189]: "By clicking on the report of one of the browsers, we can see a more detailed error message:"
+            - img "test error message" [ref=e191]
+            - paragraph [ref=e192]: "In the big picture, it is of course a very good thing that the testing takes place with all three commonly used browser engines, but this is slow, and when developing the tests it is probably best to carry them out mainly with only one browser. You can define the browser engine to be used with the command line parameter:"
+            - generic [ref=e194]:
+              - code [ref=e195]: npm test -- --project chromium
+              - button "copy" [ref=e196] [cursor=pointer]
+            - paragraph [ref=e197]:
+              - text: Now let's fix the test with the correct year and let's add a
+              - emphasis [ref=e198]: describe
+              - text: "block to the tests:"
+            - generic [ref=e200]:
+              - code [ref=e201]:
+                - text: "const { test, describe, expect } = require('@playwright/test')"
+                - generic [ref=e202]: "describe('Note app', () => {"
+                - text: test('front page can be opened', async (
+                - generic [ref=e203]: "{ page }"
+                - text: ") => { await page.goto('http://localhost:5173') const locator = page.getByText('Notes') await expect(locator).toBeVisible() await expect(page.getByText('Note app, Department of Computer Science, University of Helsinki 2025')).toBeVisible() }) })"
+              - button "copy" [ref=e204] [cursor=pointer]
+            - paragraph [ref=e205]:
+              - text: Before we move on, let's break the tests one more time. We notice that the execution of the tests is quite fast when they pass, but much slower if the they do not pass. The reason for this is that Playwright's policy is to wait for searched elements until
+              - link "they are rendered and ready for action" [ref=e206] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/actionability
+              - text: . If the element is not found, a
+              - emphasis [ref=e207]: TimeoutError
+              - text: is raised and the test fails. Playwright waits for elements by default for 5 or 30 seconds
+              - link "depending on the functions used in testing" [ref=e208] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/test-timeouts#introduction
+              - text: .
+            - paragraph [ref=e209]:
+              - text: When developing tests, it may be wiser to reduce the waiting time to a few seconds. According to the
+              - link "documentation" [ref=e210] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/test-timeouts
+              - text: ", this can be done by changing the file"
+              - emphasis [ref=e211]: playwright.config.js
+              - text: "as follows:"
+            - generic [ref=e213]:
+              - code [ref=e214]:
+                - text: "export default defineConfig({ // ..."
+                - generic [ref=e215]: "timeout: 3000,"
+                - generic [ref=e216]: "fullyParallel: false,"
+                - generic [ref=e217]: "workers: 1,"
+                - text: "// ... })"
+              - button "copy" [ref=e218] [cursor=pointer]
+            - paragraph [ref=e219]:
+              - text: We also made two other changes to the file, specifying that all tests
+              - link "be executed one at a time" [ref=e220] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/test-parallel
+              - text: . With the default configuration, the execution happens in parallel, and since our tests use a database, parallel execution causes problems.
+            - heading "Writing on the form" [level=3] [ref=e221]
+            - paragraph [ref=e222]: Let's write a new test that tries to log into the application. Let's assume that a user is stored in the database, with username mluukkai and password salainen.
+            - paragraph [ref=e223]: Let's start by opening the login form.
+            - generic [ref=e225]:
+              - code [ref=e226]:
+                - text: "describe('Note app', () => { // ... test('user can log in', async ("
+                - generic [ref=e227]: "{ page }"
+                - text: ") => { await page.goto('http://localhost:5173') await page.getByRole('button', { name: 'login' }).click() }) })"
+              - button "copy" [ref=e228] [cursor=pointer]
+            - paragraph [ref=e229]:
+              - text: The test first uses the method
+              - link "page.getByRole" [ref=e230] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-page#page-get-by-role
+              - text: to retrieve the button based on its text. The method returns the
+              - link "Locator" [ref=e231] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator
+              - text: corresponding to the Button element. Pressing the button is performed using the Locator method
+              - link "click" [ref=e232] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator#locator-click
+              - text: .
+            - paragraph [ref=e233]:
+              - text: When developing tests, you could use Playwright's
+              - link "UI mode" [ref=e234] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/test-ui-mode
+              - text: ", i.e. the user interface version. Let's start the tests in UI mode as follows:"
+            - generic [ref=e236]:
+              - code [ref=e237]: npm test -- --ui
+              - button "copy" [ref=e238] [cursor=pointer]
+            - paragraph [ref=e239]: We now see that the test finds the button
+            - img "playwright UI rendering the notes app while testing it" [ref=e241]
+            - paragraph [ref=e242]: After clicking, the form will appear
+            - img "playwright UI rendering the login form of the notes app" [ref=e244]
+            - paragraph [ref=e245]:
+              - text: When the form is opened, the test should look for the text fields and enter the username and password in them. Let's make the first attempt using the method
+              - link "page.getByRole" [ref=e246] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-page#page-get-by-role
+              - text: ":"
+            - generic [ref=e248]:
+              - code [ref=e249]:
+                - text: "describe('Note app', () => { // ... test('user can log in', async ("
+                - generic [ref=e250]: "{ page }"
+                - text: ") => { await page.goto('http://localhost:5173') await page.getByRole('button', { name: 'login' }).click()"
+                - generic [ref=e251]: await page.getByRole('textbox').fill('mluukkai')
+                - text: "}) })"
+              - button "copy" [ref=e252] [cursor=pointer]
+            - paragraph [ref=e253]: "This results to an error:"
+            - generic [ref=e255]:
+              - code [ref=e256]: "Error: locator.fill: Error: strict mode violation: getByRole('textbox') resolved to 2 elements: 1) <input value=\"\"/> aka locator('div').filter({ hasText: /^username$/ }).getByRole('textbox') 2) <input value=\"\" type=\"password\"/> aka locator('input[type=\"password\"]')"
+              - button "copy" [ref=e257] [cursor=pointer]
+            - paragraph [ref=e258]:
+              - text: The problem now is that
+              - emphasis [ref=e259]: getByRole
+              - text: finds two text fields, and calling the
+              - link "fill" [ref=e260] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator#locator-fill
+              - text: method fails, because it assumes that there is only one text field found. One way around the problem is to use the methods
+              - link "first" [ref=e261] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator#locator-first
+              - text: and
+              - link "last" [ref=e262] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator#locator-last
+              - text: ":"
+            - generic [ref=e264]:
+              - code [ref=e265]:
+                - text: "describe('Note app', () => { // ... test('user can log in', async ("
+                - generic [ref=e266]: "{ page }"
+                - text: ") => { await page.goto('http://localhost:5173') await page.getByRole('button', { name: 'login' }).click()"
+                - generic [ref=e267]: await page.getByRole('textbox').first().fill('mluukkai')
+                - generic [ref=e268]: await page.getByRole('textbox').last().fill('salainen')
+                - generic [ref=e269]: "await page.getByRole('button', { name: 'login' }).click()"
+                - generic [ref=e271]: await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible()
+                - text: "}) })"
+              - button "copy" [ref=e272] [cursor=pointer]
+            - paragraph [ref=e273]:
+              - text: After writing in the text fields, the test presses the
+              - emphasis [ref=e274]: login
+              - text: button and checks that the application renders the logged-in user's information on the screen.
+            - paragraph [ref=e275]:
+              - text: If there were more than two text fields, using the methods
+              - emphasis [ref=e276]: first
+              - text: and
+              - emphasis [ref=e277]: last
+              - text: would not be enough. One possibility would be to use the
+              - link "all" [ref=e278] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator#locator-all
+              - text: "method, which turns the found locators into an array that can be indexed:"
+            - generic [ref=e280]:
+              - code [ref=e281]:
+                - text: "describe('Note app', () => { // ... test('user can log in', async ("
+                - generic [ref=e282]: "{ page }"
+                - text: ") => { await page.goto('http://localhost:5173') await page.getByRole('button', { name: 'login' }).click()"
+                - generic [ref=e283]: const textboxes = await page.getByRole('textbox').all()
+                - generic [ref=e284]: await textboxes[0].fill('mluukkai')
+                - generic [ref=e285]: await textboxes[1].fill('salainen')
+                - text: "await page.getByRole('button', { name: 'login' }).click() await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible() }) })"
+              - button "copy" [ref=e286] [cursor=pointer]
+            - paragraph [ref=e287]: Both this and the previous version of the test work. However, both are problematic to the extent that if the registration form is changed, the tests may break, as they rely on the fields to be on the page in a certain order.
+            - paragraph [ref=e288]:
+              - text: If an element is difficult to locate in tests, you can assign it a separate test-id attribute and find the element in tests using the
+              - link "getByTestId" [ref=e289] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-page#page-get-by-test-id
+              - text: method.
+            - paragraph [ref=e290]: "Let's now take advantage of the existing elements of the login form. The input fields of the login form have been assigned unique labels:"
+            - generic [ref=e292]:
+              - code [ref=e293]:
+                - text: "// ... <form onSubmit={handleSubmit}> <div>"
+                - generic [ref=e294]: <label>
+                - generic [ref=e295]: username
+                - text: "<input type=\"text\" value={username} onChange={handleUsernameChange} />"
+                - generic [ref=e296]: </label>
+                - text: </div> <div>
+                - generic [ref=e297]: <label>
+                - generic [ref=e298]: password
+                - text: "<input type=\"password\" value={password} onChange={handlePasswordChange} />"
+                - generic [ref=e299]: </label>
+                - text: </div> <button type="submit">login</button> </form> // ...
+              - button "copy" [ref=e300] [cursor=pointer]
+            - paragraph [ref=e301]:
+              - text: Input fields can and should be located in tests using labels with the
+              - link "getByLabel" [ref=e302] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-page#page-get-by-label
+              - text: "method:"
+            - generic [ref=e304]:
+              - code [ref=e305]:
+                - text: "describe('Note app', () => { // ... test('user can log in', async ("
+                - generic [ref=e306]: "{ page }"
+                - text: ") => { await page.goto('http://localhost:5173') await page.getByRole('button', { name: 'login' }).click()"
+                - generic [ref=e307]: await page.getByLabel('username').fill('mluukkai')
+                - generic [ref=e308]: await page.getByLabel('password').fill('salainen')
+                - text: "await page.getByRole('button', { name: 'login' }).click() await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible() }) })"
+              - button "copy" [ref=e309] [cursor=pointer]
+            - paragraph [ref=e310]: When locating elements, it makes sense to aim to utilize the content visible to the user in the interface, as this best simulates how a user would actually find the desired input field while navigating the application.
+            - paragraph [ref=e311]: Note that passing the test at this stage requires that there is a user in the test database of the backend with username mluukkai and password salainen. Create a user if needed!
+            - heading "Test Initialization" [level=3] [ref=e312]
+            - paragraph [ref=e313]:
+              - text: Since both tests start in the same way, i.e. by opening the page
+              - link "http://localhost:5173" [ref=e315] [cursor=pointer]:
+                - /url: http://localhost:5173
+              - text: ", it is recommended to isolate the common part in the beforeEach block that is executed before each test:"
+            - generic [ref=e317]:
+              - code [ref=e318]:
+                - text: "const { test, describe, expect, beforeEach } = require('@playwright/test') describe('Note app', () => {"
+                - generic [ref=e319]:
+                  - text: beforeEach(async (
+                  - generic [ref=e320]: "{ page }"
+                  - text: ") => {"
+                - generic [ref=e321]: await page.goto('http://localhost:5173')
+                - generic [ref=e322]: "})"
+                - text: test('front page can be opened', async (
+                - generic [ref=e323]: "{ page }"
+                - text: ") => { const locator = page.getByText('Notes') await expect(locator).toBeVisible() await expect(page.getByText('Note app, Department of Computer Science, University of Helsinki 2025')).toBeVisible() }) test('user can log in', async ("
+                - generic [ref=e324]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill('mluukkai') await page.getByLabel('password').fill('salainen') await page.getByRole('button', { name: 'login' }).click() await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible() }) })"
+              - button "copy" [ref=e325] [cursor=pointer]
+            - heading "Testing note creation" [level=3] [ref=e326]
+            - paragraph [ref=e327]: "Next, let's create a test that adds a new note to the application:"
+            - generic [ref=e329]:
+              - code [ref=e330]:
+                - text: "const { test, describe, expect, beforeEach } = require('@playwright/test') describe('Note app', () => { // ... describe('when logged in', () => { beforeEach(async ("
+                - generic [ref=e331]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill('mluukkai') await page.getByLabel('password').fill('salainen') await page.getByRole('button', { name: 'login' }).click() }) test('a new note can be created', async ("
+                - generic [ref=e332]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'new note' }).click() await page.getByRole('textbox').fill('a note created by playwright') await page.getByRole('button', { name: 'save' }).click() await expect(page.getByText('a note created by playwright')).toBeVisible() }) }) })"
+              - button "copy" [ref=e333] [cursor=pointer]
+            - paragraph [ref=e334]:
+              - text: The test is defined in its own
+              - emphasis [ref=e335]: describe
+              - text: block. Creating a note requires that the user is logged in, which is handled in the
+              - emphasis [ref=e336]: beforeEach
+              - text: block.
+            - paragraph [ref=e337]: "The test trusts that when creating a new note, there is only one input field on the page, so it searches for it as follows:"
+            - generic [ref=e339]:
+              - code [ref=e340]: page.getByRole('textbox')
+              - button "copy" [ref=e341] [cursor=pointer]
+            - paragraph [ref=e342]: If there were more fields, the test would break. Because of this, it could be better to add a test-id to the form input and search for it in the test based on this id.
+            - paragraph [ref=e343]:
+              - strong [ref=e344]: "Note:"
+              - text: the test will only pass the first time. The reason for this is that its expectation
+            - generic [ref=e346]:
+              - code [ref=e347]: await expect(page.getByText('a note created by playwright')).toBeVisible()
+              - button "copy" [ref=e348] [cursor=pointer]
+            - paragraph [ref=e349]: causes problems when the same note is created in the application more than once. The problem will be solved in the next chapter.
+            - paragraph [ref=e350]: "The structure of the tests looks like this:"
+            - generic [ref=e352]:
+              - code [ref=e353]:
+                - text: "const { test, describe, expect, beforeEach } = require('@playwright/test') describe('Note app', () => { // .... test('user can log in', async ("
+                - generic [ref=e354]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill('mluukkai') await page.getByLabel('password').fill('salainen') await page.getByRole('button', { name: 'login' }).click() await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible() }) describe('when logged in', () => { beforeEach(async ("
+                - generic [ref=e355]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill('mluukkai') await page.getByLabel('password').fill('salainen') await page.getByRole('button', { name: 'login' }).click() }) test('a new note can be created', async ("
+                - generic [ref=e356]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'new note' }).click() await page.getByRole('textbox').fill('a note created by playwright') await page.getByRole('button', { name: 'save' }).click() await expect(page.getByText('a note created by playwright')).toBeVisible() }) }) })"
+              - button "copy" [ref=e357] [cursor=pointer]
+            - paragraph [ref=e358]: Since we have prevented the tests from running in parallel, Playwright runs the tests in the order they appear in the test code. That is, first the test user can log in, where the user logs into the application, is performed. After this the test a new note can be created gets executed, which also does a log in, in the beforeEach block. Why is this done, isn't the user already logged in thanks to the previous test? No, because the execution of each test starts from the browser's "zero state", all changes made to the browser's state by the previous tests are reset.
+            - heading "Controlling the state of the database" [level=3] [ref=e359]
+            - paragraph [ref=e360]: If the tests need to be able to modify the server's database, the situation immediately becomes more complicated. Ideally, the server's database should be the same each time we run the tests, so our tests can be reliably and easily repeatable.
+            - paragraph [ref=e361]: As with unit and integration tests, with E2E tests it is best to empty the database and possibly format it before the tests are run. The challenge with E2E tests is that they do not have access to the database.
+            - paragraph [ref=e362]: The solution is to create API endpoints for the backend tests. We can empty the database using these endpoints. Let's create a new router for the tests inside the controllers folder, in the testing.js file
+            - generic [ref=e364]:
+              - code [ref=e365]:
+                - text: const router = require('express').Router() const Note = require('../models/note') const User = require('../models/user') router.post('/reset', async (
+                - generic [ref=e366]: request, response
+                - text: ") => { await Note.deleteMany({}) await User.deleteMany({}) response.status(204).end() }) module.exports = router"
+              - button "copy" [ref=e367] [cursor=pointer]
+            - paragraph [ref=e368]: "and add it to the backend only if the application is run in test-mode:"
+            - generic [ref=e370]:
+              - code [ref=e371]:
+                - text: // ... app.use('/api/login', loginRouter) app.use('/api/users', usersRouter) app.use('/api/notes', notesRouter)
+                - generic [ref=e372]: "if (process.env.NODE_ENV === 'test') {"
+                - generic [ref=e373]: const testingRouter = require('./controllers/testing')
+                - generic [ref=e374]: app.use('/api/testing', testingRouter)
+                - generic [ref=e375]: "}"
+                - text: app.use(middleware.unknownEndpoint) app.use(middleware.errorHandler) module.exports = app
+              - button "copy" [ref=e376] [cursor=pointer]
+            - paragraph [ref=e377]: "After the changes, an HTTP POST request to the /api/testing/reset endpoint empties the database. Make sure your backend is running in test mode by starting it with this command (previously configured in the package.json file):"
+            - generic [ref=e379]:
+              - code [ref=e380]: npm run start:test
+              - button "copy" [ref=e381] [cursor=pointer]
+            - paragraph [ref=e382]:
+              - text: The modified backend code can be found on the
+              - link "GitHub" [ref=e383] [cursor=pointer]:
+                - /url: https://github.com/fullstack-hy2020/part3-notes-backend/tree/part5-1
+              - text: branch part5-1.
+            - paragraph [ref=e384]:
+              - text: Next, we will change the
+              - emphasis [ref=e385]: beforeEach
+              - text: block so that it empties the server's database before tests are run.
+            - paragraph [ref=e386]: Currently, it is not possible to add new users through the frontend's UI, so we add a new user to the backend from the beforeEach block.
+            - generic [ref=e388]:
+              - code [ref=e389]:
+                - text: "describe('Note app', () => { beforeEach(async ("
+                - generic [ref=e390]: "{ page, request }"
+                - text: ") => { await request.post('http://localhost:3001/api/testing/reset') await request.post('http://localhost:3001/api/users', { data: { name: 'Matti Luukkainen', username: 'mluukkai', password: 'salainen' } }) await page.goto('http://localhost:5173') }) test('front page can be opened', () => { // ... }) test('user can login', () => { // ... }) describe('when logged in', () => { // ... }) })"
+              - button "copy" [ref=e391] [cursor=pointer]
+            - paragraph [ref=e392]:
+              - text: During initialization, the test makes HTTP requests to the backend with the method
+              - link "post" [ref=e393] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-apirequestcontext#api-request-context-post
+              - text: of the parameter
+              - emphasis [ref=e394]: request
+              - text: .
+            - paragraph [ref=e395]: Unlike before, now the testing of the backend always starts from the same state, i.e. there is one user and no notes in the database.
+            - paragraph [ref=e396]: Let's make a test that checks that the importance of the notes can be changed.
+            - paragraph [ref=e397]: There are a few different approaches to taking the test.
+            - paragraph [ref=e398]: In the following, we first look for a note and click on its button that has text make not important. After this, we check that the note contains the button with make important.
+            - generic [ref=e400]:
+              - code [ref=e401]:
+                - text: "describe('Note app', () => { // ... describe('when logged in', () => { // ..."
+                - generic [ref=e402]: "describe('and a note exists', () => {"
+                - generic [ref=e403]:
+                  - text: beforeEach(async (
+                  - generic [ref=e404]: "{ page }"
+                  - text: ") => {"
+                - generic [ref=e405]: "await page.getByRole('button', { name: 'new note' }).click()"
+                - generic [ref=e406]: await page.getByRole('textbox').fill('another note by playwright')
+                - generic [ref=e407]: "await page.getByRole('button', { name: 'save' }).click()"
+                - generic [ref=e408]: "})"
+                - generic [ref=e410]:
+                  - text: test('importance can be changed', async (
+                  - generic [ref=e411]: "{ page }"
+                  - text: ") => {"
+                - generic [ref=e412]: "await page.getByRole('button', { name: 'make not important' }).click()"
+                - generic [ref=e413]: await expect(page.getByText('make important')).toBeVisible()
+                - generic [ref=e414]: "})"
+                - text: "}) }) })"
+              - button "copy" [ref=e415] [cursor=pointer]
+            - paragraph [ref=e416]: The first command first searches for the component where there is the text another note by playwright and inside it the button make not important and clicks on it.
+            - paragraph [ref=e417]: The second command ensures that the text of the same button has changed to make important.
+            - paragraph [ref=e418]:
+              - text: The current code for the tests is on
+              - link "GitHub" [ref=e419] [cursor=pointer]:
+                - /url: https://github.com/fullstack-hy2020/notes-e2e/tree/part5-1
+              - text: ", in branch part5-1."
+            - heading "Test for failed login" [level=3] [ref=e420]
+            - paragraph [ref=e421]: Now let's do a test that ensures that the login attempt fails if the password is wrong.
+            - paragraph [ref=e422]: "The first version of the test looks like this:"
+            - generic [ref=e424]:
+              - code [ref=e425]:
+                - text: "describe('Note app', () => { // ... test('login fails with wrong password', async ("
+                - generic [ref=e426]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill('mluukkai') await page.getByLabel('password').fill('wrong') await page.getByRole('button', { name: 'login' }).click() await expect(page.getByText('wrong credentials')).toBeVisible() }) // ... })"
+              - button "copy" [ref=e427] [cursor=pointer]
+            - paragraph [ref=e428]:
+              - text: The test verifies with the method
+              - link "page.getByText" [ref=e429] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-page#page-get-by-text
+              - text: that the application prints an error message.
+            - paragraph [ref=e430]: "The application renders the error message to an element containing the CSS class error:"
+            - generic [ref=e432]:
+              - code [ref=e433]:
+                - text: const Notification = (
+                - generic [ref=e434]: "{ message }"
+                - text: ") => { if (message === null) { return null } return ("
+                - generic [ref=e435]: <div className="error">
+                - text: "{message} </div> ) }"
+              - button "copy" [ref=e436] [cursor=pointer]
+            - paragraph [ref=e437]: "We could refine the test to ensure that the error message is printed exactly in the right place, i.e. in the element containing the CSS class error:"
+            - generic [ref=e439]:
+              - code [ref=e440]:
+                - text: test('login fails with wrong password', async (
+                - generic [ref=e441]: "{ page }"
+                - text: ") => { // ..."
+                - generic [ref=e442]: const errorDiv = page.locator('.error')
+                - text: "await expect(errorDiv).toContainText('wrong credentials') })"
+              - button "copy" [ref=e443] [cursor=pointer]
+            - paragraph [ref=e444]:
+              - text: So the test uses the
+              - link "page.locator" [ref=e445] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-page#page-locator
+              - text: method to find the component containing the CSS class error and stores it in a variable. The correctness of the text associated with the component can be verified with the expectation
+              - link "toContainText" [ref=e446] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-contain-text
+              - text: . Note that the
+              - link "CSS class selector" [ref=e447] [cursor=pointer]:
+                - /url: https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors
+              - text: starts with a dot, so the error class selector is .error.
+            - paragraph [ref=e448]:
+              - text: It is possible to test the application's CSS styles with matcher
+              - link "toHaveCSS" [ref=e449] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-css
+              - text: ". We can, for example, make sure that the color of the error message is red, and that there is a border around it:"
+            - generic [ref=e451]:
+              - code [ref=e452]:
+                - text: test('login fails with wrong password', async (
+                - generic [ref=e453]: "{ page }"
+                - text: ") => { // ... const errorDiv = page.locator('.error') await expect(errorDiv).toContainText('wrong credentials')"
+                - generic [ref=e454]: await expect(errorDiv).toHaveCSS('border-style', 'solid')
+                - generic [ref=e455]: await expect(errorDiv).toHaveCSS('color', 'rgb(255, 0, 0)')
+                - text: "})"
+              - button "copy" [ref=e456] [cursor=pointer]
+            - paragraph [ref=e457]:
+              - text: Colors must be defined to Playwright as
+              - link "rgb" [ref=e458] [cursor=pointer]:
+                - /url: https://rgbcolorcode.com/color/red
+              - text: codes.
+            - paragraph [ref=e459]:
+              - text: Let's finalize the test so that it also ensures that the application
+              - strong [ref=e460]: does not render
+              - text: "the text describing a successful login 'Matti Luukkainen logged in':"
+            - generic [ref=e462]:
+              - code [ref=e463]:
+                - text: test('login fails with wrong password', async (
+                - generic [ref=e464]: "{ page }"
+                - text: ") =>{ await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill('mluukkai') await page.getByLabel('password').fill('wrong') await page.getByRole('button', { name: 'login' }).click() const errorDiv = page.locator('.error') await expect(errorDiv).toContainText('wrong credentials') await expect(errorDiv).toHaveCSS('border-style', 'solid') await expect(errorDiv).toHaveCSS('color', 'rgb(255, 0, 0)')"
+                - generic [ref=e465]: await expect(page.getByText('Matti Luukkainen logged in')).not.toBeVisible()
+                - text: "})"
+              - button "copy" [ref=e466] [cursor=pointer]
+            - heading "Running tests one by one" [level=3] [ref=e467]
+            - paragraph [ref=e468]: "By default, Playwright always runs all tests, and as the number of tests increases, it becomes time-consuming. When developing a new test or debugging a broken one, the test can be defined instead than with the command test, with the command test.only, in which case Playwright will run only that test:"
+            - generic [ref=e470]:
+              - code [ref=e471]:
+                - text: "describe(() => { // this is the only test executed!"
+                - generic [ref=e472]:
+                  - text: test.only('login fails with wrong password', async (
+                  - generic [ref=e473]: "{ page }"
+                  - text: ") => {"
+                - text: "// ... }) // this test is skipped... test('user can login with correct credentials', async ("
+                - generic [ref=e474]: "{ page }"
+                - text: ") => { // ... }) // ... })"
+              - button "copy" [ref=e475] [cursor=pointer]
+            - paragraph [ref=e476]:
+              - text: When the test is ready, only can and
+              - strong [ref=e477]: should
+              - text: be deleted.
+            - paragraph [ref=e478]: "Another option to run a single test is to use a command line parameter:"
+            - generic [ref=e480]:
+              - code [ref=e481]: npm test -- -g "login fails with wrong password"
+              - button "copy" [ref=e482] [cursor=pointer]
+            - heading "Helper functions for tests" [level=3] [ref=e483]
+            - paragraph [ref=e484]: "Our application tests currently look like this:"
+            - generic [ref=e486]:
+              - code [ref=e487]:
+                - text: "const { test, describe, expect, beforeEach } = require('@playwright/test') describe('Note app', () => { // ... test('user can login with correct credentials', async ("
+                - generic [ref=e488]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill('mluukkai') await page.getByLabel('password').fill('salainen') await page.getByRole('button', { name: 'login' }).click() await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible() }) test('login fails with wrong password', async ("
+                - generic [ref=e489]: "{ page }"
+                - text: ") =>{ // ... }) describe('when logged in', () => { beforeEach(async ("
+                - generic [ref=e490]: "{ page, request }"
+                - text: ") => { await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill('mluukkai') await page.getByLabel('password').fill('salainen') await page.getByRole('button', { name: 'login' }).click() }) test('a new note can be created', async ("
+                - generic [ref=e491]: "{ page }"
+                - text: ") => { // ... }) // ... }) })"
+              - button "copy" [ref=e492] [cursor=pointer]
+            - paragraph [ref=e493]:
+              - text: First, the login function is tested. After this, another
+              - emphasis [ref=e494]: describe
+              - text: block contains a set of tests that assume that the user is logged in, the login is handled inside the initializing
+              - emphasis [ref=e495]: beforeEach
+              - text: block.
+            - paragraph [ref=e496]: As already stated earlier, each test is executed starting from the initial state (where the database is cleared and one user is created there), so even though the test is defined after another test in the code, it does not start from the same state where the tests in the code executed earlier have left!
+            - paragraph [ref=e497]:
+              - text: It is also worth striving for having non-repetitive code in tests. Let's isolate the code that handles the login as a helper function, which is placed e.g. in the file
+              - emphasis [ref=e498]: tests/helper.js
+              - text: ":"
+            - generic [ref=e500]:
+              - code [ref=e501]:
+                - text: const loginWith = async (
+                - generic [ref=e502]: page, username, password
+                - text: ") => { await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill(username) await page.getByLabel('password').fill(password) await page.getByRole('button', { name: 'login' }).click() } export { loginWith }"
+              - button "copy" [ref=e503] [cursor=pointer]
+            - paragraph [ref=e504]: "The tests becomes simpler and clearer:"
+            - generic [ref=e506]:
+              - code [ref=e507]:
+                - text: "const { test, describe, expect, beforeEach } = require('@playwright/test')"
+                - generic [ref=e508]: "const { loginWith } = require('./helper')"
+                - text: "describe('Note app', () => { // ... test('user can log in', async ("
+                - generic [ref=e509]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e510]: await loginWith(page, 'mluukkai', 'salainen')
+                - text: "await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible() }) test('login fails with wrong password', async ("
+                - generic [ref=e511]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e512]: await loginWith(page, 'mluukkai', 'wrong')
+                - text: "const errorDiv = page.locator('.error') // ... }) describe('when logged in', () => { beforeEach(async ("
+                - generic [ref=e513]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e514]: await loginWith(page, 'mluukkai', 'salainen')
+                - text: "}) // ... }) })"
+              - button "copy" [ref=e515] [cursor=pointer]
+            - paragraph [ref=e516]:
+              - text: Playwright also offers a
+              - link "solution" [ref=e517] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/auth
+              - text: where the login is performed once before the tests, and each test starts from a state where the application is already logged in. In order for us to take advantage of this method, the initialization of the application's test data should be done a bit differently than now. In the current solution, the database is reset before each test, and because of this, logging in just once before the tests is impossible. In order for us to use the pre-test login provided by Playwright, the user should be initialized only once before the tests. We stick to our current solution for the sake of simplicity.
+            - paragraph [ref=e518]:
+              - text: The corresponding repeating code actually also applies to creating a new note. For that, there is a test that creates a note using a form. Also in the
+              - emphasis [ref=e519]: beforeEach
+              - text: "initialization block of the test that tests changing the importance of the note, a note is created using the form:"
+            - generic [ref=e521]:
+              - code [ref=e522]:
+                - text: "describe('Note app', function() { // ... describe('when logged in', () => { test('a new note can be created', async ("
+                - generic [ref=e523]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'new note' }).click() await page.getByRole('textbox').fill('a note created by playwright') await page.getByRole('button', { name: 'save' }).click() await expect(page.getByText('a note created by playwright')).toBeVisible() }) describe('and a note exists', () => { beforeEach(async ("
+                - generic [ref=e524]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'new note' }).click() await page.getByRole('textbox').fill('another note by playwright') await page.getByRole('button', { name: 'save' }).click() }) test('it can be made important', async ("
+                - generic [ref=e525]: "{ page }"
+                - text: ") => { // ... }) }) }) })"
+              - button "copy" [ref=e526] [cursor=pointer]
+            - paragraph [ref=e527]:
+              - text: Creation of a note is also isolated as its helper function. The file
+              - emphasis [ref=e528]: tests/helper.js
+              - text: "expands as follows:"
+            - generic [ref=e530]:
+              - code [ref=e531]:
+                - text: const loginWith = async (
+                - generic [ref=e532]: page, username, password
+                - text: ") => { await page.getByRole('button', { name: 'login' }).click() await page.getByLabel('username').fill(username) await page.getByLabel('password').fill(password) await page.getByRole('button', { name: 'login' }).click() }"
+                - generic [ref=e533]:
+                  - text: const createNote = async (
+                  - generic [ref=e534]: page, content
+                  - text: ") => {"
+                - generic [ref=e535]: "await page.getByRole('button', { name: 'new note' }).click()"
+                - generic [ref=e536]: await page.getByRole('textbox').fill(content)
+                - generic [ref=e537]: "await page.getByRole('button', { name: 'save' }).click()"
+                - generic [ref=e538]: "}"
+                - generic [ref=e539]: "export { loginWith, createNote }"
+              - button "copy" [ref=e540] [cursor=pointer]
+            - paragraph [ref=e541]: "The tests are simplified as follows:"
+            - generic [ref=e543]:
+              - code [ref=e544]:
+                - text: "const { test, describe, expect, beforeEach } = require('@playwright/test')"
+                - generic [ref=e545]: "const { createNote, loginWith } = require('./helper')"
+                - text: "describe('Note app', () => { // ... describe('when logged in', () => { beforeEach(async ("
+                - generic [ref=e546]: "{ page }"
+                - text: ") => { await loginWith(page, 'mluukkai', 'salainen') }) test('a new note can be created', async ("
+                - generic [ref=e547]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e548]: await createNote(page, 'a note created by playwright')
+                - text: "await expect(page.getByText('a note created by playwright')).toBeVisible() }) describe('and a note exists', () => { beforeEach(async ("
+                - generic [ref=e549]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e550]: await createNote(page, 'another note by playwright')
+                - text: "}) test('importance can be changed', async ("
+                - generic [ref=e551]: "{ page }"
+                - text: ") => { await page.getByRole('button', { name: 'make not important' }).click() await expect(page.getByText('make important')).toBeVisible() }) }) }) })"
+              - button "copy" [ref=e552] [cursor=pointer]
+            - paragraph [ref=e553]: "There is one more annoying feature in our tests. The frontend address http:localhost:5173 and the backend address http:localhost:3001 are hardcoded for tests. Of these, the address of the backend is actually useless, because a proxy has been defined in the Vite configuration of the frontend, which forwards all requests made by the frontend to the address http:localhost:5173/api to the backend:"
+            - generic [ref=e555]:
+              - code [ref=e556]: "export default defineConfig({ server: { proxy: { '/api': { target: 'http://localhost:3001', changeOrigin: true, }, } }, // ... })"
+              - button "copy" [ref=e557] [cursor=pointer]
+            - paragraph [ref=e558]:
+              - text: So we can replace all the addresses in the tests from
+              - emphasis [ref=e559]:
+                - link "http://localhost:3001/api/.." [ref=e560] [cursor=pointer]:
+                  - /url: http://localhost:3001/api/..
+                - text: .
+              - text: to
+              - emphasis [ref=e561]:
+                - link "http://localhost:5173/api/.." [ref=e562] [cursor=pointer]:
+                  - /url: http://localhost:5173/api/..
+                - text: .
+            - paragraph [ref=e563]:
+              - text: We can now define the
+              - emphasis [ref=e564]: baseUrl
+              - text: "for the application in the tests configuration file playwright.config.js:"
+            - generic [ref=e566]:
+              - code [ref=e567]: "export default defineConfig({ // ... use: { baseURL: 'http://localhost:5173', // ... }, // ... })"
+              - button "copy" [ref=e568] [cursor=pointer]
+            - paragraph [ref=e569]: All the commands in the tests that use the application url, e.g.
+            - generic [ref=e571]:
+              - code [ref=e572]: await page.goto('http://localhost:5173') await request.post('http://localhost:5173/api/testing/reset')
+              - button "copy" [ref=e573] [cursor=pointer]
+            - paragraph [ref=e574]: "can now be transformed into:"
+            - generic [ref=e576]:
+              - code [ref=e577]: await page.goto('/') await request.post('/api/testing/reset')
+              - button "copy" [ref=e578] [cursor=pointer]
+            - paragraph [ref=e579]:
+              - text: The current code for the tests is on
+              - link "GitHub" [ref=e580] [cursor=pointer]:
+                - /url: https://github.com/fullstack-hy2020/notes-e2e/tree/part5-2
+              - text: ", branch part5-2."
+            - heading "Note importance change revisited" [level=3] [ref=e581]
+            - paragraph [ref=e582]: Let's take a look at the test we did earlier, which verifies that it is possible to change the importance of a note.
+            - paragraph [ref=e583]: "Let's change the initialization block of the test so that it creates two notes instead of one:"
+            - generic [ref=e585]:
+              - code [ref=e586]:
+                - text: "describe('when logged in', () => { // ..."
+                - generic [ref=e587]: "describe('and several notes exists', () => {"
+                - text: beforeEach(async (
+                - generic [ref=e588]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e589]: await createNote(page, 'first note')
+                - generic [ref=e590]: await createNote(page, 'second note')
+                - text: "}) test('one of those can be made nonimportant', async ("
+                - generic [ref=e591]: "{ page }"
+                - text: ") => { const otherNoteElement = page.getByText('first note') await otherNoteElement .getByRole('button', { name: 'make not important' }).click() await expect(otherNoteElement.getByText('make important')).toBeVisible() }) }) })"
+              - button "copy" [ref=e592] [cursor=pointer]
+            - paragraph [ref=e593]:
+              - text: The test first searches for the element corresponding to the first created note using the method
+              - emphasis [ref=e594]: page.getByText
+              - text: and stores it in a variable. After this, a button with the text
+              - emphasis [ref=e595]: make not important
+              - text: is searched inside the element and the button is pressed. Finally, the test verifies that the button's text has changed to
+              - emphasis [ref=e596]: make important
+              - text: .
+            - paragraph [ref=e597]: "The test could also have been written without the auxiliary variable:"
+            - generic [ref=e599]:
+              - code [ref=e600]:
+                - text: test('one of those can be made nonimportant', async (
+                - generic [ref=e601]: "{ page }"
+                - text: ") => { page.getByText('first note') .getByRole('button', { name: 'make not important' }).click() await expect(page.getByText('first note').getByText('make important')) .toBeVisible() })"
+              - button "copy" [ref=e602] [cursor=pointer]
+            - paragraph [ref=e603]:
+              - text: Let's change the
+              - emphasis [ref=e604]: Note
+              - text: component so that the note text is rendered inside a
+              - emphasis [ref=e605]: span
+              - text: element
+            - generic [ref=e607]:
+              - code [ref=e608]:
+                - text: const Note = (
+                - generic [ref=e609]: "{ note, toggleImportance }"
+                - text: ") => { const label = note.important ? 'make not important' : 'make important' return ( <li className='note'>"
+                - generic [ref=e610]: "<span>{note.content}</span>"
+                - text: "<button onClick={toggleImportance}>{label}</button> </li> ) }"
+              - button "copy" [ref=e611] [cursor=pointer]
+            - paragraph [ref=e612]:
+              - text: Tests break! The reason for the problem is that the command
+              - emphasis [ref=e613]: page.getByText('first note')
+              - text: now returns a
+              - emphasis [ref=e614]: span
+              - text: element containing only text, and the button is outside of it.
+            - paragraph [ref=e615]: "One way to fix the problem is as follows:"
+            - generic [ref=e617]:
+              - code [ref=e618]:
+                - text: test('one of those can be made nonimportant', async (
+                - generic [ref=e619]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e620]: const otherNoteText = page.getByText('first note')
+                - generic [ref=e621]: const otherNoteElement = otherNoteText.locator('..')
+                - text: "await otherNoteElement.getByRole('button', { name: 'make not important' }).click() await expect(otherNoteElement.getByText('make important')).toBeVisible() })"
+              - button "copy" [ref=e622] [cursor=pointer]
+            - paragraph [ref=e623]:
+              - text: The first line now looks for the
+              - emphasis [ref=e624]: span
+              - text: element containing the text associated with the first created note. In the second line, the function
+              - emphasis [ref=e625]: locator
+              - text: is used and
+              - emphasis [ref=e626]: ..
+              - text: is given as an argument, which retrieves the element's parent element. The locator function is very flexible, and we take advantage of the fact that accepts
+              - link "as argument" [ref=e627] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/locators#locate-by-css-or-xpath
+              - text: not only CSS selectors but also
+              - link "XPath" [ref=e628] [cursor=pointer]:
+                - /url: https://developer.mozilla.org/en-US/docs/Web/XPath
+              - text: selector. It would be possible to express the same with CSS, but in this case XPath provides the simplest way to find the parent of an element.
+            - paragraph [ref=e629]: "Of course, the test can also be written using only one auxiliary variable:"
+            - generic [ref=e631]:
+              - code [ref=e632]:
+                - text: test('one of those can be made nonimportant', async (
+                - generic [ref=e633]: "{ page }"
+                - text: ") => { const secondNoteElement = page.getByText('second note').locator('..') await secondNoteElement.getByRole('button', { name: 'make not important' }).click() await expect(secondNoteElement.getByText('make important')).toBeVisible() })"
+              - button "copy" [ref=e634] [cursor=pointer]
+            - paragraph [ref=e635]: "Let's change the test so that three notes are created, the importance is changed in the second created note:"
+            - generic [ref=e637]:
+              - code [ref=e638]:
+                - text: "describe('when logged in', () => { beforeEach(async ("
+                - generic [ref=e639]: "{ page }"
+                - text: ") => { await loginWith(page, 'mluukkai', 'salainen') }) test('a new note can be created', async ("
+                - generic [ref=e640]: "{ page }"
+                - text: ") => { await createNote(page, 'a note created by playwright', true) await expect(page.getByText('a note created by playwright')).toBeVisible() }) describe('and several notes exists', () => { beforeEach(async ("
+                - generic [ref=e641]: "{ page }"
+                - text: ") => { await createNote(page, 'first note') await createNote(page, 'second note')"
+                - generic [ref=e642]: await createNote(page, 'third note')
+                - text: "}) test('one of those can be made nonimportant', async ("
+                - generic [ref=e643]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e644]: const otherNoteText = page.getByText('second note')
+                - text: "const otherNoteElement = otherNoteText.locator('..') await otherNoteElement.getByRole('button', { name: 'make not important' }).click() await expect(otherNoteElement.getByText('make important')).toBeVisible() }) }) })"
+              - button "copy" [ref=e645] [cursor=pointer]
+            - paragraph [ref=e646]: For some reason the test starts working unreliably, sometimes it passes and sometimes it doesn't. It's time to roll up your sleeves and learn how to debug tests.
+            - heading "Test development and debugging" [level=3] [ref=e647]
+            - paragraph [ref=e648]:
+              - text: If, and when the tests don't pass and you suspect that the fault is in the tests instead of in the code, you should run the tests in
+              - link "debug" [ref=e649] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/debug#run-in-debug-mode-1
+              - text: mode.
+            - paragraph [ref=e650]: "The following command runs the problematic test in debug mode:"
+            - generic [ref=e652]:
+              - code [ref=e653]: npm test -- -g'one of those can be made nonimportant' --debug
+              - button "copy" [ref=e654] [cursor=pointer]
+            - paragraph [ref=e655]: "Playwright-inspector shows the progress of the tests step by step. The arrow-dot button at the top takes the tests one step further. The elements found by the locators and the interaction with the browser are visualized in the browser:"
+            - img "playwright inspector highlighting element found by the selected locator in the application" [ref=e657]
+            - paragraph [ref=e658]:
+              - text: By default, debug steps through the test command by command. If it is a complex test, it can be quite a burden to step through the test to the point of interest. This can be avoided by using the command
+              - emphasis [ref=e659]: await page.pause()
+              - text: ":"
+            - generic [ref=e661]:
+              - code [ref=e662]:
+                - text: "describe('Note app', () => { beforeEach(async ("
+                - generic [ref=e663]: "{ page, request }"
+                - text: ") => { // ... }) describe('when logged in', () => { beforeEach(async ("
+                - generic [ref=e664]: "{ page }"
+                - text: ") => { // ... }) describe('and several notes exists', () => { beforeEach(async ("
+                - generic [ref=e665]: "{ page }"
+                - text: ") => { await createNote(page, 'first note') await createNote(page, 'second note') await createNote(page, 'third note') }) test('one of those can be made nonimportant', async ("
+                - generic [ref=e666]: "{ page }"
+                - text: ") => {"
+                - generic [ref=e667]: await page.pause()
+                - text: "const otherNoteText = page.getByText('second note') const otherNoteElement = otherNoteText.locator('..') await otherNoteElement.getByRole('button', { name: 'make not important' }).click() await expect(otherNoteElement.getByText('make important')).toBeVisible() }) }) }) })"
+              - button "copy" [ref=e668] [cursor=pointer]
+            - paragraph [ref=e669]:
+              - text: Now in the test you can go to
+              - emphasis [ref=e670]: page.pause()
+              - text: in one step, by pressing the green arrow symbol in the inspector.
+            - paragraph [ref=e671]:
+              - text: When we now run the test and jump to the
+              - emphasis [ref=e672]: page.pause()
+              - text: "command, we find an interesting fact:"
+            - img "playwright inspector showing the state of the application at page.pause" [ref=e674]
+            - paragraph [ref=e675]:
+              - text: It seems that the browser does not render all the notes created in the block
+              - emphasis [ref=e676]: beforeEach
+              - text: . What is the problem?
+            - paragraph [ref=e677]: The reason for the problem is that when the test creates one note, it starts creating the next one even before the server has responded, and the added note is rendered on the screen. This in turn can cause some notes to be lost (in the picture, this happened to the second note created), since the browser is re-rendered when the server responds, based on the state of the notes at the start of that insert operation.
+            - paragraph [ref=e678]:
+              - text: The problem can be solved by "slowing down" the insert operations by using the
+              - link "waitFor" [ref=e679] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator#locator-wait-for
+              - text: "command after the insert to wait for the inserted note to render:"
+            - generic [ref=e681]:
+              - code [ref=e682]:
+                - text: const createNote = async (
+                - generic [ref=e683]: page, content
+                - text: ") => { await page.getByRole('button', { name: 'new note' }).click() await page.getByRole('textbox').fill(content) await page.getByRole('button', { name: 'save' }).click()"
+                - generic [ref=e684]: await page.getByText(content).waitFor()
+                - text: "}"
+              - button "copy" [ref=e685] [cursor=pointer]
+            - paragraph [ref=e686]: "Instead of, or alongside debugging mode, running tests in UI mode can be useful. As already mentioned, tests are started in UI mode as follows:"
+            - generic [ref=e688]:
+              - code [ref=e689]: npm run test -- --ui
+              - button "copy" [ref=e690] [cursor=pointer]
+            - paragraph [ref=e691]:
+              - text: Almost the same as UI mode is use of the Playwright's
+              - link "Trace Viewer" [ref=e692] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/trace-viewer-intro
+              - text: ". The idea is that a \"visual trace\" of the tests is saved, which can be viewed if necessary after the tests have been completed. A trace is saved by running the tests as follows:"
+            - generic [ref=e694]:
+              - code [ref=e695]: npm run test -- --trace on
+              - button "copy" [ref=e696] [cursor=pointer]
+            - paragraph [ref=e697]: If necessary, Trace can be viewed with the command
+            - generic [ref=e699]:
+              - code [ref=e700]: npx playwright show-report
+              - button "copy" [ref=e701] [cursor=pointer]
+            - paragraph [ref=e702]:
+              - text: or with the npm script we defined
+              - emphasis [ref=e703]: npm run test:report
+            - paragraph [ref=e704]: Trace looks practically the same as running tests in UI mode.
+            - paragraph [ref=e705]: "UI mode and Trace Viewer also offer the possibility of assisted search for locators. This is done by pressing the double circle on the left side of the lower bar, and then by clicking on the desired user interface element. Playwright displays the element locator:"
+            - img "playwright's trace viewer with red arrows pointing at the locator assisted search location and to the element selected with it showing a suggested locator for the element" [ref=e707]
+            - paragraph [ref=e708]: Playwright suggests the following as the locator for the third note
+            - generic [ref=e710]:
+              - code [ref=e711]: "page.locator('li').filter({ hasText: 'third note' }).getByRole('button')"
+              - button "copy" [ref=e712] [cursor=pointer]
+            - paragraph [ref=e713]:
+              - text: The method
+              - link "page.locator" [ref=e714] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-page#page-locator
+              - text: is called with the argument
+              - emphasis [ref=e715]: li
+              - text: ", i.e. we search for all li elements on the page, of which there are three in total. After this, using the"
+              - link "locator.filter" [ref=e716] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator#locator-filter
+              - text: method, we narrow down to the li element that contains the text third note and the button element inside it is taken using the
+              - link "locator.getByRole" [ref=e717] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator#locator-get-by-role
+              - text: method.
+            - paragraph [ref=e718]: The locator generated by Playwright is somewhat different from the locator used by our tests, which was
+            - generic [ref=e720]:
+              - code [ref=e721]: "page.getByText('first note').locator('..').getByRole('button', { name: 'make not important' })"
+              - button "copy" [ref=e722] [cursor=pointer]
+            - paragraph [ref=e723]: Which of the locators is better is probably a matter of taste.
+            - paragraph [ref=e724]:
+              - text: Playwright also includes a
+              - link "test generator" [ref=e725] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/codegen-intro
+              - text: "that makes it possible to \"record\" a test through the user interface. The test generator is started with the command:"
+            - generic [ref=e727]:
+              - code [ref=e728]: npx playwright codegen http://localhost:5173/
+              - button "copy" [ref=e729] [cursor=pointer]
+            - paragraph [ref=e730]:
+              - text: When the
+              - emphasis [ref=e731]: Record
+              - text: "mode is on, the test generator \"records\" the user's interaction in the Playwright inspector, from where it is possible to copy the locators and actions to the tests:"
+            - img "playwright's record mode enabled with its output in the inspector after user interaction" [ref=e733]
+            - paragraph [ref=e734]:
+              - text: Instead of the command line, Playwright can also be used via the
+              - link "VS Code" [ref=e735] [cursor=pointer]:
+                - /url: https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright
+              - text: plugin. The plugin offers many convenient features, e.g. use of breakpoints when debugging tests.
+            - paragraph [ref=e736]:
+              - text: To avoid problem situations and increase understanding, it is definitely worth browsing Playwright's high-quality
+              - link "documentation" [ref=e737] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/intro
+              - text: ". The most important sections are listed below:"
+            - list [ref=e738]:
+              - listitem [ref=e739]:
+                - text: the section about
+                - link "locators" [ref=e740] [cursor=pointer]:
+                  - /url: https://playwright.dev/docs/locators
+                - text: gives good hints for finding elements in test
+              - listitem [ref=e741]:
+                - text: section
+                - link "actions" [ref=e742] [cursor=pointer]:
+                  - /url: https://playwright.dev/docs/input
+                - text: tells how it is possible to simulate the interaction with the browser in tests
+              - listitem [ref=e743]:
+                - text: the section about
+                - link "assertions" [ref=e744] [cursor=pointer]:
+                  - /url: https://playwright.dev/docs/test-assertions
+                - text: demonstrates the different expectations Playwright offers for testing
+            - paragraph [ref=e745]:
+              - text: In-depth details can be found in the
+              - link "API" [ref=e746] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-playwright
+              - text: description, particularly useful are the class
+              - link "Page" [ref=e747] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-page
+              - text: corresponding to the browser window of the application under test, and the class
+              - link "Locator" [ref=e748] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-locator
+              - text: corresponding to the elements searched for in the tests.
+            - paragraph [ref=e749]:
+              - text: The final version of the tests is in full on
+              - link "GitHub" [ref=e750] [cursor=pointer]:
+                - /url: https://github.com/fullstack-hy2020/notes-e2e/tree/part5-3
+              - text: ", in branch part5-3."
+            - paragraph [ref=e751]:
+              - text: The final version of the frontend code is in its entirety on
+              - link "GitHub" [ref=e752] [cursor=pointer]:
+                - /url: https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-9
+              - text: ", in branch part5-9."
+          - generic [ref=e755]:
+            - heading "Exercises 5.17.-5.23." [level=3] [ref=e756]
+            - paragraph [ref=e757]:
+              - text: In the last exercises of this part, let's do some E2E tests for the blog application. The material above should be enough to do most of the exercises. However, you should definitely read Playwright's
+              - link "documentation" [ref=e758] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/intro
+              - text: and
+              - link "API description" [ref=e759] [cursor=pointer]:
+                - /url: https://playwright.dev/docs/api/class-playwright
+              - text: ", at least the sections mentioned at the end of the previous chapter."
+            - 'heading "5.17: Blog List End To End Testing, step 1" [level=4] [ref=e760]'
+            - paragraph [ref=e761]: Create a new npm project for tests and configure Playwright there.
+            - paragraph [ref=e762]: Make a test to ensure that the application displays the login form by default.
+            - paragraph [ref=e763]: "The body of the test should be as follows:"
+            - generic [ref=e765]:
+              - code [ref=e766]:
+                - text: "const { test, expect, beforeEach, describe } = require('@playwright/test') describe('Blog app', () => { beforeEach(async ("
+                - generic [ref=e767]: "{ page }"
+                - text: ") => { await page.goto('http://localhost:5173') }) test('Login form is shown', async ("
+                - generic [ref=e768]: "{ page }"
+                - text: ") => { // ... }) })"
+              - button "copy" [ref=e769] [cursor=pointer]
+            - 'heading "5.18: Blog List End To End Testing, step 2" [level=4] [ref=e770]'
+            - paragraph [ref=e771]:
+              - text: Do the tests for login. Test both successful and failed login. For tests, create a user in the
+              - emphasis [ref=e772]: beforeEach
+              - text: block.
+            - paragraph [ref=e773]: The body of the tests expands as follows
+            - generic [ref=e775]:
+              - code [ref=e776]:
+                - text: "const { test, expect, beforeEach, describe } = require('@playwright/test') describe('Blog app', () => { beforeEach(async ("
+                - generic [ref=e777]: "{ page, request }"
+                - text: ") => { // empty the db here // create a user for the backend here // ... }) test('Login form is shown', async ("
+                - generic [ref=e778]: "{ page }"
+                - text: ") => { // ... }) describe('Login', () => { test('succeeds with correct credentials', async ("
+                - generic [ref=e779]: "{ page }"
+                - text: ") => { // ... }) test('fails with wrong credentials', async ("
+                - generic [ref=e780]: "{ page }"
+                - text: ") => { // ... }) }) })"
+              - button "copy" [ref=e781] [cursor=pointer]
+            - paragraph [ref=e782]:
+              - text: The
+              - emphasis [ref=e783]: beforeEach
+              - text: block must empty the database using, for example, the reset method we used in the
+              - link "material" [ref=e784] [cursor=pointer]:
+                - /url: /en/part5/end_to_end_testing_playwright#controlling-the-state-of-the-database
+              - text: .
+            - 'heading "5.19: Blog List End To End Testing, step 3" [level=4] [ref=e785]'
+            - paragraph [ref=e786]: Create a test that verifies that a logged in user can create a blog. The body of the test may look like the following
+            - generic [ref=e788]:
+              - code [ref=e789]:
+                - text: "describe('When logged in', () => { beforeEach(async ("
+                - generic [ref=e790]: "{ page }"
+                - text: ") => { // ... }) test('a new blog can be created', async ("
+                - generic [ref=e791]: "{ page }"
+                - text: ") => { // ... }) })"
+              - button "copy" [ref=e792] [cursor=pointer]
+            - paragraph [ref=e793]: The test should ensure that the created blog is visible in the list of blogs.
+            - 'heading "5.20: Blog List End To End Testing, step 4" [level=4] [ref=e794]'
+            - paragraph [ref=e795]: Do a test that makes sure the blog can be liked.
+            - 'heading "5.21: Blog List End To End Testing, step 5" [level=4] [ref=e796]'
+            - paragraph [ref=e797]:
+              - text: Make a test that ensures that the user who added the blog can delete the blog. If you use the
+              - emphasis [ref=e798]: window.confirm
+              - text: dialog in the delete operation, you may have to Google how to use the dialog in the Playwright tests.
+            - 'heading "5.22: Blog List End To End Testing, step 6" [level=4] [ref=e799]'
+            - paragraph [ref=e800]: Make a test that ensures that only the user who added the blog sees the blog's delete button.
+            - 'heading "5.23: Blog List End To End Testing, step 7" [level=4] [ref=e801]'
+            - paragraph [ref=e802]: Do a test that ensures that the blogs are arranged in the order according to the likes, the blog with the most likes first.
+            - paragraph [ref=e803]: This task is significantly more challenging than the previous ones.
+      - link "Propose changes to material" [ref=e805] [cursor=pointer]:
+        - /url: https://github.com/fullstack-hy2020/fullstack-hy2020.github.io/edit/source/src/content/5/en/part5d.md
+      - generic [ref=e806]:
+        - link "Part 5c Previous part" [ref=e807] [cursor=pointer]:
+          - /url: /en/part5/testing_react_apps
+          - generic [ref=e808]:
+            - paragraph [ref=e809]: Part 5c
+            - generic [ref=e810]: Previous part
+        - link "Part 5e Next part" [ref=e811] [cursor=pointer]:
+          - /url: /en/part5/react_router_ui_frameworks
+          - generic [ref=e812]:
+            - paragraph [ref=e813]: Part 5e
+            - generic [ref=e814]: Next part
+  - contentinfo [ref=e815]:
+    - generic [ref=e816]:
+      - link "Helsingin yliopiston logo" [ref=e817] [cursor=pointer]:
+        - /url: https://www.helsinki.fi/
+        - img "Helsingin yliopiston logo" [ref=e820]
+      - link "Houston inc. logo" [ref=e821] [cursor=pointer]:
+        - /url: https://www.houston-inc.com/
+        - img "Houston inc. logo" [ref=e824]
+    - generic [ref=e826]:
+      - link "About course" [ref=e827] [cursor=pointer]:
+        - /url: /en/about
+      - link "Course contents" [ref=e828] [cursor=pointer]:
+        - /url: /en/#course-contents
+      - link "FAQ" [ref=e829] [cursor=pointer]:
+        - /url: /en/faq
+      - link "Partners" [ref=e830] [cursor=pointer]:
+        - /url: /en/companies
+      - link "Challenge" [ref=e831] [cursor=pointer]:
+        - /url: /en/challenge
