@@ -28,6 +28,7 @@
 // 这是 Playwright 的标准实践——按 test isolation,每个 test 独立 page,
 // 但"准备新页面"是公用步骤。
 const { test, describe, expect, beforeEach } = require('@playwright/test')
+const { loginWith, createNote } = require('./helper')
 
 describe('Note app', () => {
   beforeEach(async ({ page, request }) => {
@@ -64,10 +65,7 @@ describe('Note app', () => {
   // 用户 mluukkai/salainen / name 'Matti Luukkainen' 按课程原文 1:1 复刻,
   // 由 test_helper.js 在 backend 启动时 seed(与现有 root/sekret 共存)。
   test('user can log in', async ({ page }) => {
-    await page.getByRole('button', { name: 'login' }).click()
-    await page.getByLabel('username').fill('mluukkai')
-    await page.getByLabel('password').fill('salainen')
-    await page.getByRole('button', { name: 'login' }).click()
+    await loginWith(page, 'mluukkai', 'salainen')
 
     await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible()
   })
@@ -89,7 +87,28 @@ describe('Note app', () => {
   //   - Notification 组件(<div className='error'>)渲染 → 测试断言
   //
   // 位置:顶层 describe 内、'when logged in' 之外(因为本 test 期望"未登录")
-  // ===== part5d — Running tests one by one(课程 1:1,纯技术演示)=====
+  // ===== part5d — Helper functions for tests(课程 1:1)=====
+// 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#helper-functions-for-tests
+// 课程原文 verbatim:把 spec 里"点击+填表+提交"这类重复步骤抽成 helper function,
+// 放到 tests/helper.js(本仓库已 1:1 复刻 — ESM 改 CommonJS 适配现有 package.json)。
+// spec 主体从"操作 UI"变成"调用 helper + 断言",显著降低重复。
+//
+// 抽出的 2 个 helper(详情见 tests/helper.js):
+//   loginWith(page, username, password)  → 3 处调用:
+//     - d.4 'user can log in'(密码 'salainen')
+//     - d.6 'when logged in' 嵌套 beforeEach(密码 'salainen')
+//     - d.8 'login fails with wrong password'(密码 'wrong')
+//   createNote(page, content) → 2 处调用:
+//     - d.6 'a new note can be created'
+//     - (下一节 d.11) 'and a note exists' 嵌套 beforeEach
+//
+// 本节**未**做的事:
+//   - 课程 d.10 末尾演示的"用 baseURL 替换 hardcoded URL"是进阶内容,
+//     课程标了"can now be transformed",本节按"一次只推进一小节"原则不并入。
+//     当前 spec 里 hardcoded 'http://localhost:5173' / 'http://localhost:3001/api/...'
+//     暂保留原状(留给后续小节或单独清理)。
+
+// ===== part5d — Running tests one by one(课程 1:1,纯技术演示)=====
   // 课程章节: https://fullstackopen.com/en/part5/end_to_end_testing#running-tests-one-by-one
   // 课程原文 verbatim:d.9 演示 2 种"只跑单个 test"的方式(本节**不**要求持久的代码变更,
   // 课程原话:"When the test is ready, only can and should be deleted."):
@@ -108,10 +127,7 @@ describe('Note app', () => {
   // 实战建议:开发中调试某个 test → 用 CLI -g(不污染源码);标记「想跑的 test」
   //         用 test.only(开发完必须删掉,否则 CI 会漏测)。
   test('login fails with wrong password', async ({ page }) => {
-    await page.getByRole('button', { name: 'login' }).click()
-    await page.getByLabel('username').fill('mluukkai')
-    await page.getByLabel('password').fill('wrong')
-    await page.getByRole('button', { name: 'login' }).click()
+    await loginWith(page, 'mluukkai', 'wrong')
 
     const errorDiv = page.locator('.error')
     await expect(errorDiv).toContainText('wrong credentials')
@@ -137,16 +153,11 @@ describe('Note app', () => {
   // 再跑内层 beforeEach(login)。所以 nested describe 内的 test 起步已是"已登录态"。
   describe('when logged in', () => {
     beforeEach(async ({ page }) => {
-      await page.getByRole('button', { name: 'login' }).click()
-      await page.getByLabel('username').fill('mluukkai')
-      await page.getByLabel('password').fill('salainen')
-      await page.getByRole('button', { name: 'login' }).click()
+      await loginWith(page, 'mluukkai', 'salainen')
     })
 
     test('a new note can be created', async ({ page }) => {
-      await page.getByRole('button', { name: 'new note' }).click()
-      await page.getByRole('textbox').fill('a note created by playwright')
-      await page.getByRole('button', { name: 'save' }).click()
+      await createNote(page, 'a note created by playwright')
       await expect(page.getByText('a note created by playwright')).toBeVisible()
     })
   })
