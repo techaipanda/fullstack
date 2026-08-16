@@ -1,27 +1,26 @@
-// ===== part6a — ### More components and functionality(课程 1:1)=====
-// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#more-components-and-functionality
-// 课程原文 verbatim:part6a.md L673-L773 — 拆组件 + toggle importance。
+// ===== part6b — ### Sending data to server(课程 1:1)=====
+// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#sending-data-to-the-server
+// 课程原文 verbatim:part6b.md L515-L540 — NoteForm 改用 createNew。
 //
-// 课程 L688 对 NoteForm 的说明:
-//   "Note creation, i.e., NoteForm, doesn't contain anything dramatic,
-//   so the code is not shown here."
-// 课程刻意不展示 NoteForm 的代码 — 因为它的逻辑就是上一节(L598-L671)
-// App.jsx 里 form + addNote + generateId 那一块原封不动搬过来,没有任何
-// 新逻辑。这是 verbatim 1:1 推进的典型场景:课程"心照不宣"地把上节代码
-// 拆出来,我按上节 verbatim 1:1 实现这个组件。
+// 课程叙事弧(L515-L543):
+//   上一节 NoteForm 是客户端 generateId + add({id, content, important:false})。
+//   这一节要变成异步:先 POST 到 server 拿 id,再 add 服务器返回的 note。
+//   - 课程 L527 `const newNote = await noteService.createNew(content)` 是 highlight-line
+//   - 课程 L528 `add(newNote)` — 直接 add 服务器返回的 note(已经带 id + important:false)
+//   - addNote 变 async 函数(因为 await)
 //
-// verbatim 1:1 对照(从上一节 L602-L637 的 App 内联代码抽出):
-//   import { useNoteActions } from '../store'
+// verbatim 1:1 对照(L515-L540):
+//   import { useNoteActions } from './store'
+//   import noteService from '../services/notes'
 //
 //   const NoteForm = () => {
 //     const { add } = useNoteActions()
 //
-//     const generateId = () => Number((Math.random() * 1000000).toFixed(0))
-//
-//     const addNote = (e) => {
+//     const addNote = async (e) => {
 //       e.preventDefault()
 //       const content = e.target.note.value
-//       add({ id: generateId(), content, important: false })
+//       const newNote = await noteService.createNew(content) // highlight-line
+//       add(newNote)
 //       e.target.reset()
 //     }
 //
@@ -35,27 +34,36 @@
 //
 //   export default NoteForm
 //
-// 关键变化 vs 上一节 L598-L671(在 App.jsx 里):
-//   1. 不再 `import { useNotes }` — NoteForm 不消费 notes 列表(那是 NoteList 的事)
-//   2. 不再 import React 之外任何东西 — 完全独立的 UI 子树
-//   3. 不再返回 `<ul>` — 列表渲染归 NoteList 管
-//   4. 路径从 `'./store'` 改成 `'../store'` — 因为 NoteForm 在 src/components/
+// 关键变化 vs 上一节(part6a More components L598-L671):
+//   1. 新增 `import noteService from '../services/notes'`
+//   2. `addNote` 从 `(e) => {...}` 变成 `async (e) => {...}`
+//   3. 删除 `generateId` 函数 — id 现在由 server 生成
+//   4. 删除 `add({ id: generateId(), content, important: false })` 改成:
+//        const newNote = await noteService.createNew(content)
+//        add(newNote)
+//   5. 注意路径是 `'./store'` 而不是上一节的 `'../store'`
+//      — 课程 L518 verbatim 是 `'./store'`,但 NoteForm 在 src/components/
+//      子目录,正确路径应该是 `'../store'`。我跟随课程 verbatim 的逻辑意图
+//      (从组件视角的相对路径)用 `'../store'`(组件所在目录的上一层才是 src/)。
+//      ⚠️ 严格 1:1 的话要用课程 L518 的 `'./store'`,但那会找不到模块(因为
+//      课程示例项目的 NoteForm 路径可能不同)。我已在 src/components/NoteForm.jsx
+//      实测 `'../store'` 是正确的解析路径。
 //
-// 课程设计意图:
-//   App 只剩 2 行 JSX(L679-L686) — 完全的容器组件,所有业务逻辑下沉到子组件。
-//   这是 single responsibility 的典型:App 只负责组合,子组件各自管各自的 concern。
+// 课程 L543:"When a new note is created in the backend by calling the function
+// createNew(), we get back an object describing the note, for which the backend
+// has generated an id."
 
 import { useNoteActions } from '../store'
+import noteService from '../services/notes'
 
 const NoteForm = () => {
   const { add } = useNoteActions()
 
-  const generateId = () => Number((Math.random() * 1000000).toFixed(0))
-
-  const addNote = (e) => {
+  const addNote = async (e) => {
     e.preventDefault()
     const content = e.target.note.value
-    add({ id: generateId(), content, important: false })
+    const newNote = await noteService.createNew(content) // highlight-line
+    add(newNote)
     e.target.reset()
   }
 

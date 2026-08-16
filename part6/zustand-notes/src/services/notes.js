@@ -1,47 +1,53 @@
-// ===== part6b — ### Fetching data from the server(课程 1:1)=====
-// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#fetching-data-from-the-server
-// 课程原文 verbatim:part6b.md L340-L355 + L381-L391(简化版)
+// ===== part6b — ### Sending data to server(课程 1:1)=====
+// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#sending-data-to-the-server
+// 课程原文 verbatim:part6b.md L441-L471 + L475-L493(最终 refactor 版本)。
 //
-// 课程叙事弧(L336-L429):
-//   上一节把 db.json + json-server 准备好。这一节用 fetch() 真正
-//   从后端拉数据:
-//     1. 建 src/services/notes.js — getAll() 函数
-//     2. store.js 加 initialize action(把 notes 数组整个替换)
-//     3. App.jsx 用 useEffect 调 noteService.getAll().then(notes => initialize(notes))
+// 课程叙事弧(L435-L545):
+//   上一节加了 fetch GET。这一节加 fetch POST,把新 note 存到 server。
+//     1. notes.js 加 createNew(content) — POST 到 baseUrl, body 是 JSON.stringify
+//     2. refactor:把 fetch options 抽到独立 options 变量(课程 L473:"We can
+//        further clarify the code by storing the object defining the request
+//        details in a separate options helper variable")
+//     3. NoteForm.jsx 改成 async + await noteService.createNew(content) + add(newNote)
 //
-// verbatim 1:1 对照(L340-L355 原始版 + L381-L391 简化版,采用简化版):
-//   const baseUrl = 'http://localhost:3001/notes'
-//
+// verbatim 1:1 对照(采用 L475-L493 的 options-refactored 版本作为最终态):
 //   const getAll = async () => {
 //     const response = await fetch(baseUrl)
-//
-//     if (!response.ok) {
-//       throw new Error('Failed to fetch notes')
-//     }
-//
-//     return await response.json() // highlight-line
+//     if (!response.ok) throw new Error('Failed to fetch notes')
+//     return await response.json()
 //   }
 //
-//   export default { getAll }
+//   // highlight-start
+//   const createNew = async (content) => {
+//     const options = {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ content, important: false }),
+//     }
 //
-// 课程 L357:"The notes are now fetched from the backend by calling the
-// fetch() function, which has been given the backend URL as an argument.
-// The request type is not separately specified, so fetch performs the
-// default action, which is a GET request." — fetch() 默认是 GET。
+//     const response = await fetch(baseUrl, options)
 //
-// 课程 L367:"The attribute response.ok gets the value true if the request
-// succeeded, i.e., if the response status code is in the range 200-299."
+//     if (!response.ok) {
+//       throw new Error('Failed to create note')
+//     }
 //
-// 课程 L369:"Note that fetch does not automatically throw an error even if
-// the response status code is, for example, 404. Error handling must be
-// implemented manually, as we have done now."
+//     return await response.json()
+//   }
+//   // highlight-end
 //
-// 课程 L377:"It is also worth noting that response.json() is an asynchronous
-// function, so the await keyword must be used with it."
+//   export default { getAll, createNew } // highlight-line
 //
-// 课程 L389 高亮 line:用 `return await response.json()` 直接返回,不再中转 data。
-// 课程 L341 baseUrl 硬编码 'http://localhost:3001/notes' — 这是 JSON Server 默认
-// 端口 + 我们前面 db.json 配的 notes 资源路径。
+// 课程 L497-L499 解释 options 三个字段:
+//   - method: 'POST'                          — 请求类型
+//   - headers: { 'Content-Type': 'application/json' }  — 让 server 知道 body 是 JSON
+//   - body: JSON.stringify({ content, important: false })  — body 不能直接是 JS 对象
+//
+// 课程 L509:"If the request succeeds, JSON Server returns the just-created
+// note, for which it has also generated a unique id. The data contained in
+// the response must still be converted to JSON format using the
+// response.json() function"
+//
+// 课程 L545:本节代码对应 part6-4 分支。
 
 const baseUrl = 'http://localhost:3001/notes'
 
@@ -52,7 +58,25 @@ const getAll = async () => {
     throw new Error('Failed to fetch notes')
   }
 
-  return await response.json() // highlight-line
+  return await response.json()
 }
 
-export default { getAll }
+// highlight-start
+const createNew = async (content) => {
+  const options = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content, important: false }),
+  }
+
+  const response = await fetch(baseUrl, options)
+
+  if (!response.ok) {
+    throw new Error('Failed to create note')
+  }
+
+  return await response.json()
+}
+// highlight-end
+
+export default { getAll, createNew } // highlight-line
