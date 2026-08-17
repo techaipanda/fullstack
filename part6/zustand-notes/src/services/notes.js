@@ -1,53 +1,38 @@
-// ===== part6b — ### Sending data to server(课程 1:1)=====
-// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#sending-data-to-the-server
-// 课程原文 verbatim:part6b.md L441-L471 + L475-L493(最终 refactor 版本)。
+// ===== part6b — ### Async actions(课程 1:1)=====
+// 课程章节: https://fullstackopen.com/en/part6/flux_architecture_and_zustand#async-actions
+// 课程原文 verbatim:part6b.md L547-L705 — 这一节 services/notes.js 加 update() 函数。
 //
-// 课程叙事弧(L435-L545):
-//   上一节加了 fetch GET。这一节加 fetch POST,把新 note 存到 server。
-//     1. notes.js 加 createNew(content) — POST 到 baseUrl, body 是 JSON.stringify
-//     2. refactor:把 fetch options 抽到独立 options 变量(课程 L473:"We can
-//        further clarify the code by storing the object defining the request
-//        details in a separate options helper variable")
-//     3. NoteForm.jsx 改成 async + await noteService.createNew(content) + add(newNote)
+// 课程叙事弧(L547-L705):
+//   上一节 NoteForm 自己在调 noteService.createNew + add(返回的 note)。
+//   这一节把 fetch 全部搬进 store action:
+//     1. notes.js 加 update(id, note) — PUT 到 /notes/:id
+//     2. store.js 加 `import noteService` + 3 个 action 全部改 async + 用 get() 取当前 state
+//     3. NoteForm.jsx 删 noteService import,改成 `await add(content)`
+//     4. App.jsx 删 noteService import,改成 `initialize()` 无参
 //
-// verbatim 1:1 对照(采用 L475-L493 的 options-refactored 版本作为最终态):
-//   const getAll = async () => {
-//     const response = await fetch(baseUrl)
-//     if (!response.ok) throw new Error('Failed to fetch notes')
-//     return await response.json()
-//   }
-//
-//   // highlight-start
-//   const createNew = async (content) => {
-//     const options = {
-//       method: 'POST',
+// 这一节本文件的 verbatim 增补(L625-L641):
+//   const update = async (id, note) => {
+//     const response = await fetch(`${baseUrl}/${id}`, {
+//       method: 'PUT',
 //       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({ content, important: false }),
-//     }
-//
-//     const response = await fetch(baseUrl, options)
+//       body: JSON.stringify(note),
+//     })
 //
 //     if (!response.ok) {
-//       throw new Error('Failed to create note')
+//       throw new Error('Failed to update note')
 //     }
 //
 //     return await response.json()
 //   }
-//   // highlight-end
 //
-//   export default { getAll, createNew } // highlight-line
+//   export default { getAll, createNew, update }
 //
-// 课程 L497-L499 解释 options 三个字段:
-//   - method: 'POST'                          — 请求类型
-//   - headers: { 'Content-Type': 'application/json' }  — 让 server 知道 body 是 JSON
-//   - body: JSON.stringify({ content, important: false })  — body 不能直接是 JS 对象
+// 课程 L621 "Let's finalize the application by synchronizing the importance
+// toggle change to the server." — toggleImportance action 改成 PUT 到 server
+// 后,UI 改的状态(important 翻转)会同步到 json-server 的 db.json,真正
+// 实现"刷新后重要标记保留"。
 //
-// 课程 L509:"If the request succeeds, JSON Server returns the just-created
-// note, for which it has also generated a unique id. The data contained in
-// the response must still be converted to JSON format using the
-// response.json() function"
-//
-// 课程 L545:本节代码对应 part6-4 分支。
+// 课程 L705:本节代码对应 part6-5 分支(zustand-notes/tree/part6-5)。
 
 const baseUrl = 'http://localhost:3001/notes'
 
@@ -61,7 +46,6 @@ const getAll = async () => {
   return await response.json()
 }
 
-// highlight-start
 const createNew = async (content) => {
   const options = {
     method: 'POST',
@@ -77,6 +61,21 @@ const createNew = async (content) => {
 
   return await response.json()
 }
+
+// highlight-start
+const update = async (id, note) => {
+  const response = await fetch(`${baseUrl}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(note),
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to update note')
+  }
+
+  return await response.json()
+}
 // highlight-end
 
-export default { getAll, createNew } // highlight-line
+export default { getAll, createNew, update } // highlight-line

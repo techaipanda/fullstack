@@ -27,13 +27,23 @@
     },
     {
       "content": "123",
-      "important": false,
+      "important": true,
       "id": "V8-Kk7fKUZA"
     },
     {
       "content": "123123",
-      "important": false,
+      "important": true,
       "id": "Nfx2b-n6haM"
+    },
+    {
+      "content": "Async actions verification test",
+      "important": true,
+      "id": "lLzEcHz4aY4"
+    },
+    {
+      "content": "31313",
+      "important": false,
+      "id": "quFd6cNWAaI"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
