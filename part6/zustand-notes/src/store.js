@@ -66,9 +66,26 @@
 // 课程 L705:本节代码对应 part6-5 分支(zustand-notes/tree/part6-5)。
 
 import { create } from 'zustand'
+import { devtools } from 'zustand/middleware' // highlight-line
 import noteService from './services/notes' // highlight-line
 
-const useNoteStore = create((set, get) => ({ // highlight-line
+// highlight-start
+// 课程 L770-L781 也演示了一个自定义 logger middleware(为了展示 middleware 形状):
+//   const logger = (config) => (set, get) => config(
+//     (...args) => {
+//       console.log('prev state', get());
+//       set(...args);
+//       console.log('next state', get());
+//     },
+//     get
+//   )
+// curry 形状 (config) => (set, get) => config(...) — 课程 L770 称 "somewhat cryptic"。
+// 课程 L811-L826 推出 ready-made 的 devtools,这是小节最终态。
+// 课程 L828:"When the Redux DevTools extension is installed in the browser, the
+// state of the store and its changes can be inspected in the browser's developer tools"
+// highlight-end
+
+const useNoteStore = create(devtools((set, get) => ({ // highlight-line
   notes: [],
   filter: '',
   actions: {
@@ -97,7 +114,7 @@ const useNoteStore = create((set, get) => ({ // highlight-line
     }
     // highlight-end
   }
-}))
+}))) // highlight-line
 
 // ===== 项目 hook(More complex state 引入,本节课程不动)=====
 export const useNotes = () => {
