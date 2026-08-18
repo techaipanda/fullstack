@@ -8,7 +8,7 @@
     {
       "id": "2",
       "content": "It manages async operations between server and client",
-      "important": true
+      "important": false
     },
     {
       "content": "123123",
@@ -19,6 +19,11 @@
       "content": "11",
       "important": true,
       "id": "iAp38rpVoLo"
+    },
+    {
+      "content": "123123",
+      "important": true,
+      "id": "K5khDiwOWtk"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
