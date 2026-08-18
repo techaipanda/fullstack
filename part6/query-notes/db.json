@@ -1,0 +1,14 @@
+{
+  "notes": [
+    {
+      "id": "1",
+      "content": "TanStack Query is a server-state library",
+      "important": true
+    },
+    {
+      "id": "2",
+      "content": "It manages async operations between server and client",
+      "important": false
+    }
+  ]
+}
