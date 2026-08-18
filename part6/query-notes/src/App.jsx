@@ -1,68 +1,49 @@
-// ===== part6c — Optimizing the performance =====
-// 课程章节: https://fullstackopen.com/en/part6/react_query_context_api#optimizing-the-performance
-// 课程原文 verbatim: part6c 第 3 个 H2 最终态(part6-3 branch)。
+// ===== part6c — useNotes custom hook =====
+// 课程章节: https://fullstackopen.com/en/part6/react_query_context_api#useNotes-custom-hook
+// 课程原文 verbatim: part6c 第 4 个 H2 整段(本节无 H3 子段)。
 //
-// 本节在 part6-2 之上三处改动:
-//   1. 修 button onClick bug(从 toggleImportance(note.id) 改为 toggleImportance(note))
-//   2. useQuery 选项加 refetchOnWindowFocus: false
-//      — 关掉切 tab 自动 refetch 的默认行为
-//   3. newNoteMutation.onSuccess 用 queryClient.setQueryData 手动更新缓存
-//      — 取代 invalidateQueries,避免一次额外的 server round-trip
-//      — verbatim 形态: const notes = queryClient.getQueryData(['notes'])
-//                      queryClient.setQueryData(['notes'], notes.concat(newNote))
+// 本节做了什么:
+//   - 新增 src/hooks/useNotes.js(verbatim 1:1 对照课程 §2 代码块)
+//   - App.jsx 不再 import useQuery / useMutation / useQueryClient
+//     — TanStack Query 的所有细节全在 hook 内部,App 只消费 hook 返回值
+//   - 解构 hook 返回值: { notes, isPending, addNote: addNoteToServer, toggleImportance }
+//     注意 rename:addNote 在 hook 里吃 string(content),在 App 里改名 addNoteToServer
+//     以避免与 form onSubmit 的本地 addNote 包装函数同名
+//   - <li> 上不再有 onClick(本节清掉;part6-3 时已经修过 button onClick 传 note 而非 note.id,
+//     既然 button 自己触发 toggleImportance,li onClick 就是冗余)
 //
-// updateNoteMutation.onSuccess 仍用 invalidateQueries(课程本节没优化它,
-// 因为 updateNote 要 spread 全原 note 才能保留 id/content,setQueryData 写起来
-// 反而麻烦;invalidateQueries 是更直接的选择)。
+// verbatim 1:1 对照(从课程 §3 代码块抽取):
+//   - hook 调用形态: const { notes, isPending, addNote: addNoteToServer, toggleImportance } = useNotes()
+//   - 本地 addNote 函数保留: event.preventDefault + 取 note.value + reset + addNoteToServer(content)
+//   - loading 分支: if (isPending) return <div>loading data...</div>
+//   - 列表渲染: notes.map(note => <li key={note.id}> ... <button onClick={() => toggleImportance(note)}> ... </button> </li>)
+//
+// 课程说明(本节首段,抽 hook 的动机):
+// "Our solution is fairly good, but somewhat bothersome is the fact that many
+//  TanStack Query implementation details have been placed directly inside the
+//  React component. Let's extract these into their own custom hook function."
 //
 // 课程原话末段:"The code for the application is in GitHub in the branch _part6-3_."
-//
-// 下一个 H2 是 "useNotes custom hook"(part6-4),把 TanStack Query 调用抽到
-// src/hooks/useNotes.js,App.jsx 不再直接接触 useQuery / useMutation / useQueryClient。
+// — 注意:part6-3 branch 实际上包含本课程 part6c 中三节的代码 state:
+//    1) Optimizing the performance(setQueryData + refetchOnWindowFocus)
+//    2) 本节(useNotes custom hook)
+//    下一节直接进 "Exercises 6.16-6.19"(anecdotes 题),不再有 part6-4+ 新分支。
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getNotes, createNote, updateNote } from './requests'
+import { useNotes } from './hooks/useNotes'
 
 const App = () => {
-  const queryClient = useQueryClient()
-
-  const newNoteMutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: (newNote) => {
-      const notes = queryClient.getQueryData(['notes'])
-      queryClient.setQueryData(['notes'], notes.concat(newNote))
-    }
-  })
-
-  const updateNoteMutation = useMutation({
-    mutationFn: updateNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] })
-    }
-  })
+  const { notes, isPending, addNote: addNoteToServer, toggleImportance } = useNotes()
 
   const addNote = async (event) => {
     event.preventDefault()
     const content = event.target.note.value
     event.target.reset()
-    newNoteMutation.mutate({ content, important: true })
+    addNoteToServer(content)
   }
 
-  const toggleImportance = (note) => {
-    updateNoteMutation.mutate({...note, important: !note.important })
-  }
-
-  const result = useQuery({
-    queryKey: ['notes'],
-    queryFn: getNotes,
-    refetchOnWindowFocus: false
-  })
-
-  if (result.isPending) {
+  if (isPending) {
     return <div>loading data...</div>
   }
-
-  const notes = result.data
 
   return (
     <div>
@@ -72,7 +53,7 @@ const App = () => {
         <button type="submit">add</button>
       </form>
       {notes.map((note) => (
-        <li key={note.id} onClick={() => toggleImportance(note)}>
+        <li key={note.id}>
           {note.important ? <strong>{note.content}</strong> : note.content}
           <button onClick={() => toggleImportance(note)}>
             {note.important ? 'make not important' : 'make important'}
