@@ -16,13 +16,22 @@
 // "The application code is in the GitHub repository
 //  https://github.com/fullstack-hy2020/context-counter."
 
+// H3 子段 "Defining the counter context in its own file" verbatim:
+//   - 引入 StrictMode(本节课程 §H3 main.jsx 代码块里有)
+//   - 用 <StrictMode> 包住 <CounterContextProvider>
+//   — StrictMode 是 React 18+ 的开发期检查工具,会双调用渲染函数
+//     来暴露副作用问题;生产 build 不会影响。
+
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import App from './App'
 import { CounterContextProvider } from './CounterContext'
 
 createRoot(document.getElementById('root')).render(
-  <CounterContextProvider>
-    <App />
-  </CounterContextProvider>
+  <StrictMode>
+    <CounterContextProvider>
+      <App />
+    </CounterContextProvider>
+  </StrictMode>
 )
