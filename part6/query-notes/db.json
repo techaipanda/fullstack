@@ -3,12 +3,23 @@
     {
       "id": "1",
       "content": "TanStack Query is a server-state library",
-      "important": true
+      "important": false
     },
     {
       "id": "2",
       "content": "It manages async operations between server and client",
-      "important": false
+      "important": true
+    },
+    {
+      "content": "123123",
+      "important": false,
+      "id": "ufIjQdj3yns"
+    },
+    {
+      "content": "11",
+      "important": true,
+      "id": "iAp38rpVoLo"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

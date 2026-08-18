@@ -1,31 +1,49 @@
-// ===== part6c — Managing data on the server with the TanStack Query library =====
-// 课程章节: https://fullstackopen.com/en/part6/many_redux_or_one_question#managing-data-on-the-server-with-the-tanstack-query-library
-// 课程原文 verbatim: part6c 第 1 个 H2 — 起始版本(part6-0)展示 + 改造后版本
-// 用 useQuery({ queryKey: ['notes'], queryFn: getNotes })(最终 part6-1)。
+// ===== part6c — Synchronizing data to the server using TanStack Query =====
+// 课程章节: https://fullstackopen.com/en/part6/react_query_context_api#synchronizing-data-to-the-server-using-tanstack-query
+// 课程原文 verbatim: part6c 第 2 个 H2 最终态(part6-2 branch)。
 //
-// 课程叙事弧(第 1 个 H2 段 1-段 6):
-//   段 1 起始版本:App 是空架子,addNote / toggleImportance 只 console.log,
-//   notes 写死 const notes = []。本节起始版本在 part6-0 分支。
-//   段 3 改造 1:useQuery({ queryKey: ['notes'], queryFn: async () => fetch... })
-//   — 直接内联 fetch,验证 isPending → success 状态机。
-//   段 4 提取:fetch 逻辑搬到 src/requests.js 的 getNotes()。
-//   段 6 改造 2:queryFn: getNotes(函数引用)。
-//   本文件取最终态(段 6 改造 2,即 part6-1)。
+// 本节在 part6-1 之上增量:
+//   - import 加 useMutation + useQueryClient(从 @tanstack/react-query)
+//   - import 加 createNote + updateNote(从 ./requests)
+//   - App 体内首句 const queryClient = useQueryClient()
+//   - 新增 newNoteMutation = useMutation({ mutationFn: createNote,
+//       onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes'] }) })
+//   - 新增 updateNoteMutation = useMutation({ mutationFn: updateNote,
+//       onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes'] }) })
+//   - addNote 函数体改为 newNoteMutation.mutate({ content, important: true })
+//   - toggleImportance 函数体改为 updateNoteMutation.mutate(
+//       { ...note, important: !note.important })
 //
-// verbatim 1:1 对照(段 1 起始 + 段 6 最终态):
-//   import { useQuery } from '@tanstack/react-query'
-//   import { getNotes } from './requests'
+// verbatim 1:1 对照(本节最终 App.jsx):
+//   import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+//   import { getNotes, createNote, updateNote } from './requests'
 //
 //   const App = () => {
+//     const queryClient = useQueryClient()
+//
+//     const newNoteMutation = useMutation({
+//       mutationFn: createNote,
+//       onSuccess: () => {
+//         queryClient.invalidateQueries({ queryKey: ['notes'] })
+//       }
+//     })
+//
+//     const updateNoteMutation = useMutation({
+//       mutationFn: updateNote,
+//       onSuccess: () => {
+//         queryClient.invalidateQueries({ queryKey: ['notes'] })
+//       }
+//     })
+//
 //     const addNote = async (event) => {
 //       event.preventDefault()
 //       const content = event.target.note.value
 //       event.target.reset()
-//       console.log(content)
+//       newNoteMutation.mutate({ content, important: true })
 //     }
 //
 //     const toggleImportance = (note) => {
-//       console.log('toggle importance of', note.id)
+//       updateNoteMutation.mutate({...note, important: !note.important })
 //     }
 //
 //     const result = useQuery({
@@ -39,48 +57,54 @@
 //
 //     const notes = result.data
 //
-//     return (
-//       <div>
-//         <h2>Notes app</h2>
-//         <form onSubmit={addNote}>
-//           <input name="note" />
-//           <button type="submit">add</button>
-//         </form>
-//         {notes.map((note) => (
-//           <li key={note.id} onClick={() => toggleImportance(note)}>
-//             {note.important ? <strong>{note.content}</strong> : note.content}
-//             <button onClick={() => toggleImportance(note.id)}>
-//               {note.important ? 'make not important' : 'make important'}
-//             </button>
-//           </li>
-//         ))}
-//       </div>
-//     )
+//     return (...)
 //   }
 //
-// 课程说明:"So the application retrieves data from the server and renders it
-// on the screen without using the React hooks useState and useEffect used in
-// chapters 2-5 at all. The data on the server is now entirely under the
-// administration of the TanStack Query library, and the application does not
-// need the state defined with React's useState hook at all!"
+// 课程要点:
+//   - useQueryClient 拿到 QueryClient 实例(在 main.jsx 创建并通过 Provider 注入)
+//   - mutationFn 是 async 函数(createNote / updateNote)
+//   - onSuccess 在 mutation 成功后回调,这里用 invalidateQueries 让 ['notes']
+//     查询失效 → 触发 useQuery 自动 refetch → 数据与 server 同步
+//   - 这种 "发完请求后让 query 失效重取" 是 TanStack Query 的官方推荐模式
 //
-// 注意:课程 addNote / toggleImportance 仍是 console.log 占位,因为本节不教
-// mutation — 那属于下一个 H2 "Synchronizing data to the server using TanStack
-// Query"。console.log 在课程里是刻意的 teaching 步骤,verbatim 保留。
+// 注意 verbatim 保留 bug:
+//   课程 part6-2 最终态 JSX 仍写 <button onClick={() => toggleImportance(note.id)}>
+//   — 但本节新 toggleImportance(note) 要求入参是整个 note 对象,传 note.id(string)
+//   会导致 spread `{...note.id}` 抛出(字符串可 spread 但无 important 字段,
+//   后续 !note.important 计算没问题但服务端 PUT 不识别)。这是 fullstackopen
+//   课程原代码的已知 bug,在下一个 H2 "Optimizing the performance"(part6-3)
+//   会修复 — 改 onClick 为 toggleImportance(note)。
+//   本节 verbatim 1:1,保留这个 bug。
 
-import { useQuery } from '@tanstack/react-query'
-import { getNotes } from './requests'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getNotes, createNote, updateNote } from './requests'
 
 const App = () => {
+  const queryClient = useQueryClient()
+
+  const newNoteMutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+    }
+  })
+
+  const updateNoteMutation = useMutation({
+    mutationFn: updateNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+    }
+  })
+
   const addNote = async (event) => {
     event.preventDefault()
     const content = event.target.note.value
     event.target.reset()
-    console.log(content)
+    newNoteMutation.mutate({ content, important: true })
   }
 
   const toggleImportance = (note) => {
-    console.log('toggle importance of', note.id)
+    updateNoteMutation.mutate({...note, important: !note.important })
   }
 
   const result = useQuery({
