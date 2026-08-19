@@ -6,6 +6,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { useField } from './hooks/useField.js'       // 课程 a.5 verbatim 自定义 hook
+import { useLocalStorage } from './hooks/useLocalStorage.js' // 课程 a 后续 verbatim 自定义 hook
 import FilteredList from './FilteredList.jsx'
 import SearchResults from './SearchResults.jsx'   // 已被 React.memo 包裹(见 SearchResults.jsx)
 import MyComponent from './MyComponent.jsx'       // 课程 a.3 verbatim 演示组件
@@ -100,6 +101,19 @@ const App = () => {
   // ==========================================================================
   const handleIncrement = useCallback(() => setCount(c => c + 1), [])
 
+  // ==========================================================================
+  // ⭐ 核心概念(a 后续):useLocalStorage — 持久化 state 到 localStorage
+  // ==========================================================================
+  // 跟 useState 几乎一样的 API:const [value, setValue] = useLocalStorage(key, init)
+  // 区别:setValue 会同时写回 localStorage,刷新页面 / 重启浏览器都不丢
+  //   - 第一次渲染:读 localStorage,没有就用 ''
+  //   - 后续渲染:跳过读,直接用 storedValue
+  //   - setValue 触发:更新 React state + 同步写 localStorage
+  //
+  // 父组件完全无感知:"The component has no idea that localStorage is involved"
+  // ==========================================================================
+  const [name, setName] = useLocalStorage('name', '')
+
   return (
     <div>
       <h1>part7 a.2/a.3/a.4 — useMemo + React.memo + useCallback demo</h1>
@@ -128,16 +142,35 @@ const App = () => {
       {/* a.5 演示:用 useField 管理表单 input state */}
       <div>
         <h2>custom hook — useField</h2>
-        <form>
+        <form onSubmit={(e) => {
+          // a.6 演示:form submit 时 reset 所有字段
+          // - 阻止默认提交行为(防止页面刷新)
+          // - 调用每个 useField 返回的 reset 方法,把内部 setValue('') 触发
+          //   → spread 到 input 上的 value={nameField.value} 自动变成 ''
+          e.preventDefault()
+          nameField.reset()
+          phoneField.reset()
+        }}>
           {/* {...nameField} 等价于:
               type="text"
               value={nameField.value}
               onChange={nameField.onChange} */}
           name: <input {...nameField} />{' '}
           phone: <input {...phoneField} />
+          <button type="submit">reset</button>
         </form>
         <p>name value: {nameField.value || '(empty)'}</p>
         <p>phone value: {phoneField.value || '(empty)'}</p>
+      </div>
+
+      {/* a 后续演示:useLocalStorage — 持久化到 localStorage */}
+      <div>
+        <h2>custom hook — useLocalStorage</h2>
+        <input value={name} onChange={e => setName(e.target.value)} />
+        <p>Hello, {name || 'stranger'}! (your name is stored in localStorage)</p>
+        <p style={{ fontSize: '0.85em', color: '#666' }}>
+          try:输入名字 → 按 F5 刷新页面 → 名字仍在(从 localStorage 读回)
+        </p>
       </div>
     </div>
   )

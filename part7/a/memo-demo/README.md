@@ -435,7 +435,205 @@ export const useField = (name) => {
 
 ---
 
+## a.6 — Spread attributes
+
+对应 Full Stack Open part7 a.6 子段(锚点未在课程目录里标注):
+
+> <https://fullstackopen.com/en/part7/more_about_react_hooks#spread-attributes>
+
+### 段 1 — spread 语法简化 props 传递
+
+> "Since the name object has exactly all of the attributes that the input element expects
+> to receive as props, we can pass the props to the element using the spread syntax
+> in the following way: `<input {...name} />`."
+
+### 段 2 — React 文档的等价写法对照
+
+> "As the example in the React documentation states, the following two ways of passing
+> props to a component achieve the exact same result:"
+
+```jsx
+<Greeting firstName='Arto' lastName='Hellas' />
+
+const person = {
+  firstName: 'Arto',
+  lastName: 'Hellas'
+}
+
+<Greeting {...person} />
+```
+
+### 段 3 — 完整 App 简化版(verbatim)
+
+```jsx
+const App = () => {
+  const name = useField('text')
+  const born = useField('date')
+  const height = useField('number')
+
+  return (
+    <div>
+      <form>
+        name: <input {...name} />
+        <br />
+        birthdate: <input {...born} />
+        <br />
+        height: <input {...height} />
+      </form>
+      <div>
+        {name.value} {born.value} {height.value}
+      </div>
+    </div>
+  )
+}
+```
+
+### 段 4 — 表单状态封装的价值
+
+> "Dealing with forms is greatly simplified when the unpleasant nitty-gritty details
+> related to synchronizing the state of the form are encapsulated inside our custom hook."
+
+### 课程代码块对应的 useField 签名变化
+
+课程 a.6 的 `useField(type)` 把第一个参数当 `type` 属性(text / date / number),
+而 a.5 我们的 `useField(name)` 把第一个参数当 `name` 属性。
+
+本地版本选择保留 **name 属性** 语义 + 写死 `type: 'text'`,理由:
+
+- 课程从 a.5 → a.6 改了签名(从 `useField(name)` → `useField(type)`),这不是"渐进"
+- 保留 name 属性更接近浏览器 `<input name="...">` 的实际用法(表单提交时用)
+- type 写死 'text' 是简化,实际项目应该两种参数都接受: `useField({ name, type })`
+
+### 关键 takeaway
+
+| 编号 | takeaway |
+|---|---|
+| 1 | Spread `{...obj}` 把对象的所有**可枚举属性**作为独立 props 传下去 |
+| 2 | `<input {...nameField} />` 等价于 `<input type="text" value={...} onChange={...} />` |
+| 3 | 适用场景:custom hook 返回的对象属性恰好匹配组件期望的 props |
+| 4 | React 文档等价写法:`<Greeting firstName=... lastName=... />` 与 `<Greeting {...person} />` 完全等价 |
+| 5 | 表单状态封装的价值:同步 input state 的细节隐藏在 hook 里,父组件只关心"显示什么 / 提交时做什么" |
+| 6 | **本演示扩展**:useField 返回 `reset` 方法,form `onSubmit` 时清空所有字段 |
+
+### 本地源码 vs 课程 verbatim 偏离说明
+
+| 文件 | 偏离 | 原因 |
+|---|---|---|
+| `src/hooks/useField.js` | 保留 `useField(name)` 签名(name 当 name 属性),课程 a.6 用 `useField(type)`(第一个参数当 type) | a.5 → a.6 渐进,保留已有签名 |
+| `src/hooks/useField.js` | 加 `reset` 方法到返回对象 | 演示段 4 "encapsulated inside our custom hook" — 表单提交时 reset 也是应封装的行为 |
+| `src/App.jsx` | 在 `<form>` 加 `onSubmit` 处理器(课程代码块没给 submit 逻辑) | 演示 reset 行为:点 "reset" 按钮 → nameField.reset() + phoneField.reset() |
+| `src/App.jsx` | 加 `<button type="submit">reset</button>` | 触发 form onSubmit |
+
+### 验证步骤(a.6)
+
+打开浏览器:
+1. 在 `name` 输入框打字 "Alice" → 下方 `name value: Alice`
+2. 在 `phone` 输入框打字 "12345" → 下方 `phone value: 12345`
+3. 点 "reset" 按钮 → 表单触发 onSubmit → `nameField.reset()` + `phoneField.reset()` → 两个输入框**瞬间清空** → 下方变 `(empty)`
+4. 打开 console:**没有 "search" 或其他报错** → 证明 spread + reset 都正常工作
+
+---
+
+## a 后续 — Persisting State with a Custom Hook (useLocalStorage)
+
+对应 Full Stack Open part7 a 后续段 "Persisting State with a Custom Hook":
+
+> <https://fullstackopen.com/en/part7/more_about_react_hooks>
+
+### 段 1 — 引入:custom hook 可以组合多个内置 hook
+
+> "Custom hooks can combine several built-in hooks to encapsulate more complex behaviour.
+> A commonly needed feature is persisting state to localStorage so that it survives
+> a page refresh. Here is a useLocalStorage hook that wraps useState and keeps the
+> value in sync with localStorage:"
+
+### 课程 verbatim 代码块 1 — useLocalStorage 实现
+
+```javascript
+import { useState } from 'react'
+
+const useLocalStorage = (key, initialValue) => {
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialValue
+    } catch (error) {
+      return initialValue
+    }
+  })
+
+  const setValue = (value) => {
+    try {
+      setStoredValue(value)
+      window.localStorage.setItem(key, JSON.stringify(value))
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  return [storedValue, setValue]
+}
+```
+
+### 段 2 — 行为说明
+
+> "The hook accepts a storage key and an initial value. On the first render it reads
+> from localStorage, falling back to initialValue if nothing is stored yet. The returned
+> setter updates both React state and localStorage at the same time."
+
+### 课程 verbatim 代码块 2 — App 用法(你引用的那段)
+
+```javascript
+const App = () => {
+  const [name, setName] = useLocalStorage('name', '')
+
+  return (
+    <div>
+      <input value={name} onChange={e => setName(e.target.value)} />
+      <p>Hello, {name}! (your name is stored in localStorage)</p>
+    </div>
+  )
+}
+```
+
+### 段 3 — 封装价值的总结
+
+> "The component has no idea that localStorage is involved. That concern is entirely
+> hidden inside the hook."
+
+### 关键 takeaway
+
+| 编号 | takeaway |
+|---|---|
+| 1 | Custom hook 可以**组合多个内置 hook** — 这里是 `useState` + `localStorage` |
+| 2 | API 设计模仿 `useState`:返回 `[value, setValue]` 元组,父组件无感知 |
+| 3 | 用 `useState(() => ...)` **lazy initializer**:读 localStorage 只在第一次渲染跑 |
+| 4 | `setValue` 同步更新两处:React state + `window.localStorage.setItem(...)` |
+| 5 | localStorage 只能存字符串,所有值都要 `JSON.stringify` / `JSON.parse` |
+| 6 | 必须 try/catch:SSR 没有 `window`、隐私模式禁用、5MB 写满都可能抛错 |
+| 7 | **核心价值**:父组件用法跟 `useState` 一模一样,持久化细节完全隐藏在 hook 内 |
+
+### 本地源码 vs 课程 verbatim 偏离说明
+
+| 文件 | 偏离 | 原因 |
+|---|---|---|
+| `src/hooks/useLocalStorage.js` | 完整保留课程 verbatim 代码块 | 课程代码已经是生产级(try/catch + lazy init),无需修改 |
+| `src/hooks/useLocalStorage.js` | 加大量中文 ⭐ 核心概念注释 | 解释 lazy initializer、同步两处写入、try/catch 必要性 |
+| `src/App.jsx` | 加 useLocalStorage 演示区块(`<input>` + `<p>Hello, ...</p>`) | 课程 App 是独立最小演示,本地版本要跟 useField 区块共存 |
+| `src/App.jsx` | 把 `<p>` 文案改成 `Hello, {name || 'stranger'}!` | 空字符串时给个 fallback,避免显示 "Hello, !" |
+
+### 验证步骤(useLocalStorage)
+
+打开浏览器:
+1. 在新加的 `useLocalStorage` input 输入 "Alice" → 下方变 `Hello, Alice!`
+2. **按 F5 刷新页面** → input 和 `<p>` 仍然显示 "Alice" ← 关键证据,证明从 localStorage 恢复
+3. 打开 DevTools → Application → Local Storage → 看到 `name: "Alice"` 键值对
+4. 改成 "Bob" → 刷新 → 显示 "Bob"
+5. 清空 input → 刷新 → 显示空字符串(没显示 "stranger",因为 storedValue 是 '' 而非 undefined)
+6. DevTools 里手动 `localStorage.removeItem('name')` 然后刷新 → 显示空(因为 initialValue 是 '')
+
+---
+
 ## 后续子段
 
-- a.6 More about hooks(hook 规则 + 注意事项)
 - a.7 Exercises 7.1.-7.6.

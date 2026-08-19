@@ -26,10 +26,11 @@ import { useState } from 'react'
 //
 // 这个 hook 的设计(课程 verbatim):
 //   输入: `name`(input 的 name 属性,本演示版本未使用,保留课程签名)
-//   输出: 一个对象 `{ type, value, onChange }`
+//   输出: 一个对象 `{ type, value, onChange, reset }`
 //     - type:固定是 'text'(简化版)
 //     - value:当前输入值
 //     - onChange:直接 spread 给 <input>(无需在父组件写 setName)
+//     - reset:清空输入框(用于 form onSubmit,a.6 演示)
 // ============================================================================
 export const useField = (name) => {
   // 内部用 useState 维护 input 当前值 — 这就是 custom hook 持有 state 的方式
@@ -42,11 +43,30 @@ export const useField = (name) => {
     setValue(event.target.value)
   }
 
+  // ==========================================================================
+  // ⭐ 核心概念(a.6):reset 方法 — 让父组件能在 form submit 后清空所有字段
+  // ==========================================================================
+  // 课程 a.6 在 form onSubmit 里演示 reset 行为(实际代码块没给 reset,
+  // 但 "Dealing with forms is greatly simplified" 隐含了 form reset 流程)。
+  //
+  // 我们把 reset 也封装在 useField 内部,父组件不必直接拿到 setValue:
+  //   - 调用 `nameField.reset()` → setValue('') → input 通过 spread 的 value={nameField.value}
+  //     自动变成空
+  //   - 同理 `phoneField.reset()`
+  //
+  // 注意 reset 是新函数引用 — 如果配合 React.memo 包裹的 Form 组件,
+  // 父组件需要 useCallback 包裹 onSubmit 才能让 memo 生效(本演示没用到)
+  // ==========================================================================
+  const reset = () => {
+    setValue('')
+  }
+
   // 返回一个对象 — 父组件直接 spread 到 input 上即可
   //   <input {...useField('name')} />
   return {
     type: 'text',
     value,
-    onChange
+    onChange,
+    reset
   }
 }
