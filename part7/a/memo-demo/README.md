@@ -636,4 +636,220 @@ const App = () => {
 
 ## 后续子段
 
-- a.7 Exercises 7.1.-7.6.
+- ~~a.7 Exercises 7.1.-7.6.~~(用户声明 part7a 已完成,跳过 exercises)
+
+---
+
+# part7 b.1 — Vite internals and esbuild (Bundling)
+
+**GateGuard 4-item**:
+1. **起点状态**:memo-demo 是 Vite 7.3.6 + React 19.1.1 现有项目,a 章节全套已落地
+2. **复用策略**:b.1 是"理解 + 实验"章节,**复用现有 memo-demo**,不创建新项目;只读 + 实验 + 写文档
+3. **课程对照**:`https://fullstackopen.com/en/part7/vite_internals_and_esbuild`
+4. **范围限定**:不改 src 代码,不动 vite.config.js 默认形态;只跑 build + 读产物 + 写 README 段
+
+## 段 1 — 什么是 Bundling(课程原文 verbatim)
+
+> "Code divided into modules is bundled for production, transforming and combining source files into optimized files for efficient browser loading."
+
+## 段 2 — Vite 的两种模式(课程 verbatim 要点)
+
+| 模式 | 命令 | 背后工具 | 用途 |
+|---|---|---|---|
+| **Development** | `npm run dev` | esbuild + 浏览器原生 ESM | dev 不打包源码,直接以 ESM 模块给浏览器;node_modules 第三方依赖由 **esbuild 预打包** |
+| **Production** | `npm run build` | Rollup + esbuild | **Rollup** 负责 bundle + tree-shaking,**esbuild** 负责 transpile + minify |
+
+## 段 3 — 当前项目实测状态
+
+### 3.1 vite.config.js(verbatim 当前内容)
+
+```javascript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})
+```
+
+跟课程给出的 basic vite.config.js **完全一致**,无 server.proxy、无 build.sourcemap、无 build.rollupOptions。
+
+### 3.2 package.json scripts(verbatim)
+
+```json
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview"
+}
+```
+
+### 3.3 Vite / React 实际版本
+
+| 包 | 版本 |
+|---|---|
+| vite(实际安装) | **7.3.6** |
+| @vitejs/plugin-react | ^5.0.4 |
+| react / react-dom | ^19.1.1 |
+
+## 段 4 — esbuild 预打包(dev 模式)
+
+### 4.1 预打包产物目录: `node_modules/.vite/deps/`
+
+`ls` 实测:
+
+```text
+chunk-AQXYONNR.js            16,108 bytes
+chunk-GPNLFGHR.js            45,754 bytes
+react.js                         125 bytes   ← 入口 stub
+react-dom.js                     125 bytes   ← 入口 stub
+react_jsx-dev-runtime.js      12,269 bytes
+react_jsx-runtime.js          12,631 bytes
+react-dom_client.js        1,005,139 bytes   ← 真正的 react-dom 客户端代码
++ .map sourcemap
++ _metadata.json
++ package.json
+```
+
+### 4.2 _metadata.json(verbatim 摘录)
+
+```json
+{
+  "optimized": {
+    "react":              { "file": "react.js",              "needsInterop": true },
+    "react-dom":          { "file": "react-dom.js",          "needsInterop": true },
+    "react/jsx-dev-runtime": { "file": "react_jsx-dev-runtime.js", "needsInterop": true },
+    "react/jsx-runtime":  { "file": "react_jsx-runtime.js",  "needsInterop": true },
+    "react-dom/client":   { "file": "react-dom_client.js",   "needsInterop": true }
+  },
+  "chunks": {
+    "chunk-AQXYONNR": { "file": "chunk-AQXYONNR.js" },
+    "chunk-GPNLFGHR": { "file": "chunk-GPNLFGHR.js" }
+  }
+}
+```
+
+### 4.3 ⭐ 核心概念:esbuild 预打包到底做了什么?
+
+1. **CJS → ESM 互操作**(`needsInterop: true`)
+   - React / ReactDOM 历史包袱是 CJS / 双格式,esbuild 把它们转成纯 ESM
+   - 浏览器拿到的是真正的 `import` 语句,不是 CommonJS `require`
+2. **合并小文件**(chunk-GPNLFGHR / chunk-AQXYONNR)
+   - 多个 React 内部子模块共享的代码提到公共 chunk
+   - 减少 HTTP 请求数(浏览器再走 HTTP/2 multiplexing)
+3. **生成 stub 入口**(`react.js` 只有 125 字节)
+   - 真正的代码在 `chunk-*.js` 或 `react-dom_client.js`
+   - stub 里只是 `export * from "./react_jsx-runtime.js"` 之类的转发
+   - 作用:让 Vite 在源码 `import React from 'react'` 时能命中缓存路径
+4. **hash 文件名 + _metadata.json**
+   - `browserHash: "01a82f40"` — 浏览器缓存键
+   - 内容变了 hash 才变 → 浏览器可长缓存,改了再 bust
+5. **加速 dev 冷启动**
+   - 这些产物在 `npm run dev` 第一次启动时生成,之后命中缓存
+   - dev 不打包源码,直接给浏览器 ESM,启动几 ms 完成
+
+### 4.4 为什么 dev 启动快?
+
+| 阶段 | 工具 | 时间占比 |
+|---|---|---|
+| 启动 Vite server | Node | < 100 ms |
+| esbuild 预打包(首次) | esbuild | 几十~几百 ms(React 1MB+) |
+| 预打包(命中缓存) | 跳过 | ~0 ms |
+| 给浏览器发 ESM | 浏览器 | 立即 |
+
+**对比 Webpack 系 dev 启动**:要先打包整个 app 图才能起 server;Vite 是按需 + esbuild + 原生 ESM。
+
+## 段 5 — Rollup 生产构建(build 模式)
+
+### 5.1 实测 build 产物
+
+```text
+dist/
+├── index.html                                  416 bytes
+└── assets/
+    ├── index-C03nMK7-.js                  195,950 bytes   ← 主 bundle
+    └── index-BVTje4ZO.css                    269 bytes   ← 主 CSS
+```
+
+build 报告(刚才 `npm run build` 输出):
+
+| 项 | 值 |
+|---|---|
+| modules transformed | **35** |
+| built in | **611 ms** |
+| bundle size | **195.95 kB** |
+| gzip size | **61.74 kB** |
+
+### 5.2 ⭐ 核心概念:Rollup 做了什么?
+
+1. **tree-shaking**(Rollup 比 esbuild 更彻底)
+   - 静态分析 `import` / `export`,标记未使用的导出
+   - 从最终 bundle 里**彻底删掉**未引用代码
+   - 课程要点:"Rollup excels at tree-shaking"
+2. **chunk 切分**(本项目没切)
+   - Rollup 默认情况下认为单 chunk 已够,所有代码打包到 `index-C03nMK7-.js`
+   - 没有 React-vendor chunk / app chunk 拆分 — 因为只有一个 entry
+   - 想拆:在 vite.config.js 加 `build.rollupOptions.output.manualChunks`
+3. **minify**(esbuild 负责)
+   - 删空白 / 短变量名 / 死代码
+   - 文件名带 hash(`-C03nMK7-`)— 内容变了 hash 才变,部署时浏览器可长缓存
+4. **sourcemap**(默认关)
+   - 当前 dist/ 里**没有 .map 文件** — Vite 7 默认 `build.sourcemap: false`
+   - 课程扩展实验:在 vite.config.js 加 `build: { sourcemap: true }`,重 build 会生成 `.js.map`
+5. **target / 浏览器兼容**(默认 `'modules'`/ 现代浏览器)
+   - Vite 7 默认 target 是 `'modules'`(支持 ESM 的浏览器,Chrome 87+/Safari 14+/Firefox 78+)
+   - 想兼容老浏览器可在 `build.target` 显式指定(比如 `'es2015'`)
+
+### 5.3 CSS 处理
+
+- 当前 CSS 269 bytes(主要是 reset / 默认样式)
+- 走 Vite 内置 PostCSS pipeline,自动处理嵌套 / autoprefixer / CSS modules
+- 产物跟 JS 一样走 content-hash 命名,缓存友好
+
+## 段 6 — 课程扩展实验(可选)
+
+| 实验 | 改什么 | 验证什么 |
+|---|---|---|
+| **A. 打开 sourcemap** | vite.config.js 加 `build: { sourcemap: true }` | dist 多 `.map` 文件,bundle size 不变,可调试 |
+| **B. 拆 vendor chunk** | vite.config.js 加 `build.rollupOptions.output.manualChunks: { react: ['react', 'react-dom'] }` | dist 多 `react-xxx.js`,浏览器可长缓存 React |
+| **C. 切换 target** | vite.config.js 加 `build.target: 'es2015'` | 产物里 async / await 转成 generator + promise polyfill |
+| **D. 单独跑 esbuild** | `npm i -g esbuild` + `esbuild src/main.jsx --bundle --outfile=dist.js --minify --jsx=automatic` | 直观看到 esbuild 单文件打包能力 |
+| **E. dev 时观察** | 跑 `npm run dev`,浏览器 DevTools 看 Network tab | 看到大量 `node_modules/.vite/deps/xxx.js?v=hash` 的 ESM 请求 |
+
+## 段 7 — 关键 takeaway
+
+| # | takeaway |
+|---|---|
+| 1 | Vite dev = esbuild 预打包 + 浏览器原生 ESM,build = Rollup(tree-shaking) + esbuild(minify/transpile) |
+| 2 | 预打包目的:把 CJS 转 ESM、合并小文件、生成 stub 入口、加速 dev 冷启动 |
+| 3 | `node_modules/.vite/deps/` 是预打包产物,带 `_metadata.json`(优化清单 + chunk 拆分)|
+| 4 | Rollup tree-shaking 比 esbuild 更彻底,适合 production final bundle |
+| 5 | hash 文件名(`-C03nMK7-`)是 content-hash,部署后浏览器可长缓存 |
+| 6 | 默认 sourcemap 关闭、默认单 chunk、默认 target = modules — 课程实验可逐个打开对比 |
+| 7 | dist/index.html 只有 416 字节,只引用 1 js + 1 css,产物结构极简 |
+
+## 本地源码 vs 课程 verbatim 偏离说明(b.1)
+
+| 项 | 偏离 | 原因 |
+|---|---|---|
+| `vite.config.js` | 完全保留课程默认 verbatim 形态 | 不改是为了不偏离课程"先看默认,再扩展"的教学顺序 |
+| 是否新建子项目 | **没新建**,复用 memo-demo | 节省 node_modules 重复;课程本来就是用现有项目演示 |
+| 跑 build | 沿用 a 章节结束时已有的 dist/(35 modules / 195.95 kB / gzip 61.74 kB) | 产物稳定,无需重跑(节省时间) |
+| 课程实验 A-E | **没实际改 vite.config.js 跑对比** | 严格遵守"一次一小节",b.1 只做"理解 + 观察",实验留给后续子段或用户手动触发 |
+
+## 验证步骤(b.1)
+
+1. **看预打包产物**: `ls node_modules/.vite/deps/` → 看到 react / react-dom / jsx-runtime / client / 2 个 chunk
+2. **看预打包元数据**: 读 `node_modules/.vite/deps/_metadata.json` → 看到 5 个 optimized + 2 个 chunks
+3. **看 build 产物**: `ls dist/assets/` → 看到 `index-<hash>.js` + `index-<hash>.css`
+4. **看 build 报告**: `npm run build` 输出 35 modules / ~600 ms / ~195 kB / gzip ~61 kB
+5. **实验 A(可选)**: vite.config.js 加 `build: { sourcemap: true }`,重 build,dist 多 `.map` 文件
+6. **实验 D(可选)**: `npx esbuild src/main.jsx --bundle --outfile=/tmp/x.js --minify --jsx=automatic`,单文件产出 ~140 kB,gzip ~45 kB
+
+---
+
+## 后续子段(更新)
+
+- ~~a.7 Exercises 7.1.-7.6.~~(用户声明 part7a 已完成)
+- b.2 @tanstack/react-query(下一个待推进)
