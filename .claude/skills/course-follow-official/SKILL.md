@@ -59,7 +59,7 @@ This catches "course says X, your repo has Y" before you write. Do not skip this
 When writing the file, **only add** these two things — nothing else:
 
 1. **Section markers** — e.g. `// part5 a — setToken` placed immediately above the code that implements that section. These let the learner map code → tutorial step.
-2. **Chinese learning comments** — short explanations of *what the course line does* in Chinese, because the user is learning and the course itself is in English.
+2. **Chinese learning comments** — explanations of *what the course line does* in Chinese, because the user is learning and the course itself is in English. **For new concepts (hooks, APIs, syntax patterns), comments must be deep enough that a learner who reads only the code (not the README) can understand the concept.** See `Step 4.5` for the required depth.
 
 **Forbidden additions** (these are "improvement drift"):
 
@@ -70,6 +70,48 @@ When writing the file, **only add** these two things — nothing else:
 - ❌ Changing JSX element order, attribute order, or wrapper `<div>`s
 - ❌ Reordering state declarations or hooks
 - ❌ Adding any "safety" code (extra try/catch, null checks) not in the course
+
+### Step 4.5 — Comment depth for new concepts (关键概念注释纪律)
+
+When the course introduces a **new concept** (a hook, an API, a syntax pattern the learner hasn't seen), the comment beside it must include ALL of the following:
+
+1. **What the concept is** — define it in plain Chinese terms
+2. **Why this code uses it** — "不用会怎样 / 用会怎样" 对比
+3. **What the dependency array / arguments mean** — semantics, not just naming
+4. **How to verify** — console.log pattern or browser observation the learner can do
+5. **Anchor to README** — point to the verbatim paragraph in the README so the learner can cross-reference
+
+Format hint: use a `⭐ 核心概念:` prefix on the most important concept so the learner can spot it at a glance.
+
+**Why** (use case): in part7 a.2 useMemo, the user reported they couldn't understand the new concept from the code alone — comments that merely said "这里是 useMemo" were useless. The README had the verbatim text but the user (and other learners) read code first, README second.
+
+**Anti-patterns** (do NOT do these in comments):
+
+- ❌ Just naming the concept ("// useMemo 缓存") without explaining it
+- ❌ Copying the English official docs verbatim — translate to Chinese in your own words
+- ❌ Comments that only say WHAT the code does without explaining WHY
+- ❌ Long English Stack Overflow quotes — Chinese learning comments must be in Chinese
+
+Example (good vs bad):
+
+```javascript
+// ❌ BAD: 只说"使用 useMemo"
+const filtered = useMemo(() => ITEMS.filter(...), [filter])
+
+// ✅ GOOD: 解释"为什么" + "怎么验证" + 关联 README
+// ⭐ 核心概念: useMemo 缓存计算结果
+// 不用 useMemo: 每次 re-render 都重跑 ITEMS.filter(10000 × 100000 次循环)
+// 用 useMemo:    只在 [filter] 变化时重跑,否则返回缓存
+// 验证: 打开 console,切 dark mode 时**看不到** 'filtering...' 日志
+// 关联: README.md 段 4-6
+const filtered = useMemo(() => {
+  console.log('filtering...')
+  return ITEMS.filter(item => {
+    expensiveCalculation()
+    return item.includes(filter)
+  })
+}, [filter])
+```
 
 ### Step 5 — Tooling friction: handle it explicitly, don't paper over it
 
@@ -101,6 +143,9 @@ Before saying "1:1 done", self-check:
 - [ ] No helpers replaced with idiomatic alternatives
 - [ ] No aliases / wrapper variables added to dodge lints
 - [ ] Section markers and Chinese comments are the **only** additions
+- [ ] Every new concept (hook / API / syntax) has a `⭐ 核心概念:` Chinese comment that explains WHY, not just WHAT
+- [ ] For hook usage, the comment includes a "不用 X / 用 X" comparison so the learner sees the effect
+- [ ] Comments include a verification method (console.log / browser observation) the learner can run to confirm the concept works
 
 If any item fails, revert and re-apply Step 4's discipline.
 
