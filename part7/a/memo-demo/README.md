@@ -359,8 +359,83 @@ const App = () => {
 
 ---
 
+## a.5 — Custom hooks
+
+对应 Full Stack Open part7 a.5 子段(锚点 `#custom-hooks`):
+
+> <https://fullstackopen.com/en/part7/more_about_react_hooks#custom-hooks>
+
+### 段 1 — 引入:抽离 stateful logic
+
+> "Extracting reusable logic into custom hooks is one of the most common patterns
+> in React. A custom hook is just a regular JavaScript function whose name starts
+> with use and that may call other hooks."
+
+### 段 2 — 命名约定
+
+> "By convention, custom hooks start with use. This convention is not enforced but
+> lint rules and React itself rely on it to identify hooks."
+
+### 段 3 — 复用表单 input 状态管理
+
+> "We can extract the input state handling into a custom hook, so we can reuse it
+> across all the input fields of the form."
+
+### 段 4 — spread 模式简化用法
+
+> "With the spread syntax, the input fields can be written much more cleanly:
+> `<input {...nameField} />`."
+
+### 课程 verbatim 代码块 — useField
+
+```javascript
+import { useState } from 'react'
+
+export const useField = (name) => {
+  const [value, setValue] = useState('')
+
+  const onChange = (event) => {
+    setValue(event.target.value)
+  }
+
+  return {
+    type: 'text',
+    value,
+    onChange
+  }
+}
+```
+
+### 关键 takeaway
+
+| 编号 | takeaway |
+|---|---|
+| 1 | Custom hook 本质是普通 JS 函数,**必须**以 `use*` 开头(命名约定) |
+| 2 | 内部可以调用其他 hooks(useState / useEffect / 自定义 hooks…) |
+| 3 | 跟普通函数的区别:custom hook **跨渲染持有 state**(内部用 useState) |
+| 4 | 返回**任何**东西:值 / 对象 / 数组 / 函数 — 课程 spread 模式返回 `{ type, value, onChange }` 对象 |
+| 5 | 跟"组件抽取"的区别:custom hook 抽的是**逻辑**(不是 UI),返回任意数据结构 |
+| 6 | 同一个 hook 多次调用 → **独立的** state 槽位(React 按调用顺序识别) |
+
+### 本地源码 vs 课程 verbatim 偏离说明
+
+| 文件 | 偏离 | 原因 |
+|---|---|---|
+| `src/hooks/useField.js` | 把 hook 拆到独立文件(课程代码块直接在组件文件) | 现代项目惯例 — 放 `src/hooks/` 目录,方便多个组件复用 |
+| `src/App.jsx` | 同时演示 `nameField` + `phoneField` 两个 useField 调用 | 验证 takeaway #6 — 同一 hook 多次调用、独立的 state |
+| `src/App.jsx` | 加 `<p>name value: ...</p>` 显示当前值 | 在浏览器直接观察 useField 内部的 state(无需打开 React DevTools) |
+
+### 验证步骤(a.5)
+
+打开浏览器:
+1. 在 `name` 输入框打字 → 下方 `name value: ...` 实时更新
+2. 在 `phone` 输入框打字 → 下方 `phone value: ...` 实时更新
+3. 两个 input **互不干扰** → 证明同一 hook 多次调用 = 独立 state 槽位
+4. 点 "bump unrelated state" 按钮 → App 重渲染 → input 输入的值**不丢失** → 证明 useField 内部 useState 状态被 React 保留
+
+---
+
 ## 后续子段
 
-- a.5 Custom hooks(本地已有 `useNotes` / `useCounter` 范例)
-- a.6 More about hooks
+- a.6 More about hooks(hook 规则 + 注意事项)
 - a.7 Exercises 7.1.-7.6.

@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useMemo, useCallback } from 'react'
+import { useField } from './hooks/useField.js'       // 课程 a.5 verbatim 自定义 hook
 import FilteredList from './FilteredList.jsx'
 import SearchResults from './SearchResults.jsx'   // 已被 React.memo 包裹(见 SearchResults.jsx)
 import MyComponent from './MyComponent.jsx'       // 课程 a.3 verbatim 演示组件
@@ -18,6 +19,22 @@ const App = () => {
   const [other, setOther] = useState(0)
   // a.4 新增:IncrementButton 的 count state
   const [count, setCount] = useState(0)
+
+  // ==========================================================================
+  // ⭐ 核心概念(a.5):Custom hook 调用 — 把表单逻辑抽离到 useField
+  // ==========================================================================
+  // 原本要在每个组件里写:
+  //   const [name, setName] = useState('')
+  //   const onChangeName = (e) => setName(e.target.value)
+  // 现在调一次 useField 就拿到一个对象,可以**直接 spread** 到 <input> 上:
+  //   <input {...nameField} />   // 等价于 <input type="text" value={...} onChange={...} />
+  //
+  // useField 内部用 useState 维护 value(详见 src/hooks/useField.js)
+  // - 每次 useField('name') 调用 → **独立**的 state 槽位
+  // - 跟 useState 一样,在父组件 re-render 时保留值(React Hooks 内部按调用顺序识别)
+  // ==========================================================================
+  const nameField = useField('name')
+  const phoneField = useField('phone')
 
   // ==========================================================================
   // ⭐ 核心概念(a.2):为什么对象 props 必须配合 useMemo,React.memo 才能生效?
@@ -107,6 +124,21 @@ const App = () => {
       <SearchResults options={options} />
       <MyComponent value={myValue} />
       <FilteredList />
+
+      {/* a.5 演示:用 useField 管理表单 input state */}
+      <div>
+        <h2>custom hook — useField</h2>
+        <form>
+          {/* {...nameField} 等价于:
+              type="text"
+              value={nameField.value}
+              onChange={nameField.onChange} */}
+          name: <input {...nameField} />{' '}
+          phone: <input {...phoneField} />
+        </form>
+        <p>name value: {nameField.value || '(empty)'}</p>
+        <p>phone value: {phoneField.value || '(empty)'}</p>
+      </div>
     </div>
   )
 }
