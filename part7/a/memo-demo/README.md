@@ -260,9 +260,107 @@ const MyComponent = React.memo(({ value }) => {
 
 ---
 
+## a.4 — useCallback
+
+对应 Full Stack Open part7 a.4 子段(锚点 `#usecallback`):
+
+> <https://fullstackopen.com/en/part7/more_about_react_hooks#usecallback>
+
+### 段 1 — 引入:函数 prop 也会让 memo 失效
+
+> "React.memo does not automatically work with function props passed from a parent component.
+> The problem is that whenever the component re-renders, all the event handler functions it
+> defines are also redefined."
+
+### 段 2 — 函数是对象引用
+
+> "This is because functions are objects in JavaScript, and the equality check on the
+> function references fails when they are redefined."
+
+### 段 3 — 解法:useCallback 缓存函数引用
+
+> "useCallback works just like useMemo, except that it caches a function definition
+> instead of a calculated value."
+
+### 段 4 — useCallback(fn, deps) vs useMemo(() => fn, deps)
+
+> "The signature is useCallback(callback, dependencies). When the dependencies don't change,
+> the callback returned is the same reference as before."
+
+### 段 5 — 失效场景:依赖项还是变了
+
+> "If the callback depends on a value that does change, the function reference will
+> still change and the memoisation will not help."
+
+### 课程 verbatim 代码块 — IncrementButton + App
+
+```javascript
+// 子组件:接收函数 prop + React.memo 包裹
+const IncrementButton = React.memo(({ onIncrement }) => {
+  console.log('IncrementButton rendered')
+  return <button onClick={onIncrement}>+1</button>
+})
+
+// 父组件 App:用 useCallback 稳定函数引用
+const App = () => {
+  const [count, setCount] = useState(0)
+
+  // ❌ 没有 useCallback 时,这个函数每次 render 都新建 — 引用每次都不同
+  // const handleIncrement = () => setCount(count + 1)
+
+  // ✅ 用 useCallback + 函数式更新 → 引用永远稳定
+  const handleIncrement = useCallback(() => setCount(c => c + 1), [])
+
+  return (
+    <div>
+      <p>count: {count}</p>
+      <IncrementButton onIncrement={handleIncrement} />
+    </div>
+  )
+}
+```
+
+> 实际 `src/App.jsx` / `src/IncrementButton.jsx` 用 React 17+ `import { memo }` + `import { useCallback }` 替代 `React.memo` / `useCallback`,拆成 Base + memo 包裹两步,方便加中文注释。
+
+### 关键 takeaway
+
+| 编号 | takeaway |
+|---|---|
+| 1 | `useCallback(fn, deps)` 只在 `deps` 变化时返回**同一个函数引用** — 否则返回上次缓存的函数 |
+| 2 | 本质上 `useCallback(fn, deps) ≈ useMemo(() => fn, deps)` |
+| 3 | **典型用法**:把回调传给被 `React.memo` 包裹的子组件,避免子组件不必要的 re-render |
+| 4 | 函数式更新 (`setCount(c => c + 1)`) 让 deps 可以是空数组 `[]` — 函数引用永远不变 |
+| 5 | 如果 deps 里的值变了,函数引用也会变 — memo 仍然失效(段 5) |
+| 6 | 性能优化,不是默认 — 先 measure,确认瓶颈再加 |
+
+### 本地源码 vs 课程 verbatim 偏离说明
+
+| 文件 | 偏离 | 原因 |
+|---|---|---|
+| `src/IncrementButton.jsx` | `import { memo }` 替代 `React.memo` | React 17+ 推荐 named import |
+| `src/IncrementButton.jsx` | 拆成 `IncrementButtonBase` + `memo()` 包裹两步 | 方便在 Base 上加 ⭐ 核心概念 注释 |
+| `src/IncrementButton.jsx` | 加 `console.log('IncrementButton rendered')` | 验证 memo 生效/失效(课程代码块没加,但本地版本需要观测点) |
+| `src/App.jsx` | `handleIncrement` 用 `useCallback(() => setCount(c => c + 1), [])` | 课程代码块 1 推荐写法 — 函数式更新让 deps 为空 |
+| `src/App.jsx` | 把 IncrementButton + count state 加在原有 App 里 | 课程代码块是独立的最小演示,本地要跟 a.2/a.3 复用同一个 App 才能在浏览器对照验证 |
+
+### 验证步骤(a.4)
+
+打开浏览器 console,操作:
+1. 在输入框打字 → 看到 `SearchResults rendered` + `MyComponent rendered` + `IncrementButton rendered` + `filtering...`(因为 options / myValue / handleIncrement 都重新计算或第一次渲染)
+2. 点 "bump unrelated state" 按钮 → **看不到** `SearchResults rendered` / `MyComponent rendered` / `IncrementButton rendered`
+   - `options` 引用稳定(useMemo)
+   - `myValue` 引用稳定(useMemo)
+   - `handleIncrement` 引用稳定(useCallback + 空 deps)
+   - React.memo 全部跳过
+3. 点 "+1" 按钮 → count 变了 → 但 `handleIncrement` 引用没变(空 deps) → IncrementButton 跳过
+4. **实验**:把 `useCallback(() => setCount(c => c + 1), [])` 改成 `() => setCount(c => c + 1)`(去掉 useCallback)
+   - 重复步骤 2 → 这次会**看到** `IncrementButton rendered`(memo 失效)
+   - 这就是 useCallback 存在的意义
+
+---
+
 ## 后续子段
 
-- **a.4 useCallback** — 跟 useMemo 配对,稳定函数引用,让 React.memo 不再失效
 - a.5 Custom hooks(本地已有 `useNotes` / `useCounter` 范例)
 - a.6 More about hooks
 - a.7 Exercises 7.1.-7.6.
