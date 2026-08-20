@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>esbuild app</title>
+  </head>
+  <body>
+    <!-- ⭐ 核心概念:根挂载点
+         React 会把整棵组件树渲染进 #root,这是 React 应用的"插座位"。
+         课程原文如此:一个空的 div 配一个 id="root",没有任何样式。 -->
+    <div id="root"></div>
+
+    <!-- ⭐ 核心概念:esbuild 产物入口
+         ./main.js 指向 esbuild 生成的 dist/main.js(由 build 脚本 --outfile=dist/main.js 决定)。
+         浏览器原生 ES module 不需要 type="module",因为 esbuild 已经把所有依赖 bundle 到一个文件里了。
+         课程原文如此:不写 type="module"。 -->
+    <script src="./main.js"></script>
+  </body>
+</html>
