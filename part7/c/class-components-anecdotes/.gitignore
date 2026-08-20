@@ -1,0 +1,8 @@
+# Vite 标准模板 + json-server 通常不写产物的约定
+node_modules
+dist
+dist-ssr
+*.local
+
+# json-server --watch 偶尔会产生一些 swap 文件(跨平台保险)
+*.swp
