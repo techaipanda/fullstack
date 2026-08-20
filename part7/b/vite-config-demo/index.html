@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>vite-config-demo</title>
+  </head>
+  <body>
+    <!-- ⭐ 核心概念:Vite 模板里 #root 是 React 应用的挂载点
+         Vite 的 index.html 就是构建入口(不像 webpack 那样要写 entry 配置)
+         因为 main.jsx 直接以相对路径 ./ 被 Vite 静态分析 -->
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+# 标准 Vite 模板的 .gitignore,加上 .env.production 兜底(课程原文警告敏感值要 ignore)
+node_modules
+dist
+dist-ssr
+*.local
+
+# .env.production 通常含线上真实 URL 甚至 secret,课程原文要求 ignore
+# .env / .env.development / .env.example 可选 ignore(本子项目选不 ignore,方便学习者看完整配置)
+.env.production
