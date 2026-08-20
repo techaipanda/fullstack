@@ -170,6 +170,74 @@ npm run dev
 
 ---
 
+---
+
+## part7 b — Transpilation 子节(verbatim 摘录 + 关键概念)
+
+> **本子节定位**:纯理论小节,**没有任何新代码或新命令**。它解释你在上一节跑 `npm run build` 时 esbuild 顺手干了哪件你可能没注意的事。
+
+### 课程原文要点(verbatim 摘录)
+
+> "Alongside bundling, esbuild performs another essential task: _transpilation_. Transpilation means converting source code written in one form of JavaScript into another form, typically from modern or extended syntax into plain JavaScript that browsers can execute."
+
+> "Browsers understand standard JavaScript, but JSX is not valid JavaScript, no browser can parse it directly. When we write `const element = <App />`, it must be transpiled it into something the browser can run: `const element = React.createElement(App, null)`."
+
+> "esbuild performs it automatically during bundling. With the `--jsx=automatic` flag, esbuild handles JSX without any external tool. In the old Webpack-based workflow you had to install and configure Babel and related packages to transpile the JSX for the browser. With esbuild, files ending in .jsx are transpiled out of the box."
+
+### ⭐ 核心概念
+
+#### ⭐ transpilation ≠ bundling,二者 esbuild 一次跑完
+
+- **bundling**:把多个文件合并成 1 个(import 链收口)— 见上一节
+- **transpilation**:把一种 JS 写法翻译成另一种 JS 写法(JSX → 函数调用)— 本节
+- esbuild 的 `--bundle` 在打包过程中**自动**调 transpile,**两者不是两个独立步骤**
+
+#### ⭐ JSX 不是合法 JS,浏览器读不了
+
+```jsx
+const element = <App />                          // 浏览器: ❌ SyntaxError
+const element = React.createElement(App, null)   // 浏览器: ✅ 普通函数调用
+```
+
+JSX 是给**人**看的语法糖,`React.createElement` 是给**浏览器**看的运行时调用 — esbuild 把前者转成后者。
+
+#### ⭐ `--jsx=automatic` = 内置 Babel
+
+- 课程原文:"In the old Webpack-based workflow you had to install and configure Babel and related packages to transpile the JSX for the browser. With esbuild, files ending in .jsx are transpiled out of the box."
+- **webpack 时代**:`babel-loader` + `@babel/preset-react` + 配置文件(`.babelrc` / `babel.config.js`)
+- **esbuild 时代**:仅一个标志 `--jsx=automatic`,**0 个 Babel 包、0 个配置文件**
+- 这也是 Vite dev 启动快的原因之一:不用经过 Babel 转译,esbuild 自己搞定
+
+### ⭐ 手动验证(回到上一节的产物)
+
+不需要任何新命令。打开你上一节 `npm run build` 生成的 `dist/main.js`,**搜索 `_jsx`** 或 `createElement`:
+
+```powershell
+# PowerShell
+Select-String -Path "dist\main.js" -Pattern "_jsx|createElement" | Select-Object -First 5
+```
+
+```bash
+# Bash
+grep -o "_jsx\|createElement" dist/main.js | head -5
+```
+
+**期望看到**:出现 `_jsx(App, ...)` 或类似函数调用(**不是**你写的 `<App />`)— 这就是 transpilation 的产物。
+
+### ⭐ 关键 takeaway(3 条)
+
+1. **bundling 和 transpilation 是 esbuild 同时干的两件事**:`--bundle` 一开,JSX 自动转
+2. **JSX 永远不是浏览器能直接读的东西**:不管用 esbuild、webpack、Babel、Vite,JSX 都得先转
+3. **webpack → esbuild 的核心收益之一** = **Babel 这一整层消失**(不光快,还少装一堆包)
+
+### 偏离课程原文的地方
+
+| 维度 | 课程原文 | 本节 | 偏离原因 |
+|---|---|---|---|
+| 演示方式 | 课程未给具体演示 | README 给了"在 dist/main.js 里搜 _jsx"的可执行命令 | 课程是 prose-only,但你说要"体验直观感受",给一个可执行验证 |
+
+---
+
 ## 后续子段
 
 - b 章节下一子节:**Vite's bundling responsibilities**(Vite 怎么配 build.rollupOptions.output.manualChunks、build.target、build.sourcemap 等)— 等用户确认再推进。
