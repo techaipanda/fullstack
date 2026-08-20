@@ -172,6 +172,60 @@ npm run dev
 
 ---
 
+## part7 b — Development environment 子节(verbatim 摘录 + 关键概念)
+
+> **本子节定位**:**章节闭环小节**,代码层面 0 新增 — 你上一节 Step 5 已经跑过 `npm run dev`,这段只是把刚才亲手做的事**重新讲一遍** + 收尾讲为什么我们要花一整章学一个"用不到"的工具。
+
+### 课程原文要点(verbatim 摘录)
+
+> "So far, every change requires running _npm run build_ and manually refreshing the browser, a slow loop that quickly becomes tedious. esbuild's built-in development server solves this. Add a _dev_ script to _package.json_:"
+
+```json
+{
+  "scripts": {
+    "build": "esbuild src/main.jsx --bundle --minify --sourcemap --outfile=dist/main.js --jsx=automatic",
+    "serve": "npx serve dist",
+    "dev": "esbuild src/main.jsx --bundle --outfile=dist/main.js --jsx=automatic --servedir=./dist --watch"
+  }
+}
+```
+
+> "Running _npm run dev_ does two things at once. Firstly [\--watch](https://esbuild.github.io/api/#watch) tells esbuild to watch all imported source files for changes and rebuild the bundle automatically whenever any of them is saved. Secondly [\--servedir](https://esbuild.github.io/api/#serve) starts a lightweight HTTP server that serves the contents of the _dist_ directory, your _index.html_ and the freshly built _main.js_ at _[http://localhost:8000](http://localhost:8000)_."
+
+> "The _\--servedir_ flag is what makes both pieces work together: without it, esbuild would only rebuild in watch mode but not serve anything. With it, the server always delivers the latest bundle so you only need to refresh the browser after saving a file."
+
+> "Note that unlike Vite's dev server, esbuild does not support hot module replacement. Changes to your source code require a manual browser refresh to take effect."
+
+### ⭐ 章节收尾(必读,b 章 thesis)
+
+> **课程原文最后一段(本章点题)**:
+>
+> "The clarity of esbuild's interface illustrates what a bundler fundamentally does: it takes an entry point, follows all imports, and produces an optimized output. **Vite builds on top of this foundation and adds the developer experience layer, a dev server, hot module replacement, and sensible defaults for React projects.**"
+
+⭐ 拆解:
+
+| esbuild 干了什么 | Vite 在这之上额外加了 |
+|---|---|
+| 吃入口,沿 import 链收口,生成产物(bundling) | 真正的开发服务器 |
+| JSX → 函数调用(transpilation) | **热模块替换 HMR**(改文件浏览器自动更新,不用刷新) |
+| minify / sourcemap / --watch / --servedir | **React 项目的合理默认值**(脚手架、自动 SCSS/TS/Less...) |
+| 单一职责,透明可调试 | DX 层 = 让你开发时少打字的全部东西 |
+
+**课程花整章 b 讲 esbuild 的目的**:让你理解 Vite 不是黑盒 — 它"底下"就是 esbuild 干 bundling/transpilation 那些事,只不过在 dev 体验上**多包了一层**。学完 b 章再看 Vite,你应该能反向猜出 Vite 内部每个体验优化对应 esbuild 的哪个 CLI 标志。
+
+### ⭐ 关键 takeaway(2 条)
+
+1. **esbuild dev server ≠ Vite dev server**:前者要手动刷新,后者自动 HMR
+2. **理解 esbuild = 理解 Vite 的"内核"**:Vite 没发明新东西,它把 esbuild 的能力**包装得更好用**
+
+### 偏离课程原文的地方
+
+| 维度 | 课程原文 | 本节 | 偏离原因 |
+|---|---|---|---|
+| 演示方式 | 课程 prose-only | README 把 Step 5 的实操结果回扣到这段 prose | 你说"体验直观感受",README 必须打通"动手 ↔ 文字"两端 |
+
+---
+
 ## part7 b — Transpilation 子节(verbatim 摘录 + 关键概念)
 
 > **本子节定位**:纯理论小节,**没有任何新代码或新命令**。它解释你在上一节跑 `npm run build` 时 esbuild 顺手干了哪件你可能没注意的事。
