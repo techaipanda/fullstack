@@ -1,0 +1,28 @@
+# Monorepo 标准的 .gitignore —— 注意每个子项目都有自己的 node_modules
+# Git 默认在子目录里有 .gitignore 时会覆盖父目录规则
+# 所以这里写 **/node_modules + **/dist 兜底更稳
+
+# 依赖 —— 每个子项目都有自己的 node_modules
+node_modules/
+
+# Vite 构建产物 —— 在 client/dist
+client/dist/
+
+# 日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
