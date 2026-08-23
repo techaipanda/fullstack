@@ -27,6 +27,8 @@
 - [`c-schema-syntax-highlighting/`](./c-schema-syntax-highlighting/) — VS Code GraphQL 语法高亮(`/* GraphQL */` + `GraphQL.vscode-graphql` 扩展;代码复用 part8a)
 - [`d-parameters-of-resolver/`](./d-parameters-of-resolver/) — Resolver 4 参数签名讲解(`(root, args, context, info)` + `args` 形状 + `root` 顶层未用;纯解释性小节,代码复用 part8a)
 - [`e-the-default-resolver/`](./e-the-default-resolver/) — Apollo default resolver 机制(`Person: { name: (root) => root.name, phone: (root) => root.phone, ... }` 5 字段全显式 + partial override 示例 — 把 street/city 硬编码为 Manhattan / New York)
+- [`f-object-within-an-object/`](./f-object-within-an-object/) — 嵌套 GraphQL type(`type Address { street, city }` + `Person.address: Address!` + 自定义 `Person.address: (root) => ({ street: root.street, city: root.city })` resolver)
+- [`f-object-within-an-object/`](./f-object-within-an-object/) — 嵌套 GraphQL type(`type Address { street, city }` + `Person.address: Address!` + 自定义 `Person.address: (root) => ({ street: root.street, city: root.city })` resolver)
 
 ## 后续子段
 

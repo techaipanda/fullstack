@@ -1,0 +1,24 @@
+{
+  "name": "object-within-an-object",
+  "version": "1.0.0",
+  "description": "part8f — Object within an object (verbatim 课程 Chapter 2 'Object within an object' 段,演示 Address 嵌套类型 + Person.address 自定义 resolver)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "graphql",
+    "apollo-server",
+    "nested-type",
+    "object-within-object",
+    "address",
+    "part8",
+    "fullstackopen"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0"
+  }
+}
