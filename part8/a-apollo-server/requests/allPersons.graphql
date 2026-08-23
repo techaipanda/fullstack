@@ -1,0 +1,21 @@
+# ⭐ allPersons query — 返 phonebook 里所有人的数组
+# 期望响应(对应 schema.js 里 mock 的 2 个人):
+#   {
+#     "data": {
+#       "allPersons": [
+#         { "name": "Arto Hellas", "phone": "040-123543" },
+#         { "name": "Mary Popup", "phone": "040-432342" }
+#       ]
+#     }
+#   }
+#
+# ⭐ 注意:必须明确指定返哪些字段(name / phone / street / city / id)
+# GraphQL 的核心特性 = 客户端精准定义想要的数据,服务端不会多返
+# 不写字段就拿不到数据(不会默认全返)
+
+query {
+  allPersons {
+    name
+    phone
+  }
+}

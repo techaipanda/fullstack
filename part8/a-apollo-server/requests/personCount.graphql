@@ -1,0 +1,13 @@
+# ⭐ personCount query — 返 phonebook 里的人数
+# 期望响应(对应 schema.js 里 mock 的 2 个人):
+#   {
+#     "data": {
+#       "personCount": 2
+#     }
+#   }
+#
+# ⭐ 这是 3 个 Query 字段里最简单的:不需要参数,直接返 Int
+
+query {
+  personCount
+}

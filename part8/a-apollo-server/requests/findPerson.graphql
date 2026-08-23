@@ -1,0 +1,30 @@
+# ⭐ findPerson query — 按 name 找某个人
+# 参数 name (String!) — 非 null,必须给值
+# 返 Person 对象或 null(查不到时)
+#
+# 期望响应(对应 schema.js 里 mock 的 Arto Hellas):
+#   {
+#     "data": {
+#       "findPerson": {
+#         "name": "Arto Hellas",
+#         "phone": "040-123543",
+#         "street": "Tapiolankatu 5 A",
+#         "city": "Helsinki",
+#         "id": "3d594650-3436-11e9-bc57-8b80ba54c431"
+#       }
+#     }
+#   }
+#
+# ⭐ 这是第一个有参数的 Query
+# 课程 Chapter 2 后续小节 "Parameters of a resolver" 会详细解释
+# resolver 函数第二个参数 args 怎么从 query 里拿
+
+query {
+  findPerson(name: "Arto Hellas") {
+    name
+    phone
+    street
+    city
+    id
+  }
+}
