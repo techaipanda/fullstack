@@ -1,0 +1,15 @@
+{
+  "name": "mutations",
+  "version": "1.0.0",
+  "description": "part8g — Mutations (verbatim 课程 Chapter 2 'Mutations' 段,演示 type Mutation + addPerson resolver + uuid() 生成 id + persons.concat 重赋值)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0",
+    "uuid": "^9.0.1"
+  }
+}
