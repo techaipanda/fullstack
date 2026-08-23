@@ -14,6 +14,7 @@
 | Chapter 2 | Apollo Studio Explorer | part8 b — Apollo Studio Explorer(观察性小节,无新增代码)| ✅ 已完结 |
 | Chapter 2 | Schema syntax highlighting in VS Code | part8 c — Schema syntax highlighting(`/* GraphQL */` + VS Code 扩展)| ✅ 已完结 |
 | Chapter 2 | Parameters of a resolver | part8 d — Parameters of a resolver(解释性小节,讲透 `(root, args, context, info)` 4 参数签名)| ✅ 已完结 |
+| Chapter 2 | The default resolver | part8 e — The default resolver(兑现 part8d 伏笔:`Person: { name: (root) => root.name, ... }` 5 字段显式 default resolver + partial override)| ✅ 已完结 |
 | Chapter 3 | React and GraphQL | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 4 | Database and user administration | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 5 | Login and updating the cache | (待映射 part8 字母) | ⏳ 待规划 |
@@ -25,6 +26,7 @@
 - [`b-apollo-studio-explorer/`](./b-apollo-studio-explorer/) — Apollo Studio Explorer walkthrough(verbatim Chapter 2 "Apollo Studio Explorer" 段;观察性小节,代码复用 part8a)
 - [`c-schema-syntax-highlighting/`](./c-schema-syntax-highlighting/) — VS Code GraphQL 语法高亮(`/* GraphQL */` + `GraphQL.vscode-graphql` 扩展;代码复用 part8a)
 - [`d-parameters-of-resolver/`](./d-parameters-of-resolver/) — Resolver 4 参数签名讲解(`(root, args, context, info)` + `args` 形状 + `root` 顶层未用;纯解释性小节,代码复用 part8a)
+- [`e-the-default-resolver/`](./e-the-default-resolver/) — Apollo default resolver 机制(`Person: { name: (root) => root.name, phone: (root) => root.phone, ... }` 5 字段全显式 + partial override 示例 — 把 street/city 硬编码为 Manhattan / New York)
 
 ## 后续子段
 

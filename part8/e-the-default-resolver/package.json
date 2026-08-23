@@ -1,0 +1,23 @@
+{
+  "name": "the-default-resolver",
+  "version": "1.0.0",
+  "description": "part8e — The default resolver (verbatim 课程 Chapter 2 'The default resolver' 段,演示 Apollo 自动为 Person 字段生成 default resolver + root 参数用途)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "graphql",
+    "apollo-server",
+    "default-resolver",
+    "root-parameter",
+    "part8",
+    "fullstackopen"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0"
+  }
+}
