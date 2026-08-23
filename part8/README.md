@@ -10,16 +10,18 @@
 | 课程章节 | 标题 | 对应子项目 | 状态 |
 |---|---|---|---|
 | Chapter 1 | Getting Started | (跳过 — 纯理论) | — |
-| Chapter 2 | GraphQL Server | part8 a — Apollo Server(v4 standalone)| ✅ 已完结 |
-| Chapter 2 | Resolvers / Object / Mutations / Enum / Error handling | part8 b ...(按一次只推进一小节纪律,逐个落地)| ⏳ 待规划 |
-| Chapter 3 | React and GraphQL | part8 c ... | ⏳ 待规划 |
-| Chapter 4 | Database and user administration | part8 d ... | ⏳ 待规划 |
-| Chapter 5 | Login and updating the cache | part8 e ... | ⏳ 待规划 |
-| Chapter 6 | Fragments and subscriptions | part8 f ... | ⏳ 待规划 |
+| Chapter 2 | Apollo Server | part8 a — Apollo Server(v4 standalone)| ✅ 已完结 |
+| Chapter 2 | Apollo Studio Explorer | part8 b — Apollo Studio Explorer(观察性小节,无新增代码)| ✅ 已完结 |
+| Chapter 2 | Schema syntax highlighting in VS Code | part8 c ...(按一次只推进一小节纪律,逐个落地)| ⏳ 待规划 |
+| Chapter 3 | React and GraphQL | (待映射 part8 字母) | ⏳ 待规划 |
+| Chapter 4 | Database and user administration | (待映射 part8 字母) | ⏳ 待规划 |
+| Chapter 5 | Login and updating the cache | (待映射 part8 字母) | ⏳ 待规划 |
+| Chapter 6 | Fragments and subscriptions | (待映射 part8 字母) | ⏳ 待规划 |
 
 ## 子项目列表
 
 - [`a-apollo-server/`](./a-apollo-server/) — Apollo Server v4 standalone(verbatim Chapter 2 "Apollo Server" 段)
+- [`b-apollo-studio-explorer/`](./b-apollo-studio-explorer/) — Apollo Studio Explorer walkthrough(verbatim Chapter 2 "Apollo Studio Explorer" 段;观察性小节,代码复用 part8a)
 
 ## 后续子段
 

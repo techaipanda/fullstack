@@ -1,0 +1,14 @@
+{
+  "name": "apollo-studio-explorer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Part 8 b — Apollo Studio Explorer (verbatim course Apollo Studio Explorer section)",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0"
+  }
+}
