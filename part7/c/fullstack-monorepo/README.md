@@ -159,6 +159,18 @@ npm install cors --prefix server
 | 根 `.gitignore` | 课程没写 | 加 `node_modules/` + `client/dist/` + 环境变量 | 课程没演示 git,实际项目需要 |
 | Express 版本 | 课程没指定 | `^5.0.1`(为了 `/*splat` 语法)| Express 4 不支持 `/*splat`,只支持 `'*'` |
 | package 版本 | 课程未指定 | react 19.2 / vite 7.x / axios 1.7 / concurrently 8 / express 5 | CLAUDE.md 约束 + 课程语法需求 |
+| `cross-env` 包 | 课程 verbatim 用 bash 语法 `NODE_ENV=production npm start` | 改用 `cross-env NODE_ENV=production npm start` + 装 `cross-env@^7.0.3` devDep | **Windows cmd.exe 不认 bash 语法** —— 直接跑会报 `'NODE_ENV' is not recognized`;cross-env 是跨平台标准做法,概念不变(都是"设 env var + 跑命令")|
+
+---
+
+## ⚠️ Windows 注意事项(只对你这台机器有效)
+
+本子项目在 macOS / Linux 上可以**严格按课程 verbatim** 跑(包括 `NODE_ENV=production npm start`),但本机是 Windows,cmd.exe 不支持 bash 风格的 `VAR=value command` 语法。已经做了**最小修复**:
+
+- 根 `package.json` 的 `start` 脚本从 `NODE_ENV=production npm start --prefix server` 改成 `cross-env NODE_ENV=production npm start --prefix server`
+- 根 devDependencies 加了 `cross-env@^7.0.3`
+
+**概念 100% 不变**:cross-env 只是让 "在调用子进程前设置 env var" 这件事在 Windows / macOS / Linux 都工作。如果你以后切到 macOS / Linux,这行依然工作(只是 cross-env 变成 noop 透传)。
 
 ---
 
