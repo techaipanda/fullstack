@@ -12,7 +12,8 @@
 | Chapter 1 | Getting Started | (跳过 — 纯理论) | — |
 | Chapter 2 | Apollo Server | part8 a — Apollo Server(v4 standalone)| ✅ 已完结 |
 | Chapter 2 | Apollo Studio Explorer | part8 b — Apollo Studio Explorer(观察性小节,无新增代码)| ✅ 已完结 |
-| Chapter 2 | Schema syntax highlighting in VS Code | part8 c ...(按一次只推进一小节纪律,逐个落地)| ⏳ 待规划 |
+| Chapter 2 | Schema syntax highlighting in VS Code | part8 c — Schema syntax highlighting(`/* GraphQL */` + VS Code 扩展)| ✅ 已完结 |
+| Chapter 2 | Parameters of a resolver | part8 d — Parameters of a resolver(解释性小节,讲透 `(root, args, context, info)` 4 参数签名)| ✅ 已完结 |
 | Chapter 3 | React and GraphQL | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 4 | Database and user administration | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 5 | Login and updating the cache | (待映射 part8 字母) | ⏳ 待规划 |
@@ -22,6 +23,8 @@
 
 - [`a-apollo-server/`](./a-apollo-server/) — Apollo Server v4 standalone(verbatim Chapter 2 "Apollo Server" 段)
 - [`b-apollo-studio-explorer/`](./b-apollo-studio-explorer/) — Apollo Studio Explorer walkthrough(verbatim Chapter 2 "Apollo Studio Explorer" 段;观察性小节,代码复用 part8a)
+- [`c-schema-syntax-highlighting/`](./c-schema-syntax-highlighting/) — VS Code GraphQL 语法高亮(`/* GraphQL */` + `GraphQL.vscode-graphql` 扩展;代码复用 part8a)
+- [`d-parameters-of-resolver/`](./d-parameters-of-resolver/) — Resolver 4 参数签名讲解(`(root, args, context, info)` + `args` 形状 + `root` 顶层未用;纯解释性小节,代码复用 part8a)
 
 ## 后续子段
 

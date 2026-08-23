@@ -1,0 +1,21 @@
+{
+  "name": "parameters-of-resolver",
+  "version": "1.0.0",
+  "description": "part8d — Parameters of a resolver (verbatim 课程 Chapter 2 'Parameters of a resolver' 段)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "graphql",
+    "apollo-server",
+    "part8",
+    "fullstackopen"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0"
+  }
+}
