@@ -1,0 +1,15 @@
+{
+  "name": "enum",
+  "version": "1.0.0",
+  "description": "part8i — Enum (verbatim 课程 Chapter 2 'Enum' 段,演示 enum YesNo { YES NO } + Query.allPersons 加 phone 过滤参数 + resolver 按 enum 过滤 persons)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0",
+    "uuid": "^9.0.1"
+  }
+}

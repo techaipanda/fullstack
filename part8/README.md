@@ -18,6 +18,7 @@
 | Chapter 2 | Object within an object | part8 f — Object within an object(嵌套 GraphQL type + `Person.address: Address!` + `Person.address` 自定义 resolver 重新组装 Address)| ✅ 已完结 |
 | Chapter 2 | Mutations | part8 g — Mutations(`type Mutation { addPerson }` + `Mutation.addPerson` resolver + `uuid()` 生成 id + `persons.concat(person)` 重赋值)| ✅ 已完结 |
 | Chapter 2 | Error handling | part8 h — Error handling(`Mutation.addPerson` 加查重 + 抛 `GraphQLError` 带 `extensions.code = 'BAD_USER_INPUT'` + `invalidArgs`)| ✅ 已完结 |
+| Chapter 2 | Enum | part8 i — Enum(`enum YesNo { YES NO }` + `Query.allPersons(phone: YesNo)` 加 nullable enum 过滤参数 + resolver 按 `'YES'` / `'NO'` 字符串过滤)| ✅ 已完结 |
 | Chapter 3 | React and GraphQL | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 4 | Database and user administration | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 5 | Login and updating the cache | (待映射 part8 字母) | ⏳ 待规划 |
@@ -33,6 +34,7 @@
 - [`f-object-within-an-object/`](./f-object-within-an-object/) — 嵌套 GraphQL type(`type Address { street, city }` + `Person.address: Address!` + 自定义 `Person.address: (root) => ({ street: root.street, city: root.city })` resolver)
 - [`g-mutations/`](./g-mutations/) — GraphQL Mutation(`type Mutation { addPerson(name, phone, street, city): Person }` + `Mutation.addPerson: (root, args) => { persons = persons.concat({...args, id: uuid()}); return person }` + `const persons` 改 `let` + `uuid` v1 npm 包)
 - [`h-error-handling/`](./h-error-handling/) — GraphQL Error handling(`Mutation.addPerson` 加查重 + 抛 `GraphQLError('Name must be unique: ...', { extensions: { code: 'BAD_USER_INPUT', invalidArgs: args.name } })` — 兑现 part8g Step 9 末尾伏笔,GraphQL 校验的两层防线:Schema 层(自动)vs Resolver 层(手动,业务规则))
+- [`i-enum/`](./i-enum/) — GraphQL Enum(`enum YesNo { YES NO }` + `Query.allPersons(phone: YesNo)` nullable enum 过滤参数 + `allPersons` resolver 按 `args.phone === 'YES' ? person.phone : !person.phone` 字符串比较过滤 — 兑现 part8h 伏笔:不是所有业务规则都该抛错,有时候应该软过滤)
 
 ## 后续子段
 
