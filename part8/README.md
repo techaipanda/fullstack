@@ -17,6 +17,7 @@
 | Chapter 2 | The default resolver | part8 e — The default resolver(兑现 part8d 伏笔:`Person: { name: (root) => root.name, ... }` 5 字段显式 default resolver + partial override)| ✅ 已完结 |
 | Chapter 2 | Object within an object | part8 f — Object within an object(嵌套 GraphQL type + `Person.address: Address!` + `Person.address` 自定义 resolver 重新组装 Address)| ✅ 已完结 |
 | Chapter 2 | Mutations | part8 g — Mutations(`type Mutation { addPerson }` + `Mutation.addPerson` resolver + `uuid()` 生成 id + `persons.concat(person)` 重赋值)| ✅ 已完结 |
+| Chapter 2 | Error handling | part8 h — Error handling(`Mutation.addPerson` 加查重 + 抛 `GraphQLError` 带 `extensions.code = 'BAD_USER_INPUT'` + `invalidArgs`)| ✅ 已完结 |
 | Chapter 3 | React and GraphQL | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 4 | Database and user administration | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 5 | Login and updating the cache | (待映射 part8 字母) | ⏳ 待规划 |
@@ -31,6 +32,7 @@
 - [`e-the-default-resolver/`](./e-the-default-resolver/) — Apollo default resolver 机制(`Person: { name: (root) => root.name, phone: (root) => root.phone, ... }` 5 字段全显式 + partial override 示例 — 把 street/city 硬编码为 Manhattan / New York)
 - [`f-object-within-an-object/`](./f-object-within-an-object/) — 嵌套 GraphQL type(`type Address { street, city }` + `Person.address: Address!` + 自定义 `Person.address: (root) => ({ street: root.street, city: root.city })` resolver)
 - [`g-mutations/`](./g-mutations/) — GraphQL Mutation(`type Mutation { addPerson(name, phone, street, city): Person }` + `Mutation.addPerson: (root, args) => { persons = persons.concat({...args, id: uuid()}); return person }` + `const persons` 改 `let` + `uuid` v1 npm 包)
+- [`h-error-handling/`](./h-error-handling/) — GraphQL Error handling(`Mutation.addPerson` 加查重 + 抛 `GraphQLError('Name must be unique: ...', { extensions: { code: 'BAD_USER_INPUT', invalidArgs: args.name } })` — 兑现 part8g Step 9 末尾伏笔,GraphQL 校验的两层防线:Schema 层(自动)vs Resolver 层(手动,业务规则))
 
 ## 后续子段
 
