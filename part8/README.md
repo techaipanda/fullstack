@@ -20,7 +20,16 @@
 | Chapter 2 | Error handling | part8 h — Error handling(`Mutation.addPerson` 加查重 + 抛 `GraphQLError` 带 `extensions.code = 'BAD_USER_INPUT'` + `invalidArgs`)| ✅ 已完结 |
 | Chapter 2 | Enum | part8 i — Enum(`enum YesNo { YES NO }` + `Query.allPersons(phone: YesNo)` 加 nullable enum 过滤参数 + resolver 按 `'YES'` / `'NO'` 字符串过滤)| ✅ 已完结 |
 | Chapter 2 | Changing a phone number | part8 j — Changing a phone number(`Mutation.editNumber(name, phone): Person` + 不可变 `persons.map` 更新 + 找不到 person 返回 null)| ✅ 已完结 |
-| Chapter 3 | React and GraphQL | (待映射 part8 字母) | ⏳ 待规划 |
+| Chapter 2 | More on queries | (待映射 part8 字母) | ⏳ 待规划(combined queries + aliases — Chapter 2 收尾小节)|
+| Chapter 3 | Apollo client | **part8 k** — Apollo client(`@apollo/client` + `ApolloClient` + `HttpLink` + `InMemoryCache` + `gql\`\`` + `client.query().then(console.log)` + `ApolloProvider` 包 `<App />` + 走 `@apollo/client/react` 子路径)| ✅ 已完结 |
+| Chapter 3 | Making queries | (待映射 part8 l) | ⏳ 待规划 |
+| Chapter 3 | Named queries and variables | (待映射 part8 m 起的字母) | ⏳ 待规划(含 H3 "Cache" 子讨论)|
+| Chapter 3 | Doing mutations | (待映射 part8 字母) | ⏳ 待规划 |
+| Chapter 3 | Updating the cache | (待映射 part8 字母) | ⏳ 待规划 |
+| Chapter 3 | Handling mutation errors | (待映射 part8 字母) | ⏳ 待规划 |
+| Chapter 3 | Updating a phone number | (待映射 part8 字母) | ⏳ 待规划 |
+| Chapter 3 | Apollo Client and the applications state | (待映射 part8 字母) | ⏳ 待规划(标题是课程原文 typo `applications state`,verbatim 沿用)|
+| Chapter 3 | Exercises 8. Authors view / 9. Books view / 10. Adding a book / 11. Authors birth year / 12. Authors birth year advanced | (跳过 — 与 part7 练习策略一致,不做练习题) | ⏭️ 跳过 |
 | Chapter 4 | Database and user administration | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 5 | Login and updating the cache | (待映射 part8 字母) | ⏳ 待规划 |
 | Chapter 6 | Fragments and subscriptions | (待映射 part8 字母) | ⏳ 待规划 |
@@ -36,7 +45,39 @@
 - [`g-mutations/`](./g-mutations/) — GraphQL Mutation(`type Mutation { addPerson(name, phone, street, city): Person }` + `Mutation.addPerson: (root, args) => { persons = persons.concat({...args, id: uuid()}); return person }` + `const persons` 改 `let` + `uuid` v1 npm 包)
 - [`h-error-handling/`](./h-error-handling/) — GraphQL Error handling(`Mutation.addPerson` 加查重 + 抛 `GraphQLError('Name must be unique: ...', { extensions: { code: 'BAD_USER_INPUT', invalidArgs: args.name } })` — 兑现 part8g Step 9 末尾伏笔,GraphQL 校验的两层防线:Schema 层(自动)vs Resolver 层(手动,业务规则))
 - [`i-enum/`](./i-enum/) — GraphQL Enum(`enum YesNo { YES NO }` + `Query.allPersons(phone: YesNo)` nullable enum 过滤参数 + `allPersons` resolver 按 `args.phone === 'YES' ? person.phone : !person.phone` 字符串比较过滤 — 兑现 part8h 伏笔:不是所有业务规则都该抛错,有时候应该软过滤)
-- [`j-changing-a-phone-number/`](./j-changing-a-phone-number/) — Mutation Update(`Mutation.editNumber(name, phone): Person` + 不可变 `persons = persons.map(p => p.name === args.name ? { ...person, phone: args.phone } : p)` 更新 + 找不到 person `return null` — 兑现 part8i 伏笔:update semantics + 不可变模式 + 找不到返回 null)|
+- [`j-changing-a-phone-number/`](./j-changing-a-phone-number/) — Mutation Update(`Mutation.editNumber(name, phone): Person` + 不可变 `persons = persons.map(p => p.name === args.name ? { ...person, phone: args.phone } : p)` 更新 + 找不到 person `return null` — 兑现 part8i 伏笔:update semantics + 不可变模式 + 找不到返回 null)
+- [`k-apollo-client/`](./k-apollo-client/) — **Chapter 3 第 1 子节**(架构大切换:服务端 → 客户端)— Vite + React + Apollo Client:`npm install @apollo/client graphql` + `new ApolloClient({ link: new HttpLink({ uri: 'http://localhost:4000' }), cache: new InMemoryCache() })` + `gql\`query { allPersons { name phone address { street city } id } }\`` + `client.query({ query }).then(response => console.log(response.data))` + `ApolloProvider` 走 `@apollo/client/react` 子路径包裹 `<App />`。**需要 part8j server 跑着才能验证** — 两个终端,4000(GraphQL server)+ 5173(Vite dev)|
+
+## Chapter 2 → Chapter 3 切换备忘(2026-08-26)
+
+> **重要状态切换**:Chapter 2(Apollo Server,part8a-j 共 10 个子项目)全部完结。下面进入 **Chapter 3: React and GraphQL** — 客户端侧 Apollo Client 接入。
+>
+> **Chapter 2 与 Chapter 3 的根本区别**:
+> - Chapter 2:**服务端**(Node.js + Apollo Server v4 standalone)— 监听端口、暴露 SDL、跑 resolver
+> - Chapter 3:**客户端**(浏览器 + React + Apollo Client)— 发 query/mutation、订阅响应、缓存、错误展示
+>
+> **Chapter 3 关键诚实声明**:
+> - 网络/环境限制:本会话无法直接拉 MOOC.fi(超时)+ fullstackopen.com(已 redirect)+ GitHub 镜像(0 hit)— 子节切分需用户协助核对
+> - 仍需遵循"verbatim 课程原文"纪律,每个子项目落地前必须从 MOOC.fi 拿到原文
+>
+> **Chapter 3 子项目命名约定**:沿用 part8a-j 的字母,继续 part8 **k** 起排(Apollo Client 接入通常以 "Apollo Client" 子节打头)
+>
+> **项目结构预想**:与 part8a-j 单文件 Node.js 不同,Chapter 3 起进入 Vite + React 标准前端工程
+> ```
+> part8/
+> ├── k-apollo-client/      # part8k — 客户端 Apollo Client 接入
+> │   ├── package.json      # React + Vite + @apollo/client + graphql
+> │   ├── vite.config.js    # Vite 配置(可选)
+> │   ├── index.html        # Vite 入口 HTML
+> │   ├── src/
+> │   │   ├── main.jsx      # React 入口 + ApolloProvider 包裹
+> │   │   ├── App.jsx       # 顶层组件 + useQuery
+> │   │   ├── queries.js    # gql 模板字符串(query/mutation 定义)
+> │   │   └── components/   # 子组件
+> │   └── README.md
+> ```
+>
+> **服务依赖**:Chapter 3 子项目要发 query/mutation 到 **Chapter 2 的 server**(part8j 当前)。需要两个终端:① 一个跑 part8j server(端口 4000);② 一个跑 Chapter 3 Vite dev(默认端口 5173)。
 
 ## 后续子段
 
@@ -44,3 +85,4 @@
 - **不** commit / push
 - **不** 跑任何命令
 - **一次只推进一小节** — 等用户确认 part8a 后再进 part8b
+- Chapter 2 → Chapter 3 切换是**架构大切换**:Node.js 单文件 → Vite + React 多文件工程。需要用户从 part8k 起明确"哪个子节先做",且需要 part8j server 在跑才能验证
