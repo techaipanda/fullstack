@@ -22,6 +22,7 @@
 | Chapter 2 | Changing a phone number | part8 j — Changing a phone number(`Mutation.editNumber(name, phone): Person` + 不可变 `persons.map` 更新 + 找不到 person 返回 null)| ✅ 已完结 |
 | Chapter 2 | More on queries | (待映射 part8 字母) | ⏳ 待规划(combined queries + aliases — Chapter 2 收尾小节)|
 | Chapter 3 | Apollo client | **part8 k** — Apollo client(`@apollo/client` + `ApolloClient` + `HttpLink` + `InMemoryCache` + `gql\`\`` + `client.query().then(console.log)` + `ApolloProvider` 包 `<App />` + 走 `@apollo/client/react` 子路径)| ✅ 已完结 |
+| Chapter 3 | Making queries | **part8 l** — Making queries(`useQuery(ALL_PERSONS)` Hook 替代 part8k 的 `client.query().then(console.log)` + `result.loading` 判 loading 态 + 抽 `src/components/Persons.jsx` 子组件 + Container/Presentational 雏形)| ✅ 已完结 |
 | Chapter 3 | Making queries | (待映射 part8 l) | ⏳ 待规划 |
 | Chapter 3 | Named queries and variables | (待映射 part8 m 起的字母) | ⏳ 待规划(含 H3 "Cache" 子讨论)|
 | Chapter 3 | Doing mutations | (待映射 part8 字母) | ⏳ 待规划 |
@@ -46,7 +47,8 @@
 - [`h-error-handling/`](./h-error-handling/) — GraphQL Error handling(`Mutation.addPerson` 加查重 + 抛 `GraphQLError('Name must be unique: ...', { extensions: { code: 'BAD_USER_INPUT', invalidArgs: args.name } })` — 兑现 part8g Step 9 末尾伏笔,GraphQL 校验的两层防线:Schema 层(自动)vs Resolver 层(手动,业务规则))
 - [`i-enum/`](./i-enum/) — GraphQL Enum(`enum YesNo { YES NO }` + `Query.allPersons(phone: YesNo)` nullable enum 过滤参数 + `allPersons` resolver 按 `args.phone === 'YES' ? person.phone : !person.phone` 字符串比较过滤 — 兑现 part8h 伏笔:不是所有业务规则都该抛错,有时候应该软过滤)
 - [`j-changing-a-phone-number/`](./j-changing-a-phone-number/) — Mutation Update(`Mutation.editNumber(name, phone): Person` + 不可变 `persons = persons.map(p => p.name === args.name ? { ...person, phone: args.phone } : p)` 更新 + 找不到 person `return null` — 兑现 part8i 伏笔:update semantics + 不可变模式 + 找不到返回 null)
-- [`k-apollo-client/`](./k-apollo-client/) — **Chapter 3 第 1 子节**(架构大切换:服务端 → 客户端)— Vite + React + Apollo Client:`npm install @apollo/client graphql` + `new ApolloClient({ link: new HttpLink({ uri: 'http://localhost:4000' }), cache: new InMemoryCache() })` + `gql\`query { allPersons { name phone address { street city } id } }\`` + `client.query({ query }).then(response => console.log(response.data))` + `ApolloProvider` 走 `@apollo/client/react` 子路径包裹 `<App />`。**需要 part8j server 跑着才能验证** — 两个终端,4000(GraphQL server)+ 5173(Vite dev)|
+- [`k-apollo-client/`](./k-apollo-client/) — **Chapter 3 第 1 子节**(架构大切换:服务端 → 客户端)— Vite + React + Apollo Client:`npm install @apollo/client graphql` + `new ApolloClient({ link: new HttpLink({ uri: 'http://localhost:4000' }), cache: new InMemoryCache() })` + `gql\`query { allPersons { name phone address { street city } id } }\`` + `client.query({ query }).then(response => console.log(response.data))` + `ApolloProvider` 走 `@apollo/client/react` 子路径包裹 `<App />`。**需要 part8j server 跑着才能验证** — 两个终端,4000(GraphQL server)+ 5173(Vite dev)
+- [`l-making-queries/`](./l-making-queries/) — **Chapter 3 第 2 子节**(从命令式 → 声明式)— Vite + React + Apollo Client `useQuery`:删除 main.jsx 的 `client.query(...).then(console.log)` 段 + App.jsx 改 `useQuery(ALL_PERSONS)` + `result.loading` 判 `<div>loading...</div>` + 抽 `src/components/Persons.jsx` Presentational 子组件 + Container/Presentational 雏形。**ApolloProvider 在本章变成强依赖**(注释掉就报"Could not find Apollo Client context")。**需要 part8j server 跑着才能验证** — 同 part8k 双终端|
 
 ## Chapter 2 → Chapter 3 切换备忘(2026-08-26)
 
