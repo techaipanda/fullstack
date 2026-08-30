@@ -1,0 +1,17 @@
+{
+  "name": "s-mongoose-and-apollo",
+  "version": "1.0.0",
+  "description": "part8s — Mongoose and Apollo (verbatim 课程 Chapter 4 'Mongoose and Apollo' 段,演示引入 mongoose Schema 替代 in-memory 数组,db.js 抽 connectToDatabase 工厂,index.js 加 main async 包 connectToDatabase + startServer,resolvers 全部转 async 用 Person model)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0",
+    "mongoose": "^8.9.0",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.4.5"
+  }
+}
