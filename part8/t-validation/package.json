@@ -1,0 +1,17 @@
+{
+  "name": "t-validation",
+  "version": "1.0.0",
+  "description": "part8t — Validation (verbatim 课程 Chapter 4 'Validation' 段,在 part8s mongoose 模型基础上,addPerson + editNumber 两个 resolver 的 await person.save() 加 try/catch 错误处理;catch 块抛 GraphQLError with extensions.code BAD_USER_INPUT + invalidArgs + error 三个字段;mongoose schema 验证失败时('Person validation failed: name: Path `name` (... is required)')通过 GraphQLError 透传给前端,前端 part8p 已用 onError 接住展示红字)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0",
+    "mongoose": "^8.9.0",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.4.5"
+  }
+}
