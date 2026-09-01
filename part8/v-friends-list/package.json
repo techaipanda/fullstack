@@ -1,0 +1,18 @@
+{
+  "name": "u-user-and-log-in",
+  "version": "1.0.0",
+  "description": "part8u — User and log in (verbatim 课程 Chapter 4 'User and log in' 段,在 part8t Validation 基础上新增用户系统:models/user.js + schema 加 User/Token 类型 + Query.me + Mutation.createUser + Mutation.login + server.js 用 Apollo context 注入 currentUser + jsonwebtoken 签发 token + 所有用户共用 password='secret' 简化(per course verbatim,故意不用 bcrypt);前后端无 form,本节纯后端)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0",
+    "mongoose": "^8.9.0",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
