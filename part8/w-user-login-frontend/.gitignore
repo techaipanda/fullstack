@@ -1,0 +1,10 @@
+# ⭐⭐⭐ .gitignore — part8w 前端 Vite 工程忽略规则 ⭐⭐⭐
+#
+# ⭐ 关键诚实声明:本文件 verbatim 沿用 part8p 的 .gitignore 内容
+#   - node_modules: npm 安装的依赖,几百 MB,必须排除
+#   - .env: 真实环境变量(可能含 API key 等),必须排除
+#   - dist: Vite build 输出,每次 build 重新生成,不需要入库
+
+node_modules
+.env
+dist
