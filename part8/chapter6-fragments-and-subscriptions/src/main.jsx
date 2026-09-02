@@ -1,58 +1,74 @@
-// ⭐⭐⭐ main.jsx — part8x "Adding a token to a header" 客户端入口 ⭐⭐⭐
+// ⭐⭐⭐ main.jsx — Chapter 6 子节 2 "Subscriptions on the client" 完整版 ⭐⭐⭐
 //
-// ⭐ 关键诚实声明:本文件是 part8x **改** 的客户端入口
-//   课程 Chapter 5 "Adding a token to a header" 小节**改 main.jsx**(per course block 21):
-//     1. 加 `import { setContext } from '@apollo/client/link/context'`(block 21 highlighted line 7)
-//     2. 加 authLink = setContext(...) 设置 authorization header(block 21 highlighted lines 9-17)
-//     3. 把 httpLink 拆成独立变量(block 21 highlighted line 19)
-//     4. ApolloClient 的 link 改为 authLink.concat(httpLink)(block 21 highlighted lines 21-24)
+// ⭐ 关键诚实声明:本文件基于 part8x 改造,新增内容**完全 verbatim 课程 Chapter 6 子节 2**
+//   - 课程原文(per part8e.md line 794-799):
+//     "In order to use subscriptions in our React application, we have to do
+//      some changes, especially to its configuration"
+//   - 改造范围:本文件**完全替换**(per course line 813-912)
+//   - 关键变更 4 处:
+//     1. 加 imports: ApolloLink + getMainDefinition + createClient + GraphQLWsLink
+//     2. 加 wsLink — WebSocket transport for subscriptions
+//     3. 加 splitLink — ApolloLink.split(...) 根据 operation kind 分流
+//     4. ApolloClient.link 从 authLink.concat(httpLink) 改为 splitLink
 //
-// ⭐ 跟 part8w main.jsx 的差异:
-//   - part8w:`link: new HttpLink({ uri: '...' })`(无 auth header)
-//   - part8x:`link: authLink.concat(httpLink)`(auth header 自动加)
+// ⭐⭐ 跟 part8x baseline 的对比:
+//   ┌─────────────────────┬───────────────────────────┬─────────────────────────────────────────┐
+//   │ 维度                │ part8x baseline            │ Chapter 6 子节 2(verbatim 改后)         │
+//   ├─────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
+//   │ transport 数        │ 1 (HTTP)                  │ 2 (HTTP + WebSocket)                    │
+//   │ ApolloLink.split?   │ 无                        │ 有 — 根据 operation kind 分流           │
+//   │ ApolloClient.link   │ authLink.concat(httpLink) │ splitLink (内部分流 wsLink vs HTTP)     │
+//   │ graphql-ws import?  │ 无                        │ 有 — createClient({ url: 'ws://...' })  │
+//   └─────────────────────┴───────────────────────────┴─────────────────────────────────────────┘
 //
-// ⭐⭐⭐ 关键 v3 vs v4 verbatim 冲突诚实声明 ⭐⭐⭐
-//   - 课程 verbatim 用 `new SetContextLink(...)`(Apollo Client v4 API,2025+ 发布)
-//   - 本项目 part8w 钉死 `@apollo/client: ^3.11.0`(per part8k 沿用)
-//   - v3.11 的 @apollo/client/link/context 模块**只导出** setContext(工厂函数),
-//     没有 SetContextLink(per 我从 npm tarball 解开的 index.d.ts 实测确认)
-//   - 选型:用 v3.11 等价的 setContext 工厂函数,功能完全一致
-//     (都是返回 ApolloLink,都是给每条 GraphQL 请求加 Authorization header)
-//   - 验证:per 课程 block 22 "this time, however, it is modified using the
-//     context defined by the authLink object so that, for each request, the
-//     authorization header is set" — 描述功能,API 实现形式等价即可
+// ⭐ 课程安装命令(verbatim):
+//   - npm install graphql-ws    (per part8e.md line 805-807)
 //
-// ⭐⭐⭐ 关键架构概念:Apollo Link chain(链路链)⭐⭐⭐
-//   - link 字段不再是单个 link,而是一个链(可以 concat 多个 link)
-//   - 数据流向:client → authLink → httpLink → 后端
-//   - authLink 拦截每条请求,从 localStorage 读 token,塞到 Authorization header
-//   - httpLink 拿到加了 header 的请求,实际发到后端
-//   - 顺序很重要:authLink 必须**先于** httpLink(因为 httpLink 才是实际发请求的)
+// ⭐⭐⭐ 关键概念:HTTP vs WebSocket 传输分流 ⭐⭐⭐
+//   - 课程原文(per part8e.md line 914-918):
+//     "The new configuration is due to the fact that the application must have
+//      an HTTP connection as well as a WebSocket connection to the GraphQL server"
+//   - query / mutation:HTTP POST(短连接,server 立即响应)
+//   - subscription:WebSocket(长连接,server 推送)
+//   - 必须用 splitLink 根据 operation kind 决定走哪个 transport
 //
-// ⭐⭐⭐ v4 SetContextLink vs v3 setContext 对照 ⭐⭐⭐
-//   ┌────────────────────────────────┬────────────────────────────────┐
-//   │ v4(课程 verbatim)             │ v3.11(本项目沿用)             │
-//   ├────────────────────────────────┼────────────────────────────────┤
-//   │ import { SetContextLink }     │ import { setContext }          │
-//   │ const authLink = new          │ const authLink = setContext(   │
-//   │   SetContextLink(({ headers })│   (_, { headers }) => ({...})  │
-//   │   => ({...}))                 │ )                              │
-//   │ authLink.concat(httpLink)     │ authLink.concat(httpLink)      │
-//   │ (相同)                        │                                │
-//   └────────────────────────────────┴────────────────────────────────┘
+// ⭐⭐⭐ 关键概念:ApolloLink.split(per course line 875-891)⭐⭐⭐
+//   - 课程原文(per part8e.md line 875-891):
+//     "const splitLink = ApolloLink.split(
+//        ({ query }) => {
+//          const definition = getMainDefinition(query)
+//          return (
+//            definition.kind === 'OperationDefinition' &&
+//            definition.operation === 'subscription'
+//          )
+//        },
+//        wsLink,
+//        authLink.concat(httpLink),
+//      )"
+//   - split 是 ApolloLink 的静态方法
+//   - 第 1 个参数:test function — 返回 true → 走 leftLink(wsLink);返回 false → 走 rightLink
+//   - 第 2 个参数:leftLink — subscription 走 wsLink
+//   - 第 3 个参数:rightLink — 其他走 authLink.concat(httpLink)(HTTP + auth header)
+//   - test function 拆解:
+//     - getMainDefinition(query) 拿到顶层 GraphQL AST
+//     - definition.kind === 'OperationDefinition' → 是 query/mutation/subscription
+//     - definition.operation === 'subscription' → 是 subscription
+//   - 组合:只有 kind 是 OperationDefinition 且 operation 是 subscription 才返回 true
 //
-// ⭐⭐⭐ authorization 字段格式 ⭐⭐⭐
-//   - HTTP 标准:`Authorization: Bearer <token>`(Bearer 大写 B + 空格 + token)
-//   - per 课程 block 21 verbatim:`token ? \`Bearer ${token}\` : null`
-//   - 后端 part8u/v 的 getUserFromAuthHeader 期望 Bearer 格式(per part8u README)
-//   - token null 时不传(authorization: null),让后端 ctx.currentUser = null
-//
-// ⭐⭐⭐ localStorage 'phonebook-user-token' key ⭐⭐⭐
-//   - 跟 LoginForm.jsx 写的 key 一致(per part8w LoginForm.jsx onCompleted)
-//   - App.jsx 登出时 localStorage.clear() 也会清掉这个 key
-//   - 注意:per 课程 setContext 是**同步**读 localStorage,
-//     跟 server side rendering 场景可能有 SSR 不一致问题
-//     (per Apollo docs 提过 SSR 应该用 ServerErrorLink 或别的方案)
+// ⭐⭐⭐ 关键概念:GraphQLWsLink(per course line 864-870)⭐⭐⭐
+//   - 课程原文(per part8e.md line 864-870):
+//     "const wsLink = new GraphQLWsLink(
+//        createClient({
+//          url: 'ws://localhost:4000',
+//        }),
+//      )"
+//   - createClient 来自 graphql-ws 库,接受 { url: 'ws://...' }
+//   - GraphQLWsLink 是 Apollo Client 适配这个 client 的 link
+//   - 当 ApolloLink.split 决定走 wsLink 时:
+//     → Apollo Client 把 operation 转成 graphql-ws 协议消息
+//     → graphql-ws client 通过 WebSocket 发到 server
+//     → server 端 useServer 收到后路由到 Subscription resolvers
+//   - 注意:wsLink **不需要** authLink — subscriptions 当前课程不做认证(per course 未涉及)
 
 // ⭐ React 核心 imports — verbatim 沿用 part8w
 import { StrictMode } from 'react'
@@ -61,71 +77,68 @@ import { createRoot } from 'react-dom/client'
 // ⭐ App 组件 — 当前目录(per part8w 沿用)
 import App from './App.jsx'
 
-// ⭐ Apollo Client 核心 imports — verbatim 沿用 part8w
+// ⭐⭐⭐ Apollo Client 核心 imports(per course line 821-829)⭐⭐⭐
 //
-// ⭐ ApolloClient:Apollo Client 的"主类",整个客户端对象
-// ⭐ HttpLink:Apollo 用来发请求的 transport(底层是 fetch)
-// ⭐ InMemoryCache:Apollo 自带的内存缓存
-// ⭐ ApolloProvider 是 React Context Provider,把 client 注入整棵组件树
+// ⭐ ApolloClient + HttpLink + InMemoryCache + ApolloProvider(per part8w 沿用)
+// ⭐⭐⭐ 新增 ApolloLink(per course line 822 highlighted):⭐⭐⭐
+//   - 用于 splitLink(per course line 875)
+//   - ApolloLink.split 是静态方法,接收 (testFn, leftLink, rightLink)
+//   - 跟 GraphQLWsLink / authLink / httpLink 同级 link 实例
 import {
   ApolloClient,
+  ApolloLink, // highlight-line
   HttpLink,
   InMemoryCache,
-  ApolloProvider,
 } from '@apollo/client'
 
-// ⭐⭐⭐ 新增(per course block 21 highlighted line 7):setContext⭐⭐⭐
+// ⭐ ApolloProvider 用 v4 API 走 @apollo/client/react(per part8p 沿用)
+//   - 课程 verbatim(per course line 830-831)同位置
+//   - ⭐ 修复(per 编译报错 "The symbol ApolloProvider has already been declared"):
+//     我之前误把 ApolloProvider 留在第一个 import 块里又单独 import 一次,
+//     跟 part8x baseline 的旧 import path (`@apollo/client`)冲突
+//   - 正确做法:**只**在第二个 import 块里 import(per course verbatim line 821-831)
+//     → 第一个 import 块只导 ApolloClient/ApolloLink/HttpLink/InMemoryCache
+//     → 第二个 import 块只导 ApolloProvider
+import { ApolloProvider } from '@apollo/client/react'
+
+// ⭐⭐⭐ 新增(per course line 832-833):SetContextLink(已被 part8x 用 setContext 替代)⭐⭐⭐
 //
-// ⭐ 课程原文(verbatim,per course block 21):
-//   import { SetContextLink } from '@apollo/client/link/context'
-//
-// ⭐⭐⭐ v3.11 等价 API 降级诚实声明 ⭐⭐⭐
-//   - 课程 verbatim 是 v4 API (new SetContextLink(...))
-//   - 本项目钉死 ^3.11.0,只支持 v3 的 setContext 工厂函数
-//   - 功能完全等价(都返回 ApolloLink,都用于注入 header context)
-//   - 验证:per 我解压 @apollo/client-3.11.0.tgz 看 package/link/context/index.d.ts:
-//     ```
-//     export type ContextSetter = (operation, prevContext) => Promise<...> | ...
-//     export declare function setContext(setter: ContextSetter): ApolloLink
-//     ```
-//   - 所以本项目用 setContext 工厂函数(没有 class 形态)
-//   - 见 README "关键诚实声明" 章节详细说明
+// ⭐⭐⭐ 关键诚实声明(per part8x verbatim 沿用):v3.11 适配 ⭐⭐⭐
+//   - 课程 verbatim 用 `new SetContextLink(...)`(Apollo Client v4 API)
+//   - 本项目 part8x 钉死 `@apollo/client: ^3.11.0`
+//   - v3.11 的 @apollo/client/link/context **只导出** setContext(工厂函数)
+//   - 选型:用 v3.11 等价的 setContext 工厂函数(per part8x README 关键诚实声明)
+//   - 完整注释见 part8x README,这里只 import
 import { setContext } from '@apollo/client/link/context'
 
-// ⭐⭐⭐ authLink(per course block 21 highlighted lines 9-17)⭐⭐⭐
+// ⭐⭐⭐ 新增(per course line 835-841 highlighted):GraphQLWsLink + createClient + getMainDefinition ⭐⭐⭐
 //
-// ⭐ 课程原文(verbatim,per course block 21):
-//   const authLink = new SetContextLink(({ headers }) => {
-//     const token = localStorage.getItem('phonebook-user-token')
-//     return {
-//       headers: {
-//         ...headers,
-//         authorization: token ? `Bearer ${token}` : null,
-//       }
-//     }
-//   })
+// ⭐ GraphQLWsLink:来自 @apollo/client/link/subscriptions
+//   - 课程 verbatim(per course line 836)用 `@apollo/client/link/subscriptions` 路径
+//   - 跟 part8x 已有的 `@apollo/client/link/context` 同级
 //
-// ⭐⭐⭐ v3.11 适配 ⭐⭐⭐
-//   - v3.11 setContext 签名:setContext((request, prevContext) => newContext | Promise<newContext>)
-//   - 跟 v4 SetContextLink 签名基本一致,只是工厂函数 vs class 区别
-//   - 第一个参数是 GraphQLRequest(用 _ 表示不读),第二个是 prevContext(读 headers)
-//   - 返回的对象会被合并到 operation context
+// ⭐ getMainDefinition:来自 @apollo/client/utilities
+//   - 课程 verbatim(per course line 838-839)用 `@apollo/client/utilities` 路径
+//   - 用来从 GraphQL AST 拿顶层 operation(per course line 879)
 //
-// ⭐⭐⭐ localStorage 同步读取 ⭐⭐⭐
-//   - getItem('phonebook-user-token') 是同步 API,React 渲染时调用没问题
-//   - 如果 key 不存在返回 null(per MDN)
-//   - 课程 verbatim:token ? `Bearer ${token}` : null
-//     - 有 token → "Bearer eyJhbGc..."
-//     - 没 token → null(Apollo 会去掉这个 header)
+// ⭐ createClient:来自 graphql-ws 库
+//   - 课程 verbatim(per course line 840-841)用 `graphql-ws` 直接 import
+//   - 返回 graphql-ws Client 实例
+//   - 接受 { url: 'ws://...' } 配置
 //
-// ⭐⭐⭐ headers spread 模式 ⭐⭐⭐
-//   - ...headers:保留之前 link 链上其他 link 加的 header(比如 locale header)
-//   - authorization 覆盖:本 authLink 最后说了算
+// ⭐ v3.11 vs v4 路径差异:GraphQLWsLink 的 import 路径在两个大版本都是
+//   `@apollo/client/link/subscriptions`,所以本节**没有** v3/v4 适配问题
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+
+import { getMainDefinition } from '@apollo/client/utilities'
+import { createClient } from 'graphql-ws'
+
+// ⭐⭐⭐ authLink(per part8x verbatim 沿用,block 21)⭐⭐⭐
 //
-// ⭐⭐⭐ "Bearer ${token}" vs "bearer ${token}" ⭐⭐⭐
-//   - HTTP 标准是 Bearer(大写 B),但实际大部分后端 case-insensitive
-//   - 课程 verbatim 用 Bearer 大写,本项目 verbatim 沿用
-//   - 后端 part8u/v 的 getUserFromAuthHeader(per part8u README)也期望 Bearer
+// ⭐ 沿用 part8x 课程 block 21 verbatim:
+//   - 用 setContext 工厂函数(v3.11 适配,见上)
+//   - 读 localStorage 'phonebook-user-token' + Bearer 格式
+//   - 完整注释见 part8x main.jsx
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('phonebook-user-token')
   return {
@@ -136,44 +149,97 @@ const authLink = setContext((_, { headers }) => {
   }
 })
 
-// ⭐⭐⭐ httpLink 拆成独立变量(per course block 21 highlighted line 19)⭐⭐⭐
-//
-// ⭐ 课程原文(verbatim,per course block 21):
-//   const httpLink = new HttpLink({ uri: 'http://localhost:4000' })
-//
-// ⭐ 跟 part8w 的差异:
-//   - part8w:`link: new HttpLink({ uri: '...' })`(内联)
-//   - part8x:把 httpLink 抽成独立 const(因为 link 字段要 .concat(httpLink))
-//   - 本项目适配:用 env 变量(per part8w 沿用)+ 兜底 'http://localhost:4000'
+// ⭐⭐⭐ httpLink(per part8x verbatim 沿用)⭐⭐⭐
 const httpLink = new HttpLink({
   uri: import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000',
 })
 
-// ⭐⭐⭐ ApolloClient 实例化(per course block 21 highlighted lines 21-24)⭐⭐⭐
+// ⭐⭐⭐ 新增(per course line 864-870 verbatim):wsLink ⭐⭐⭐
 //
-// ⭐ 课程原文(verbatim,per course block 21):
-//   const client = new ApolloClient({
-//     cache: new InMemoryCache(),
-//     link: authLink.concat(httpLink)
-//   })
+// ⭐ 课程原文(per part8e.md line 864-870):
+//   "const wsLink = new GraphQLWsLink(
+//      createClient({
+//        url: 'ws://localhost:4000',
+//      }),
+//    )"
+// ⭐ ws://(per course verbatim) — 不是 wss://(无 TLS)
+//   - 本地开发用 ws://,生产环境必须 wss://(TLS)
+//   - 端口跟 HTTP 同(4000)— server 端用同一 httpServer 升级
+// ⭐ createClient({ url }) 还可以传:
+//   - retryAttempts:重连次数
+//   - connectionParams:连接时传给 server 的认证信息(本节不用)
+//   - onConnecting / onConnected 等 callback
+//   - 课程 verbatim 只传 url,本项目 verbatim 沿用
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: 'ws://localhost:4000',
+  }),
+)
+
+// ⭐⭐⭐ 新增(per course line 875-891 verbatim):splitLink ⭐⭐⭐
 //
-// ⭐⭐⭐ link.concat() 用法 ⭐⭐⭐
-//   - ApolloLink 实例有 .concat(nextLink) 方法,把 nextLink 接到自己后面
-//   - 数据流向:client → authLink → httpLink → fetch → 后端
-//   - authLink 改 context(operation.getContext() 拿到的是 authLink 改完的)
-//     → httpLink 拿到 authorization header → 实际发请求
-//   - 顺序错会怎样?authLink 在 httpLink 后 → httpLink 先发请求,fetch 已发出
-//     authLink 来不及改 header → 后端拿不到 token
+// ⭐ 课程原文(per part8e.md line 875-891):
+//   "const splitLink = ApolloLink.split(
+//      ({ query }) => {
+//        const definition = getMainDefinition(query)
+//        return (
+//          definition.kind === 'OperationDefinition' &&
+//          definition.operation === 'subscription'
+//        )
+//      },
+//      wsLink,
+//      authLink.concat(httpLink),
+//    )"
 //
-// ⭐⭐⭐ link 顺序错误的常见反模式 ⭐⭐⭐
-//   - 错:link: httpLink.concat(authLink) → authLink 永远赶不上 fetch
-//   - 对:link: authLink.concat(httpLink) → authLink 先加 header,httpLink 再发
+// ⭐ testFn({ query }):
+//   - ApolloLink.split 在每个 operation 时调 testFn
+//   - 传入当前 operation 的 query(AST)
+//   - 返回 boolean:true → leftLink(wsLink);false → rightLink
+//
+// ⭐ getMainDefinition(query):
+//   - Apollo Client utilities 提供
+//   - 从 query AST 拿顶层 OperationDefinition
+//   - query/mutation/subscription 都属于 OperationDefinition
+//
+// ⭐ 关键判断:definition.operation === 'subscription'
+//   - 'subscription' 字符串来自 GraphQL AST
+//   - 课程没考虑 fragment — 但 fragment 不影响顶层 operation
+//   - fragment 只在 selection set 里展开,不决定顶层 operation kind
+//
+// ⭐ wsLink vs authLink.concat(httpLink):
+//   - subscription → wsLink(无 auth header)
+//   - query / mutation → authLink.concat(httpLink)(带 Authorization header)
+const splitLink = ApolloLink.split(
+  ({ query }) => {
+    const definition = getMainDefinition(query)
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    )
+  },
+  wsLink,
+  authLink.concat(httpLink),
+)
+
+// ⭐⭐⭐ ApolloClient 实例化(per course line 894-900 verbatim)⭐⭐⭐
+//
+// ⭐ 课程原文(per part8e.md line 894-900):
+//   "const client = new ApolloClient({
+//      cache: new InMemoryCache(),
+//      link: splitLink, // highlight-line
+//    })"
+// ⭐ 跟 part8x 的对比:
+//   - part8x: link: authLink.concat(httpLink)
+//   - Chapter 6 子节 2: link: splitLink(内部分流)
+//   - splitLink 本身是一个 ApolloLink,放 link 字段 OK
+//
+// ⭐ InMemoryCache 沿用 part8w — 默认 cache 实现
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  link: authLink.concat(httpLink),
+  link: splitLink, // highlight-line
 })
 
-// ⭐⭐⭐ React 渲染根(verbatim 沿用 part8w)⭐⭐⭐
+// ⭐ React 渲染根(verbatim 沿用 part8w)
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ApolloProvider client={client}>

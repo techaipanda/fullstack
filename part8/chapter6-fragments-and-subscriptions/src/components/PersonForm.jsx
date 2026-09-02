@@ -118,12 +118,26 @@ const PersonForm = ({ setError }) => {
       const message = error.graphQLErrors[0]?.message || error.message
       setError(message)
     },
+    // ⭐⭐⭐ Chapter 6 子节 2 新增(per course line 1234-1242 verbatim):use helper instead of inline cache.updateQuery ⭐⭐⭐
+    //
+    // ⭐ 课程原文(per part8e.md line 1234-1242):
+    //   "update: (cache, response) => {
+    //      // highlight-start
+    //      const addedPerson = response.data.addPerson
+    //      addPersonToCache(cache, addedPerson)
+    //      // highlight-end
+    //    },"
+    //
+    // ⭐ 跟 part8z inline 版本的关键差异:
+    //   part8z: cache.updateQuery({ query: ALL_PERSONS }, ({ allPersons }) => { ... })
+    //   Chapter 6 子节 2: addPersonToCache(cache, addedPerson)
+    //   - inline 版本:PersonForm 自己负责 cache 更新逻辑
+    //   - helper 版本:抽到 utils/apolloCache.js,PersonForm + App 都调它
+    //   - helper 内置 some(...) 去重(per part8e.md line 1132-1138)
+    //   - 两条路径(useMutation + useSubscription)同时调也不会重复添加
     update: (cache, response) => {
-      cache.updateQuery({ query: ALL_PERSONS }, ({ allPersons }) => {
-        return {
-          allPersons: allPersons.concat(response.data.addPerson),
-        }
-      })
+      const addedPerson = response.data.addPerson
+      addPersonToCache(cache, addedPerson)
     },
   })
 

@@ -1,27 +1,28 @@
-# chapter6-fragments-and-subscriptions — Chapter 6 第 1 子节"Fragments"
+# chapter6-fragments-and-subscriptions — Chapter 6 第 1 + 2 子节"Fragments" + "Subscriptions"
 
 > **课程 URL**:https://courses.mooc.fi/org/uh-cs/courses/full-stack-open-graphql/chapter-6
 >
 > **章节定位**:Part 8 Chapter 6 "Fragments and subscriptions"(本章共 7 个实质性子节 + Epilogue + 4 个 Exercises)
 >
-> **当前状态**:**第 1 子节 "Fragments" 已落地**(本 README 记录此子节)
+> **当前状态**:**第 1 子节 "Fragments" + 第 2 子节 "Subscriptions"(server + client)已落地**
 >
-> **整章策略**:**整章一个项目逐步迭代**(per 用户决策"逐步推进")— 后续子节在同一目录下追加,不另起子项目
+> **整章策略**:**整章一个项目逐步迭代**(per 用户决策"逐步推进 + 继续放在 chapter6-fragments-and-subscriptions 项目里")— 后续子节在同一目录下追加,不另起子项目。Backend 在项目根的 `server/` 子目录,frontend 在 `src/`
 
 ## Chapter 6 完整路线图(per part8e.md)
 
 | # | 子节 | 行(part8e.md)| 当前状态 | 涉及范围 |
 |---|------|-------------|---------|---------|
-| 1 | **Fragments** | 11-128 | ✅ **本子节已落地** | 纯前端(queries.js)|
-| 2 | Subscriptions(intro) | 130-138 | ⏭️ 待推进 | 概念介绍 |
-| 3 | expressMiddleware | 140-259 | ⏭️ 待推进 | **后端**(Apollo Server v4)+ WebSocket |
-| 4 | Subscriptions on the server | 261-456 | ⏭️ 待推进 | **后端** subscription resolver |
-| 5 | Subscriptions on the client | 458-728 | ⏭️ 待推进 | 前端 useSubscription |
-| 6 | n+1 problem | 730-919 | ⏭️ 待推进 | **后端** DataLoader |
-| 7 | Epilogue | 921-928 | ⏭️ 待推进 | 收尾 |
+| 1 | **Fragments** | 11-128 | ✅ **已落地**(子节 1)| 纯前端(queries.js)|
+| 2 | **Subscriptions** | 130-789 | ✅ **已落地**(子节 2)| **后端** expressMiddleware + WebSocket + PubSub + **前端** splitLink + useSubscription + addPersonToCache helper |
+| 2a | — Subscriptions(intro) | 130-138 | ✅ | 概念介绍 |
+| 2b | — expressMiddleware | 140-259 | ✅ | **后端** Apollo Server v4 |
+| 2c | — Subscriptions on the server | 261-456 | ✅ | **后端** subscription resolver |
+| 2d | — Subscriptions on the client | 458-728 | ✅ | 前端 useSubscription |
+| 3 | n+1 problem | 730-919 | ⏭️ 待推进 | **后端** DataLoader |
+| 4 | Epilogue | 921-928 | ⏭️ 待推进 | 收尾 |
 | - | Exercises 8.23-8.26 | 930-955 | ❌ **跳过** per 课程策略 | - |
 
-⚠️ **诚实声明**:本 README 记录的是**第 1 子节**("Fragments")。后续子节落地后会**追加**此 README 的对应章节,而不是另起新 README。
+⚠️ **诚实声明**:本 README 记录的是**第 1 + 2 子节**("Fragments" + "Subscriptions")。后续子节落地后会**追加**此 README 的对应章节,而不是另起新 README。
 
 ## 子项目结构
 
@@ -30,19 +31,30 @@ chapter6-fragments-and-subscriptions/
 ├── .env.example                (verbatim part8z 沿用 — VITE_BACKEND_URL 占位)
 ├── .gitignore                  (verbatim part8z 沿用 — node_modules + .env + dist)
 ├── index.html                  (verbatim part8z 沿用 — Vite 入口)
-├── package.json                (verbatim part8z 沿用,但 name 改为 chapter6-fragments-and-subscriptions)
+├── package.json                (verbatim part8z 沿用 + 章节 2 加 graphql-ws)
 ├── vite.config.js              (verbatim part8z 沿用 — react() plugin)
 ├── README.md                   (本文件)
-└── src/
-    ├── main.jsx                (verbatim part8z 沿用 — Apollo Link chain 自动加 Authorization)
-    ├── App.jsx                 (verbatim part8z 沿用 — token + LoginForm + logout + notify)
-    ├── queries.js              ⭐ **改** — 加 PERSON_DETAILS fragment + FIND_PERSON query(per 本子节)
-    └── components/
-        ├── LoginForm.jsx       (verbatim part8z 沿用 — LOGIN mutation + localStorage)
-        ├── Notify.jsx          (verbatim part8z 沿用 — 8 行错误展示)
-        ├── Persons.jsx         (verbatim part8z 沿用 — STUB "Persons here",本子节不动)
-        ├── PersonForm.jsx      (verbatim part8z 沿用 — 完整版 + part8y phone.length 修复 + onError)
-        └── PhoneForm.jsx       (verbatim part8z 沿用 — 完整版 + part8y try/catch 替代 onCompleted)
+├── src/                        ⭐ frontend (Vite + React + Apollo Client)
+│   ├── main.jsx                ⭐ **章节 2 改** — splitLink + wsLink (per part8e.md line 813-912)
+│   ├── App.jsx                 ⭐ **章节 2 改** — useSubscription + addPersonToCache (per course line 1174-1206)
+│   ├── queries.js              ⭐ **章节 1+2 改** — PERSON_DETAILS fragment + FIND_PERSON + PERSON_ADDED
+│   ├── utils/                  🆕 **章节 2 新建**
+│   │   └── apolloCache.js      (addPersonToCache helper,per part8e.md line 1094-1121)
+│   └── components/
+│       ├── LoginForm.jsx       (verbatim part8z 沿用 — LOGIN mutation + localStorage)
+│       ├── Notify.jsx          (verbatim part8z 沿用 — 8 行错误展示)
+│       ├── Persons.jsx         (verbatim part8z 沿用 — STUB "Persons here",本子节不动)
+│       ├── PersonForm.jsx      ⭐ **章节 2 改** — use addPersonToCache helper (per course line 1214-1247)
+│       └── PhoneForm.jsx       (verbatim part8z 沿用 — 完整版 + part8y try/catch 替代 onCompleted)
+└── server/                     🆕 **章节 2 新建**(verbatim part8v baseline + 课程第 2 子节改造)
+    ├── .env.example            (verbatim part8v 沿用 — JWT_SECRET + MONGODB_URI)
+    ├── db.js                   (verbatim part8v 沿用 — connectToDatabase)
+    ├── index.js                (verbatim part8v 沿用 — main() 编排 + connectDB)
+    ├── models/                 (verbatim part8v 沿用 — Person + User mongoose)
+    ├── package.json            ⭐ **章节 2 改** — 加 7 包 (express/cors/@as-integrations/express5/graphql-ws/ws/graphql-subscriptions/@graphql-tools/schema)
+    ├── resolvers.js            ⭐ **章节 2 改** — PubSub + Subscription.personAdded (per part8e.md line 597-696)
+    ├── schema.js               ⭐ **章节 2 改** — type Subscription { personAdded: Person! } (per part8e.md line 456-459)
+    └── server.js               ⭐ **章节 2 改** — expressMiddleware + WebSocketServer + useServer (per course line 295-388 + + line 480-543)
 ```
 
 ## 改造范围表(本子节"Fragments")
@@ -244,13 +256,167 @@ per discipline "minimum viable additions" + 课程严格按 part8e.md block 11:
 
 ## 下一步(per course 顺序)
 
-- ✅ Chapter 6 第 1 子节:"Fragments"(本子节)
-- ⏭️ Chapter 6 第 2 子节:"Subscriptions"(intro,纯文字)— 概念铺垫,无代码改动
-- ⏭️ Chapter 6 第 3 子节:"expressMiddleware"(后端)**— 需要新增 `chapter6-fragments-and-subscriptions-backend/` 或在子目录添加 `backend/`**
-- ⏭️ Chapter 6 第 4-6 子节:subscriptions + n+1 — 都需要后端改动
+- ✅ Chapter 6 第 1 子节:"Fragments"
+- ✅ Chapter 6 第 2 子节:"Subscriptions"(intro + expressMiddleware + server + client)— **本 README 覆盖**
+- ⏭️ Chapter 6 第 3 子节:"n+1 problem"— 后端 friendOf field + DataLoader 优化
+- ⏭️ Chapter 6 第 4 子节:"Epilogue"— 收尾
 - ❌ Exercises 8.23-8.26 — per 课程策略:**跳过练习题**
 
-我们第 1 子节落地后,**下一步是第 2 子节 "Subscriptions" intro**(纯文字,可快速扫过)或**直接进第 3 子节 "expressMiddleware"**(开始大改后端)。
+第 1+2 子节落地后,**下一步是第 3 子节 "n+1 problem"**(纯后端,加 friendOf field + resolver + populate 优化)。
+
+## 子节 2 "Subscriptions" 完成详情(per part8e.md lines 190-1259)
+
+### 课程原文 9 blocks
+
+| Block | 类型 | 内容摘要 |
+|-------|------|---------|
+| 23 | 文字 | "Along with query and mutation types, GraphQL offers a third operation type: **subscriptions**. With subscriptions, clients can **subscribe** to updates about changes in the server." |
+| 24 | 代码 | **startStandaloneServer → expressMiddleware**:加 express + cors + http.createServer + ApolloServerPluginDrainHttpServer |
+| 25 | 文字 | "Following the recommendations in the documentation, **ApolloServerPluginDrainHttpServer** has been added to the GraphQL server configuration..." |
+| 26 | 代码 | **graphql-ws + WebSocketServer + useServer**:加 wsServer + useServer({ schema }, wsServer) |
+| 27 | 代码 | **PubSub + addPerson.publish + Subscription.personAdded resolver**:PubSub publish-subscribe pattern |
+| 28 | 文字 | "It's possible to test the subscriptions with the Apollo Explorer like this..." |
+| 29 | 代码 | **前端 splitLink + GraphQLWsLink + ApolloLink.split**:ApolloLink.split 根据 operation kind 分流 wsLink vs authLink.concat(httpLink) |
+| 30 | 代码 | **PERSON_ADDED subscription + useSubscription**:在 App.jsx 用 useSubscription(PERSON_ADDED, { onData }) |
+| 31 | 代码 | **addPersonToCache helper 抽取**:避免 useSubscription + PersonForm 重复 cache 添加导致重复渲染 |
+
+### 子节 2 文件改动表(verbatim course)
+
+| 文件 | 改动 | 来源 |
+|------|------|------|
+| `server/package.json` | ⭐ **改** — 加 7 包 + description 更新 | 课程 3 个 npm install 命令(per part8e.md line 287-288, 471-473, 585-587)|
+| `server/server.js` | ⭐ **改** — 完全重写:startStandaloneServer → expressMiddleware + WebSocket | 课程 line 295-388 + line 480-543 |
+| `server/schema.js` | ⭐ **改** — 加 `type Subscription { personAdded: Person! }` | 课程 line 456-459 |
+| `server/resolvers.js` | ⭐ **改** — 加 PubSub import + pubsub 实例 + addPerson.publish + Subscription 块 | 课程 line 597-696 |
+| `package.json`(frontend)| ⭐ **改** — 加 graphql-ws | 课程 line 805-807 |
+| `src/queries.js` | ⭐ **改** — 加 PERSON_ADDED subscription | 课程 line 939-951 |
+| `src/main.jsx` | ⭐ **改** — 加 wsLink + splitLink,ApolloClient.link 改 splitLink | 课程 line 813-912 |
+| `src/utils/apolloCache.js` | 🆕 **新建** — addPersonToCache helper | 课程 line 1094-1121 |
+| `src/components/PersonForm.jsx` | ⭐ **改** — useMutation update 改用 helper | 课程 line 1214-1247 |
+| `src/App.jsx` | ⭐ **改** — 加 useSubscription(PERSON_ADDED, { onData: notify + addPersonToCache }) | 课程 line 1174-1206 |
+
+### 子节 2 关键诚实声明
+
+1. **Apollo Server v4 expressMiddleware**:`startStandaloneServer` 不支持 WebSocket upgrade,**必须**换成 `express + http.createServer + expressMiddleware`(per course line 273-280)
+2. **apollo v3.11 适配**:`GraphQLWsLink` 路径 `@apollo/client/link/subscriptions`(v3 + v4 一致,无适配问题)— 跟 part8x setContext (v3.11 vs v4 差异)不同
+3. **PubSub in-memory 警告**:默认 PubSub 单进程内存实现,多实例 / 集群部署需要换 Redis/Kafka/Google PubSub(per graphql-subscriptions docs)— 课程 verbatim 用 in-memory,学习用
+4. **addPersonToCache 必须抽取**:useSubscription + useMutation 都会触发 cache 更新 → 必须去重 → helper 用 `allPersons.some(...)` 去重(per course block 10-12)
+5. **`client.cache` vs `cache` 参数**:PersonForm 的 cache 是 useMutation 第二参数;App.jsx 的 cache 是 `useApolloClient().cache`(同一对象)— helper 接受 cache 形参,两者等价
+
+## 子节 2 验证步骤
+
+### Step 0:安装依赖(后端 + 前端各自装)
+
+```bash
+# Terminal 1: 后端
+cd part8/chapter6-fragments-and-subscriptions/server
+cp .env.example .env  # 配置 JWT_SECRET + MONGODB_URI
+npm install            # 装 13 包(包括 @apollo/server + express + graphql-ws + ws + graphql-subscriptions 等)
+
+# Terminal 2: 前端
+cd part8/chapter6-fragments-and-subscriptions
+npm install            # 装 5 包 + dev 2 包(包括新增 graphql-ws)
+```
+
+### Step 1:启动后端 server/(per 子节 2 改造后)
+
+```bash
+cd part8/chapter6-fragments-and-subscriptions/server
+npm run dev
+```
+
+预期:`Server is now running on http://localhost:4000`(注意:跟 part8u/v 的 "Server ready at" 文案不同,per 子节 2 改造)
+
+### Step 2:启动前端
+
+```bash
+cd part8/chapter6-fragments-and-subscriptions
+npm run dev
+```
+
+预期:`VITE ready in xxx ms` + `Local: http://localhost:5173/`
+
+### Step 3:浏览器登录 + 验证 Persons 列表(回归测试子节 1)
+
+- 访问 http://localhost:5173
+- 登录后看到 Persons stub + PersonForm + PhoneForm
+- 应看到 Apollo cache 里 `ROOT_QUERY.allPersons` 有 persons(per ALL_PERSONS 取 name + phone)
+
+### Step 4:验证 backend subscription 服务(per 子节 2 核心验收)
+
+打开 Apollo Sandbox(http://localhost:4000)— 课程截图 per part8e.md line 751-752):
+
+```graphql
+subscription Subscription {
+  personAdded {
+    phone
+    name
+  }
+}
+```
+
+- 点 "PersonAdded" button → start waiting
+- 打开**另一个 browser tab**(http://localhost:5173)登录后用 PersonForm 加 person
+- Apollo Sandbox 应该立即收到 personAdded 数据(per part8e.md line 766-773 描述)
+- ✅ = backend subscription 管道工作正常
+
+### Step 5:验证 frontend subscription + addPersonToCache(per 子节 2 全链路验收)
+
+- 打开**两个** http://localhost:5173 tab(都登录)
+- 在 tab A 用 PersonForm 加 person
+- 预期:
+  - tab A:Notify 红字 "xxx added" + Persons 列表出现新 person(per useSubscription onData 通知 + cache 更新)
+  - tab B:Notify 红字 + Persons 列表出现新 person(per WebSocket 推送 + useSubscription)
+- ✅ = frontend subscription + cache 去重工作
+
+### Step 6:验证 cache 去重(子节 2 关键验收)
+
+- 在两个 tab 都打开 DevTools → Apollo Client DevTools → Cache
+- 触发 addPerson
+- 预期:cache 里 `ROOT_QUERY.allPersons` 里**只有一条**新 person(per addPersonToCache 的 `some(...)` 去重)— 不应出现重复条目
+- 如果看到重复 → addPersonToCache helper 的 some() 检查失效(可能是 Apollo cache 归一化问题,需要排查)
+
+### Step 7:验证 findPerson 配合 fragment(子节 1 跨子节验收)
+
+打开 Apollo Sandbox:
+
+```graphql
+query {
+  findPerson(name: "Arto Hellas") {
+    ...PersonDetails
+  }
+}
+
+fragment PersonDetails on Person {
+  id
+  name
+  phone
+  address {
+    street
+    city
+  }
+}
+```
+
+- 预期:返回完整 Person 对象 + address 嵌套字段
+- ✅ = 子节 1 fragment 工具 + 子节 2 后端 findPerson resolver 协作
+
+## Troubleshooting(子节 2 新增)
+
+| 症状 | 可能原因 | 修复 |
+|------|---------|------|
+| 后端启动报 `Cannot find module 'express'` | server/ 没装依赖 | `cd server && npm install` |
+| 后端启动报 `Cannot find module 'graphql-subscriptions'` | 同上 | 同上 |
+| 后端启动报 `Cannot find module '@as-integrations/express5'` | 同上 | 同上 |
+| Apollo Sandbox subscription "Failed to connect" | 后端没 WebSocket 配置 / server 没启动 | 确认 server/ `npm run dev` 输出 `Server is now running at ...` |
+| Apollo Sandbox subscription 报 `Cannot query field "personAdded"` | 后端 schema 没加 Subscription type | 检查 server/schema.js 末尾是否 `type Subscription { personAdded: Person! }` |
+| 前端启动报 `Failed to resolve import "graphql-ws"` | 前端没装依赖 / 没装 graphql-ws | `cd 根目录 && npm install`(package.json 已加)|
+| 前端启动报 `Failed to resolve import "./utils/apolloCache"` | apolloCache.js 没创建 | 检查 `src/utils/apolloCache.js` 文件存在 |
+| Browser console 报 `subscription must be executed over a websocket` | main.jsx 没配 splitLink / wsLink | 检查 main.jsx 末尾 `link: splitLink` + wsLink 创建 |
+| Browser console 报 `ws://localhost:4000` connection refused | 后端 server/ 没启动 / 没装 @graphql-tools/schema | 确认 server `npm run dev` 起来 + 安装 |
+| PersonForm 加 person 后 cache 出现 2 条重复 person | addPersonToCache 的 .some() 没去重成功 | 检查 apolloCache.js 的 `personExists = allPersons.some(...)` 逻辑 + cache.updateQuery 签名 |
+| tab A 加 person tab B 没收到 Notify | WebSocket 连接断开 / splitLink 没路由到 wsLink | 浏览器 DevTools Network → WS 看 ws:// 连接状态 + main.jsx splitLink 的 testFn 是否正确 |
+| Apollo Sandbox subscription 等不到 personAdded | 后端 pubsub 没被触发(检查 addPerson publish) / WebSocket 协议不匹配 | 用 `pubsub.publish('PERSON_ADDED', { personAdded: person })` 在 addPerson 末尾 + 确认 graphql-ws lib 版本 ≥ 5.14 |
 
 ## 通道状态表(本子节)
 

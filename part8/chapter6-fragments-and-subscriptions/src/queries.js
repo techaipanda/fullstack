@@ -289,3 +289,53 @@ export const FIND_PERSON = gql`
 
   ${PERSON_DETAILS}
 `
+
+// ⭐⭐⭐ Chapter 6 子节 2 新增(per part8e.md lines 941-951 verbatim):PERSON_ADDED subscription ⭐⭐⭐
+//
+// ⭐ 课程原文(per part8e.md line 939-951):
+//   "Add the code that defines the subscription to the *queries.js* file:
+//    export const PERSON_ADDED = gql`
+//      subscription {
+//        personAdded {
+//          ...PersonDetails
+//        }
+//      }
+//      ${PERSON_DETAILS}
+//    `"
+//
+// ⭐⭐⭐ 关键概念:subscription 跟 query/mutation 的区别 ⭐⭐⭐
+//   - 课程原文(per part8e.md line 954-957):
+//     "Subscriptions are created using the useSubscription hook function"
+//   - query/mutation:用 useQuery/useMutation,触发即结束
+//   - subscription:用 useSubscription,启动后会持续 listen server 推送
+//
+// ⭐⭐⭐ 字段集复用 PERSON_DETAILS fragment ⭐⭐⭐
+//   - 课程 verbatim 用了子节 1 的 fragment(per part8e.md line 945)
+//   - 字段:id name phone address { street city }
+//   - 这就是子节 1 的"埋好工具"用法 — 后续订阅字段直接复用
+//   - 跟子节 1 FIND_PERSON 同 pattern(都是 `${PERSON_DETAILS}`)
+//
+// ⭐ Apollo Client 客户端组装文档(per 子节 1 注释):
+//   - 运行时拼接成:
+//     subscription {
+//       personAdded { ...PersonDetails }
+//     }
+//     fragment PersonDetails on Person {
+//       id name phone address { street city }
+//     }
+//   - server 端 schema.js type Subscription { personAdded: Person! } 对应
+//   - server resolvers.js Subscription.personAdded.subscribe 返回 iterator
+//
+// ⭐ 后续用法(per course line 1000-1007):App.jsx 用 useSubscription(PERSON_ADDED, { onData: ... })
+//   - 每次 server publish('PERSON_ADDED', { personAdded: person })
+//   - client 的 onData callback 触发
+//   - 拿到完整 person 对象 → 调 notify + addPersonToCache
+export const PERSON_ADDED = gql`
+  subscription {
+    personAdded {
+      ...PersonDetails
+    }
+  }
+
+  ${PERSON_DETAILS}
+`

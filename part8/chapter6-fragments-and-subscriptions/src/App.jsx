@@ -21,21 +21,50 @@
 
 import { useState } from 'react'
 
-// ⭐ useQuery 走 @apollo/client/react 子路径(per part8p 沿用)
-import { useQuery } from '@apollo/client/react'
+// ⭐⭐⭐ Chapter 6 子节 2 新增(per course line 962-968 verbatim):useSubscription ⭐⭐⭐
+//
+// ⭐ 课程原文(per part8e.md line 962-968):
+//   "import {
+//      useApolloClient,
+//      useQuery,
+//      useSubscription, // highlight-line
+//    } from '@apollo/client/react'"
+// ⭐ useSubscription(per Apollo Client v3 docs):
+//   - 接受 subscription document + options (variables / onData / onError 等)
+//   - 自动通过 splitLink 路由到 wsLink(per main.jsx 配置)
+//   - onData callback 在每次 server push 新数据时触发
+//   - 用法类似 useQuery,但语义是"持续 listen"
+//
+// ⭐⭐⭐ 关键诚实声明:part8x 的 useQuery / useApolloClient 是分开 import 的,本子节合并 ⭐⭐⭐
+//   - 课程 verbatim 用一个 import 块写三个(per course line 962-968)
+//   - part8x baseline 用两个 import 块(分开 useQuery 和 useApolloClient)
+//   - 本子节按课程 verbatim 合并三个(在 add useSubscription 时一并合并)
+//   - 行为完全等价,只是 import 写法变化
+import {
+  useApolloClient,
+  useQuery,
+  useSubscription,
+} from '@apollo/client/react'
 
-// ⭐⭐⭐ 新增(per course block 12 highlighted line 1):useApolloClient ⭐⭐⭐
-//   - useApolloClient 返回 Apollo client 实例(就是 main.jsx 里 new ApolloClient() 那个)
-//   - client 对象有 resetStore() 方法 — 清空整个 Apollo cache
-//   - logout 时调 resetStore() 是为了防止:已登录用户 cache 里有自己的"私有数据",
-//     登出后切换用户,旧数据不应该泄露给新用户
-//   - 课程原文(per course block 13):"Clearing the cache is important, because
-//     some queries may have fetched data into the cache that only an authenticated
-//     user is allowed to access"
-import { useApolloClient } from '@apollo/client/react'
+// ⭐⭐⭐ 从 './queries' 拿 ALL_PERSONS + PERSON_ADDED(per part8o 沿用 + Chapter 6 子节 2 新增)⭐⭐⭐
+//
+// ⭐ ALL_PERSONS:per part8o 沿用,useQuery 用
+// ⭐⭐⭐ PERSON_ADDED:per course line 941-951 verbatim 新增 subscription,useSubscription 用 ⭐⭐⭐
+import { ALL_PERSONS, PERSON_ADDED } from './queries'
 
-// ⭐⭐⭐ 从 './queries' 拿 ALL_PERSONS(per part8o 沿用 + part8w 加 ALL_PERSONS stub)⭐⭐⭐
-import { ALL_PERSONS } from './queries'
+// ⭐⭐⭐ Chapter 6 子节 2 新增(per course line 1215-1217):addPersonToCache helper ⭐⭐⭐
+//
+// ⭐ 课程原文(per part8e.md line 1215-1217):
+//   "and we will also use the function when updating the cache in connection
+//    with adding a new person:
+//    import { addPersonToCache } from '../utils/apolloCache' // highlight-line"
+//
+// ⭐ App.jsx 这里 import 是为了在 useSubscription onData 里调它
+// ⭐ PersonForm.jsx 也 import 了同一个 helper(per part8e.md line 1215-1217)
+//   - PersonForm 用 addPersonToCache(cache, addedPerson)
+//   - App 用 addPersonToCache(client.cache, addedPerson)
+//   - 两条路径都调同一个 helper → 自动去重(per helper 内的 .some() 检查)
+import { addPersonToCache } from './utils/apolloCache'
 
 // ⭐⭐⭐ 各种组件 imports(per part8p 沿用 + part8w 加 LoginForm)⭐⭐⭐
 import Notify from './components/Notify'
@@ -79,6 +108,52 @@ const App = () => {
   //   - 拿到 Apollo client 实例
   //   - client.resetStore() 用于 logout 时清 cache
   const client = useApolloClient()
+
+  // ⭐⭐⭐ Chapter 6 子节 2 新增(per course line 1000-1006 + 1192-1203 verbatim):useSubscription ⭐⭐⭐
+  //
+  // ⭐⭐⭐ 关键诚实声明:课程演进(per part8e.md line 985-1058 + 1174-1206)⭐⭐⭐
+  //   - 课程 block 7(line 985-1006)第一版:useSubscription(PERSON_ADDED, { onData: ({ data }) => console.log(data) })
+  //     → 仅验证 subscription 工作(server 推送的数据打到 console)
+  //   - 课程 block 8(line 1041-1058)第二版:onData 里调 notify(`${addedPerson.name} added`)
+  //     → 加通知,但 cache 还是依赖 PersonForm 自己的 update
+  //   - 课程 block 10(line 1174-1206)第三版(最终版,本项目 verbatim 采用):onData 里 notify + addPersonToCache
+  //     → 两边都更新 cache,靠 helper 去重
+  //   - 本项目**直接用最终版**(per "verbatim 课程原文"原则)
+  //   - 课程演进历史记录在 comments 里,便于学习
+  //
+  // ⭐ 课程原文(per part8e.md line 1192-1203 verbatim,本项目采用):
+  //   "useSubscription(PERSON_ADDED, {
+  //      onData: ({ data }) => {
+  //        const addedPerson = data.data.personAdded
+  //        notify(`${addedPerson.name} added`)
+  //        addPersonToCache(client.cache, addedPerson) // highlight-line
+  //      },
+  //    })"
+  //
+  // ⭐⭐⭐ 关键设计:onData 回调签名 ⭐⭐⭐
+  //   - Apollo Client 提供的 onData callback,参数是 { data, error } 形状
+  //   - data.data 是 GraphQL 响应的 data 字段(就是 subscription 的 payload)
+  //   - 本例:data.data.personAdded = 新 person 对象
+  //
+  // ⭐⭐⭐ 为什么用 client.cache 而不是 cache 参数?⭐⭐⭐
+  //   - PersonForm 是 useMutation 的 update callback,cache 是 useMutation 传进来的参数
+  //   - App.jsx 这里 useSubscription 不传 cache 参数,需要从 Apollo Client 拿
+  //   - useApolloClient() → client.cache 是同一个 InMemoryCache 实例
+  //   - helper addPersonToCache 接受 cache 形参,两者是同一对象
+  //
+  // ⭐⭐⭐ notify + addPersonToCache 双操作 ⭐⭐⭐
+  //   - notify:显示红字(已经在 part8w 沿用定义)
+  //   - addPersonToCache:用 helper(自动去重)更新 ALL_PERSONS cache
+  //   - 注意:**不** return person(per course line 1200,没有 return)
+  //   - useSubscription 的 onData callback return 值会被忽略(per Apollo Client docs)
+  useSubscription(PERSON_ADDED, {
+    onData: ({ data }) => {
+      const addedPerson = data.data.personAdded
+
+      notify(`${addedPerson.name} added`)
+      addPersonToCache(client.cache, addedPerson)
+    },
+  })
 
   if (result.loading) {
     return <div>loading...</div>

@@ -1,0 +1,25 @@
+{
+  "name": "chapter6-fragments-and-subscriptions-backend",
+  "version": "1.0.0",
+  "description": "Chapter 6 子节 2 'Subscriptions' backend (per part8e.md lines 190-789): expressMiddleware + WebSocket subscriptions + PubSub + Subscription.personAdded resolver. 基于 part8v baseline,在 chapter6-fragments-and-subscriptions/server/ 内跟 frontend 同根迭代学习。",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.9.0",
+    "mongoose": "^8.9.0",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2",
+    "express": "^5.2.1",
+    "cors": "^2.8.6",
+    "@as-integrations/express5": "^1.1.2",
+    "graphql-ws": "^6.2.1",
+    "ws": "^8.21.3",
+    "graphql-subscriptions": "^3.0.0",
+    "@graphql-tools/schema": "^10.1.0"
+  }
+}
