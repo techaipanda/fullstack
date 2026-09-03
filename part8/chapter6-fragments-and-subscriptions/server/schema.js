@@ -40,6 +40,28 @@ const typeDefs = /* GraphQL */ `
     name: String!
     phone: String
     address: Address!
+    # ⭐⭐⭐ Chapter 6 子节 3 新增(per part8e.md 子节 3 verbatim):Person.friendOf 字段 ⭐⭐⭐
+    #
+    # ⭐ 字段语义(per course n+1 section 阐释):
+    #   - 返回 [User!]!: 把当前 Person 当朋友的 User 列表
+    #   - 反向关系:User.friends: [Person!]! 是 "用户加的朋友"
+    #                Person.friendOf: [User!]! 是 "谁把这个 Person 当朋友"
+    #   - 跟 User.friends 形成 N:M 关系(每对 User/Person 可能多向)
+    #
+    # ⭐ 为什么这个字段会引发 n+1(per course 核心):
+    #   - 客户端发 query { allPersons { friendOf { username } } }
+    #   - server 先 1 次 Person.find({}) 拿所有 Person
+    #   - 然后**每个** Person 单独触发 User.find({ friends: person._id })
+    #   - N 个 Person → N 次 User.find → N+1 总查询数
+    #   - server console 会打印 N 行 MongoDB query log
+    #
+    # ⭐ 修复方法(per course n+1 section 末尾):
+    #   - 用 dataloader 库(per course line 1290 附近 npm install dataloader)
+    #   - 创建一个 batch loader:接收 personIds[],返回 Users[][]
+    #   - DataLoader 在每个 tick(一次 GraphQL 请求)收集所有 .load() 调用
+    #   - 然后一次性发 User.find({ friends: { $in: personIds } })
+    #   - 单查询替代 N 查询
+    friendOf: [User!]!
     id: ID!
   }
 

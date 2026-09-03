@@ -1,7 +1,7 @@
 {
   "name": "chapter6-fragments-and-subscriptions-backend",
   "version": "1.0.0",
-  "description": "Chapter 6 子节 2 'Subscriptions' backend (per part8e.md lines 190-789): expressMiddleware + WebSocket subscriptions + PubSub + Subscription.personAdded resolver. 基于 part8v baseline,在 chapter6-fragments-and-subscriptions/server/ 内跟 frontend 同根迭代学习。",
+  "description": "Chapter 6 子节 3 'n+1 problem' backend (per part8e.md lines 1261-1572): 在 part8v baseline + 子节 2 Subscription 基础上,Person 加 friendOf 字段 + DataLoader 批量化 User.find 查询。",
   "main": "index.js",
   "scripts": {
     "dev": "node index.js",
@@ -20,6 +20,7 @@
     "graphql-ws": "^6.2.1",
     "ws": "^8.21.3",
     "graphql-subscriptions": "^3.0.0",
-    "@graphql-tools/schema": "^10.1.0"
+    "@graphql-tools/schema": "^10.1.0",
+    "dataloader": "^2.2.3"
   }
 }

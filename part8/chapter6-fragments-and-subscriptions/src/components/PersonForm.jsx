@@ -38,6 +38,31 @@ import { useState } from 'react'
 import { useMutation } from '@apollo/client/react'
 import { ALL_PERSONS, CREATE_PERSON } from '../queries'
 
+// ⭐⭐⭐ Chapter 6 子节 2 新增(per course line 1215-1217 verbatim):addPersonToCache import ⭐⭐⭐
+//
+// ⭐ 课程原文(per part8e.md line 1215-1217):
+//   "and we will also use the function when updating the cache in connection
+//    with adding a new person:
+//    import { addPersonToCache } from '../utils/apolloCache' // highlight-line"
+//
+// ⭐ PersonForm.jsx 用 addPersonToCache 的位置:
+//   - line 138-141:useMutation 的 update callback 里调
+//     `update: (cache, response) => {
+//        const addedPerson = response.data.addPerson
+//        addPersonToCache(cache, addedPerson)
+//      }`
+//   - per part8z 用 inline cache.updateQuery,part8e 子节 2 改用 helper
+//   - helper 内部处理 .some() 去重(避免 useSubscription + useMutation 双路径重复)
+//
+// ⭐ 跟 App.jsx 的对比(per App.jsx line 67):
+//   - App.jsx 也 import 同一个 helper,用于 useSubscription onData
+//   - 两个地方共用同一个 helper → 自动去重生效
+//
+// ⭐ 为什么之前漏了:
+//   - 上轮改 PersonForm.jsx 时加了 update callback 调用 helper,但没加 import 语句
+//   - 这是 verbatim 课程 line 1215-1217 必须有的 import,本节补回
+import { addPersonToCache } from '../utils/apolloCache'
+
 // ⭐⭐⭐ PersonForm 组件 — verbatim part8n/y 完整版 + part8z update callback 替代 refetchQueries ⭐⭐⭐
 //
 // ⭐ 课程本节做的"完整版 PersonForm":

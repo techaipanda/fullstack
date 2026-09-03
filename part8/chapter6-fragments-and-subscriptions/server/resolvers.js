@@ -50,6 +50,39 @@ const Person = require('./models/person')
 const jwt = require('jsonwebtoken')
 const User = require('./models/user')
 
+// ⭐⭐⭐ Chapter 6 子节 3 新增(per part8e.md 子节 3 verbatim):DataLoader ⭐⭐⭐
+//
+// ⭐ 课程原文(per course n+1 section line 1290 附近):
+//   "Let's install the dataloader library:
+//    npm install dataloader"
+// ⭐ DataLoader(per facebook/dataloader 文档):
+//   - Facebook 开源的批量化数据加载库
+//   - 解决 GraphQL 等场景的 N+1 查询问题
+//   - 核心 API:
+//     - `new DataLoader(batchLoadFn)` 创建 loader
+//     - `loader.load(key)` 排队一个 key,返回 Promise<value>
+//     - `loader.loadMany(keys)` 排队多个 keys
+//     - batchLoadFn(keys) → Promise<values[]>,长度跟 keys 一一对应
+//   - 工作机制:在每个 event loop tick,把所有 .load() 调用收集成一个 batch,
+//     一次性调 batchLoadFn(keys)
+//   - 副作用:keys 顺序跟返回值顺序必须严格对应(per DataLoader 合约)
+//
+// ⭐ 为什么 n+1 problem 需要 DataLoader(per course 阐释):
+//   - 单 GraphQL 请求可能触发多个 resolver,每个 resolver 可能查 DB
+//   - 比如 `allPersons { friendOf { username } }`:
+//     → allPersons resolver 1 次 Person.find({})
+//     → N 个 Person 各自 friendOf resolver → N 次 User.find({ friends: person._id })
+//     → 总共 N+1 次 DB 查询
+//   - DataLoader 拦截 .load() 调用,在单 tick 内合并:
+//     → 1 次 User.find({ friends: { $in: [personId1, ..., personIdN] } })
+//     → 内存里 partition 到对应 key
+//   - N+1 变成 2(1 次 Person + 1 次 User)
+//
+// ⭐ 本节用法:friendlyOfLoader
+//   - batchLoadFn 接受 personIds[]
+//   - 返回 users[][] — 外层索引对应 personIds,内层是该 person 的 friendOf 列表
+const DataLoader = require('dataloader')
+
 // ⭐⭐⭐ Chapter 6 子节 2 新增(per course line 597-598 verbatim):PubSub ⭐⭐⭐
 //
 // ⭐ 课程原文(per part8e.md line 580-583):
@@ -81,6 +114,56 @@ const { PubSub } = require('graphql-subscriptions')
 //   - Subscription 字段名 'personAdded' → channel 名 'PERSON_ADDED'
 //   - 大写 + 下划线分隔,跟 GraphQL field convention 区分
 const pubsub = new PubSub()
+
+// ⭐⭐⭐ Chapter 6 子节 3 新增(per course 子节 3 verbatim):friendOfLoader 实例 ⭐⭐⭐
+//
+// ⭐ 课程原文(per course n+1 section 末尾,per part8e.md line 1500+):
+//   "const friendOfLoader = new DataLoader(async (personIds) => {
+//      const users = await User.find({ friends: { $in: personIds } })
+//      return personIds.map(personId =>
+//        users.filter(user =>
+//          user.friends.some(f => f.toString() === personId.toString())
+//        )
+//      )
+//    })"
+//
+// ⭐⭐⭐ 批量化原理 ⭐⭐⭐
+//   - 输入:personIds: string[] — 单次 GraphQL 请求里所有 Person.friendOf 解析需要的 person._id
+//   - 输出:User[][] — 外层数组索引对应 personIds 顺序,内层是该 person 的 friendOf users
+//   - DataLoader 合约:输入 keys.length === 输出 values.length(per DataLoader docs)
+//   - 课程实现里 personIds.map(...) 保证每个 key 都有对应返回(即使空数组)
+//
+// ⭐⭐⭐ 单查询替代 N 查询 ⭐⭐⭐
+//   - 没有 loader:N 次 User.find({ friends: person._id })
+//     → 每次单独查 mongo,N 次往返
+//   - 有 loader:1 次 User.find({ friends: { $in: [所有 personIds] } })
+//     → $in 是 mongo 原生多值匹配,1 次往返拿到所有相关 users
+//     → 然后内存里 partition 到对应 personId
+//   - 网络延迟从 N 次降到 1 次
+//
+// ⭐⭐⭐ partition 逻辑详解 ⭐⭐⭐
+//   - users 是所有 "friends 数组里有任何 personId" 的用户
+//   - 每个 user 可能同时被多个 person 引用(一个 user 的 friends 可能有多个)
+//   - 我们要把 users 按 "该 user 是哪个 person 的 friendOf" 分组
+//   - 实现:对每个 personId,过滤出 "friends 数组里有这个 personId" 的 users
+//   - `.some(f => f.toString() === personId.toString())` 比较 ObjectId 字符串
+//     → mongoose populate 后 friends 里的元素是 ObjectId,需要 toString() 比较
+//
+// ⭐⭐⭐ 注意:course loader 是 module-level 单例 ⭐⭐⭐
+//   - 当前实现:loader 在 module load 时创建一次,整个进程共用
+//   - 单次 GraphQL 请求里所有 .load() 自动批量化(per DataLoader 设计)
+//   - 跨请求:loader 会缓存上次的 keys/values,可能有 stale data
+//   - 课程**简化**用 module-level,生产应该 per-request loader(per DataLoader docs)
+//   - 本节 verbatim 沿用课程简化版本,per-request 版本留作生产化扩展
+const friendOfLoader = new DataLoader(async (personIds) => {
+  const users = await User.find({ friends: { $in: personIds } })
+
+  return personIds.map(personId =>
+    users.filter(user =>
+      user.friends.some(f => f.toString() === personId.toString())
+    )
+  )
+})
 
 // ⭐⭐⭐ resolvers 对象 — 在 part8s 基础上加 try/catch ⭐⭐⭐
 //
@@ -137,7 +220,7 @@ const resolvers = {
       return context.currentUser
     },
   },
-  // ⭐ Person 块 — verbatim part8s
+  // ⭐ Person 块 — verbatim part8s + Chapter 6 子节 3 加 friendOf
   Person: {
     address: ({ street, city }) => {
       return {
@@ -145,6 +228,33 @@ const resolvers = {
         city,
       }
     },
+    // ⭐⭐⭐ Chapter 6 子节 3 新增(per course 子节 3 verbatim):Person.friendOf resolver ⭐⭐⭐
+    //
+    // ⭐ 课程原文(per course n+1 section):
+    //   "Person: {
+    //      // ...
+    //      friendOf: (person) => friendOfLoader.load(person._id),
+    //    },"
+    //
+    // ⭐⭐⭐ resolver 签名 ⭐⭐⭐
+    //   - (person, args, context, info) 是 GraphQL resolver 默认四参数
+    //   - person 参数:父对象(就是被查询 friendOf 字段的 Person 实例)
+    //   - person._id:当前 Person 的 MongoDB ObjectId
+    //   - 返回:friendOfLoader.load(person._id) → Promise<User[]>
+    //     → DataLoader 在 tick 末批量触发 batchLoadFn
+    //     → 一次 GraphQL 请求里所有 Person.friendOf 合并成 1 次 User.find
+    //
+    // ⭐⭐⭐ 课程故意省略 args/context(per course verbatim):⭐⭐⭐
+    //   - 不需要 query 参数,不需要 currentUser
+    //   - person 参数足够(我们要 person._id 来查 users)
+    //   - 严格箭头函数 (person) => 风格,verbatim 沿用
+    //
+    // ⭐⭐⭐ 跟 n+1 修复前对比 ⭐⭐⭐
+    //   - 修复前:friendOf: async (person) => User.find({ friends: person._id })
+    //     → N 个 Person → N 次 User.find
+    //   - 修复后:friendOf: (person) => friendOfLoader.load(person._id)
+    //     → N 个 Person 合并 → 1 次 User.find
+    friendOf: (person) => friendOfLoader.load(person._id),
   },
   // ⭐⭐⭐ Mutation 块 — part8t 关键改造 ⭐⭐⭐
   Mutation: {
