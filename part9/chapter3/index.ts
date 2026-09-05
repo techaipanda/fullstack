@@ -1,3 +1,12 @@
-// chapter3 / Setting things up — FSO TypeScript mini-course starter
-// 课程原文(第 3 章 Setting things up)的最小验证代码:把 TS 编译到 JS 跑通
-console.log('Hello world!');
+import express from 'express';
+const app = express();
+
+app.get('/ping', (_req, res) => {
+  res.send('pong');
+});
+
+const PORT = 3003;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
