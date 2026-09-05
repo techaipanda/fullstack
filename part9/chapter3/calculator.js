@@ -15,7 +15,7 @@ const calculator = (a, b, op) => {
     }
 };
 try {
-    console.log(calculator(1, 5, 'divide'));
+    console.log(calculator(1, 0, 'divide'));
 }
 catch (error) {
     let errorMessage = 'Something went wrong: ';

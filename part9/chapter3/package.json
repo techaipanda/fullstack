@@ -11,7 +11,8 @@
     "tsc": "tsc",
     "start": "node index.js",
     "dev": "tsc --watch",
-    "multiply": "node multiplicator.js"
+    "multiply": "node multiplier.js 5 0",
+    "calculate": "node calculator.js"
   },
   "keywords": [],
   "author": "",
