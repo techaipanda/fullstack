@@ -1,6 +1,25 @@
-export type Weather = 'sunny' | 'rainy' | 'cloudy' | 'stormy' | 'windy';
+// part4 b — Creating your own types (前置必备,string union → enum)
+// 课程在更早的小节把 Weather/Visibility 从 string union 改成了 enum
+// ⭐ 核心概念: enum 在运行时是真实 JS 对象 — 这是它和 type union 最本质的区别
+// 为什么 union 不行:  type Weather = 'sunny' | 'rainy' | ... 是纯类型层概念,运行时 JS 里不存在,无法枚举
+// 为什么 enum 行:      enum Weather { Sunny = 'sunny', ... } 编译后是 var Weather = { Sunny: 'sunny', ... }
+//                    Object.values(Weather) 运行时拿到 ['sunny','rainy','cloudy','stormy','windy']
+// 关联: utils.ts 的 isWeather 用 Object.values(Weather) 做白名单校验 — enum 是前置依赖
+// ⚠️ 数据兼容性: enum 成员值仍是字符串字面量,data/entries.ts 里 weather: 'rainy' 等赋值自动收窄到 enum 成员,不用改
+export enum Weather {
+  Sunny = 'sunny',
+  Rainy = 'rainy',
+  Cloudy = 'cloudy',
+  Stormy = 'stormy',
+  Windy = 'windy'
+}
 
-export type Visibility = 'great' | 'good' | 'ok' | 'poor';
+export enum Visibility {
+  Great = 'great',
+  Good = 'good',
+  Ok = 'ok',
+  Poor = 'poor'
+}
 
 export interface DiaryEntry {
   id: number;
@@ -9,6 +28,14 @@ export interface DiaryEntry {
   visibility: Visibility;
   comment: string;
 }
+
+// part4 b — Adding a new diary (前置别名,供 utils.ts 和 service 共享)
+// ⭐ 核心概念: 把"新建日记需要哪些字段"提取成命名别名 NewDiaryEntry
+// 之前: addDiary 签名里直接写 Omit<DiaryEntry, 'id'> — 类型重复定义 + 改字段两边同步
+// 现在: 单独导出 NewDiaryEntry,service.addDiary 和 utils.toNewDiaryEntry 共享同一类型,改一处自动同步
+// 验证: hover 在 addDiary 的 entry 参数上,看到 NewDiaryEntry(= DiaryEntry 减 id)
+// 关联: services/diaryService.ts 的 addDiary;utils.ts 的 toNewDiaryEntry 返回值
+export type NewDiaryEntry = Omit<DiaryEntry, 'id'>;
 
 // part4 b — Utility Types
 // ⭐ 核心概念: Omit<T, K> 是 TS 内置的工具类型 (utility type)
