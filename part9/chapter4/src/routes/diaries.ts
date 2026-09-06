@@ -19,4 +19,17 @@ router.get('/', (_req, res: Response<NonSensitiveDiaryEntry[]>) => {
   res.send(diaryService.getNonSensitiveEntries());
 });
 
+// part4 b — Preventing an accidental undefined result
+// req.params.id 是 string,要用 Number() 转 — 传非数字字符串时 Number() 返回 NaN,findById(NaN) 返回 undefined,走 404 分支
+// 为什么 if/else 而不是 res.sendStatus(404)?sendStatus 仍然返回 Response,if/else 让两个分支的返回路径都明确
+router.get('/:id', (req, res) => {
+  const diary = diaryService.findById(Number(req.params.id));
+
+  if (diary) {
+    res.send(diary);
+  } else {
+    res.sendStatus(404);
+  }
+});
+
 export default router;
