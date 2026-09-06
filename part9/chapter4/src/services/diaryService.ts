@@ -1,18 +1,13 @@
-import diaryEntries from '../../data/entries.json' with { type: 'json' };
+import diaryEntries from '../../data/entries.ts';
+import type { DiaryEntry } from '../types.ts';
 
-const diaries = diaryEntries as Array<{
-  id: number;
-  date: string;
-  weather: string;
-  visibility: string;
-  comment: string;
-}>;
+const diaries: DiaryEntry[] = diaryEntries;
 
-const getEntries = () => {
+const getEntries = (): DiaryEntry[] => {
   return diaries;
 };
 
-const addDiary = (entry: Omit<typeof diaries[number], 'id'>) => {
+const addDiary = (entry: Omit<DiaryEntry, 'id'>): DiaryEntry => {
   const newDiaryEntry = {
     id: Math.max(...diaries.map(d => d.id)) + 1,
     ...entry
