@@ -1,25 +1,45 @@
-// part4 b — Creating your own types (前置必备,string union → enum)
-// 课程在更早的小节把 Weather/Visibility 从 string union 改成了 enum
-// ⭐ 核心概念: enum 在运行时是真实 JS 对象 — 这是它和 type union 最本质的区别
-// 为什么 union 不行:  type Weather = 'sunny' | 'rainy' | ... 是纯类型层概念,运行时 JS 里不存在,无法枚举
-// 为什么 enum 行:      enum Weather { Sunny = 'sunny', ... } 编译后是 var Weather = { Sunny: 'sunny', ... }
-//                    Object.values(Weather) 运行时拿到 ['sunny','rainy','cloudy','stormy','windy']
-// 关联: utils.ts 的 isWeather 用 Object.values(Weather) 做白名单校验 — enum 是前置依赖
-// ⚠️ 数据兼容性: enum 成员值仍是字符串字面量,data/entries.ts 里 weather: 'rainy' 等赋值自动收窄到 enum 成员,不用改
-export enum Weather {
-  Sunny = 'sunny',
-  Rainy = 'rainy',
-  Cloudy = 'cloudy',
-  Stormy = 'stormy',
-  Windy = 'windy'
-}
+// part4 b — Creating your own types (前置必备)
+// 课程原本用 string union,后来改成 enum(Object.values 需要),现在换成 as const object 模式
+// ⭐ 核心概念: as const 是 TS 的字面量断言 — 把对象/数组的所有属性变成 readonly 字面量类型
+// 写法:        const Weather = { Sunny: 'sunny', ... } as const
+// 效果:        TS 把 Weather 推断成 { readonly Sunny: 'sunny'; readonly Rainy: 'rainy'; ... }
+//             而不是 { Sunny: string; Rainy: string; ... }
+// 为什么用 as const 而不是 enum:
+//   - enum 是 TS 独有语法,运行时是 { Weather_Sunny: 'sunny', ... }(编译产物)或反向映射对象
+//   - as const 是普通 JS 对象 + 字面量类型,编译产物就是原对象(零运行时开销)
+//   - enum 会污染运行时命名空间,as const 不会
+//   - 现代 TS 社区倾向 as const,因为更接近 JS 语义
+// 关联: utils.ts 的 isWeather 用 Object.values(Weather) 拿所有合法值(运行时存在,和 enum 等价)
+// ⚠️ 数据兼容性: as const 对象支持 Weather.Rainy 这样的成员访问,data/entries.ts 不用改
+export const Weather = {
+  Sunny: 'sunny',
+  Rainy: 'rainy',
+  Cloudy: 'cloudy',
+  Stormy: 'stormy',
+  Windy: 'windy'
+} as const;
 
-export enum Visibility {
-  Great = 'great',
-  Good = 'good',
-  Ok = 'ok',
-  Poor = 'poor'
-}
+// ⭐ 核心概念: typeof X[keyof typeof X] — 从对象反向推导联合类型
+// 拆解:        typeof Weather              → { Sunny: 'sunny', ... } 这个字面量类型(注意:不包含 'Weather' 这个名字)
+//              keyof typeof Weather         → 'Sunny' | 'Rainy' | 'Cloudy' | 'Stormy' | 'Windy' (key 的联合)
+//              typeof Weather[keyof typeof Weather]
+//                                           → Weather['Sunny' | 'Rainy' | ...]
+//                                           → 'sunny' | 'rainy' | 'cloudy' | 'stormy' | 'windy' (值的联合)
+// 为什么这样写:
+//   - 不重复定义 union(改 as const 对象时 type 自动跟着变)
+//   - 单一事实源:as const 对象既是"值"又是"类型"的来源
+// 不用 typeof[keyof typeof]: 要么手写 type Weather = 'sunny' | 'rainy' | ...,要么用 enum
+// 验证: hover 在 Weather 类型上看到 'sunny' | 'rainy' | ...(字面量 union)
+export type Weather = typeof Weather[keyof typeof Weather];
+
+export const Visibility = {
+  Great: 'great',
+  Good: 'good',
+  Ok: 'ok',
+  Poor: 'poor'
+} as const;
+
+export type Visibility = typeof Visibility[keyof typeof Visibility];
 
 export interface DiaryEntry {
   id: number;

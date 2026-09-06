@@ -1,5 +1,5 @@
-import type { NewDiaryEntry } from './types.ts';
 import { Weather, Visibility } from './types.ts';
+import type { NewDiaryEntry } from './types.ts';
 
 // part4 b — Validating requests
 // ⭐ 核心概念: type guard — 函数返回类型用 `param is Type`,让 TS 在调用方 if 分支内把 param 收窄到 Type
@@ -43,15 +43,17 @@ const parseDate = (date: unknown): string => {
 };
 
 // part4 b — Validating requests
-// ⭐ 核心概念: 用 enum + Object.values 在运行时拿到所有合法值,做白名单校验
-// 写法:       Object.values(Weather).map(v => v.toString()).includes(param)
-// 拆解:       Object.values(Weather)  → ['sunny','rainy','cloudy','stormy','windy']
-//             .map(v => v.toString())  → 把每个值转字符串(enum 值本身就是字符串,但 Object.values 对 enum 返回类型可能是 string|number,所以课程做 toString 兜底)
-//             .includes(param)          → 是否在白名单里
+// ⭐ 核心概念: 用 as const 对象 + Object.values 在运行时拿到所有合法值,做白名单校验
+// 写法:       Object.values(Weather).includes(param)
+// 拆解:       Object.values(Weather)  → ['sunny','rainy','cloudy','stormy','windy'](TS 推断为 Weather 字面量数组)
+//             .includes(param)         → 是否在白名单里
+// 对比 enum 版本: enum Weather { Sunny = 'sunny', ... } 的 Object.values 返回 Weather[],TS 类型是 Weather 联合,
+//                课程原本要 .map(v => v.toString()) 兜底(因为 enum 编译产物可能含反向映射键)
+//                as const 对象没有反向映射,值已经是字面量,直接 .includes 即可
 // 返回类型:   param is Weather — type guard,把 param 收窄到 Weather 类型
 // 关联: parseWeather 调用 isWeather 做白名单校验
 const isWeather = (param: string): param is Weather => {
-  return Object.values(Weather).map(v => v.toString()).includes(param);
+  return Object.values(Weather).includes(param as Weather);
 };
 
 const parseWeather = (weather: unknown): Weather => {
@@ -62,7 +64,7 @@ const parseWeather = (weather: unknown): Weather => {
 };
 
 const isVisibility = (param: string): param is Visibility => {
-  return Object.values(Visibility).map(v => v.toString()).includes(param);
+  return Object.values(Visibility).includes(param as Visibility);
 };
 
 const parseVisibility = (visibility: unknown): Visibility => {
