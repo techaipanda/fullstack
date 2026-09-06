@@ -13,7 +13,7 @@ app.get('/ping', (_req, res) => {
 app.post('/calculate', (req, res) => {
     const { value1, value2, op } = req.body;
     const result = (0, calculator_1.calculator)(Number(value1), Number(value2), op);
-    res.send({ result });
+    return res.send({ result });
 });
 const PORT = 3003;
 app.listen(PORT, () => {
