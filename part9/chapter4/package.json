@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "tsc": "tsc",
-    "dev": "concurrently \"tsc --watch\" \"node --watch --experimental-transform-types src/index.ts\"",
-    "start": "node --experimental-transform-types src/index.ts",
+    "dev": "concurrently \"tsc --watch\" \"node --watch --experimental-transform-types --disable-warning=ExperimentalWarning src/index.ts\"",
+    "start": "node --experimental-transform-types --disable-warning=ExperimentalWarning src/index.ts",
     "lint": "eslint ."
   },
   "keywords": [],
