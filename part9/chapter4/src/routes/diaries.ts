@@ -32,4 +32,29 @@ router.get('/:id', (req, res) => {
   }
 });
 
+// part4 b — Adding a new diary
+// ⭐ 核心概念: POST 端点从 req.body 取数据,经过 service 写入,返回新创建的 entry
+// 不用显式解析 req.body: Express 的 express.json() 中间件(在 src/index.ts 注册)已经把 JSON body 解析成对象放在 req.body
+// 为什么不在这里做类型校验: 那是下一节 "Validating requests" 的内容 — 严格按课程顺序,本节只搭骨架
+// req.body 当前的类型: any(因为没声明) — 所以 destructure 出来是 any,传给 addDiary 不会触发 tsc 报错(类型层全开)
+// ⚠️ 课程原文如此: 课程在本节故意不解析 req.body 类型,保留 any 状态以演示"裸用"的问题 — 下一节用 type guard 收紧
+// 下面 5 行的 eslint-disable-next-line 是为了压制 no-unsafe-assignment 警告(工具/课程版本错位,不是 bug)
+// 验证: POST /api/diaries { "date":"...","weather":"...","visibility":"...","comment":"..." } → 200 + 新 entry
+// 关联: README chapter4 "Adding a new diary" 段
+router.post('/', (req, res) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { date, weather, visibility, comment } = req.body;
+  const addedEntry = diaryService.addDiary({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    date,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    weather,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    visibility,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    comment,
+  });
+  res.json(addedEntry);
+});
+
 export default router;
