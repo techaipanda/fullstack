@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.calculator = void 0;
 const calculator = (a, b, op) => {
     switch (op) {
         case 'multiply':
@@ -14,8 +15,9 @@ const calculator = (a, b, op) => {
             throw new Error('Operation is not multiply, add or divide!');
     }
 };
+exports.calculator = calculator;
 try {
-    console.log(calculator(1, 0, 'divide'));
+    console.log((0, exports.calculator)(1, 0, 'divide'));
 }
 catch (error) {
     let errorMessage = 'Something went wrong: ';
