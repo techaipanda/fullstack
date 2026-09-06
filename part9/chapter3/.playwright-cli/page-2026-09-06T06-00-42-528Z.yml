@@ -1,0 +1,42 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - banner [ref=e4]:
+        - generic "Top bar" [ref=e6]:
+          - link "Go to home" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - navigation "Primary"
+          - generic [ref=e10]:
+            - separator
+            - button "Change user interface language" [ref=e11] [cursor=pointer]:
+              - img [ref=e12]
+              - generic [ref=e15]: English
+              - img [ref=e16]
+            - generic [ref=e18]:
+              - link "Create new account" [ref=e19] [cursor=pointer]:
+                - /url: /signup?return_to=%2Forg%2Fuh-cs%2Fcourses%2Ffull-stack-open-typescript%2Fchapter-4&lang=en
+              - link "Log in" [ref=e20] [cursor=pointer]:
+                - /url: /login?return_to=%2Forg%2Fuh-cs%2Fcourses%2Ffull-stack-open-typescript%2Fchapter-4&lang=en
+      - main [ref=e21]
+    - contentinfo [ref=e25]:
+      - generic [ref=e26]:
+        - heading "About" [level=1] [ref=e27]
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - paragraph [ref=e30]: The University of Helsinki MOOC Center makes high-quality online education possible by developing and researching educational software and online learning materials. Teachers both within and without the University of Helsinki rely on our tools to create impactful teaching materials. Our popular Massive Open Online Courses (MOOCs) have been available through MOOC.fi since 2012.
+            - paragraph [ref=e31]:
+              - text: "This website is powered by an open source software developed by the University of Helsinki MOOC Center. Star the project on GitHub:"
+              - link "Project Github" [ref=e32] [cursor=pointer]:
+                - /url: https://github.com/rage/secret-project-331/
+              - text: .
+          - generic [ref=e33]:
+            - link "Privacy" [ref=e34] [cursor=pointer]:
+              - /url: https://www.mooc.fi/en/faq/tietosuojaseloste/
+            - link "Accessibility statement" [ref=e35] [cursor=pointer]:
+              - /url: https://github.com/rage/accessibility-statements/blob/main/courses.mooc.en-english.md
+          - generic [ref=e36]:
+            - link "MOOC.fi" [ref=e37] [cursor=pointer]:
+              - /url: https://www.mooc.fi/en
+            - link "University of Helsinki" [ref=e39] [cursor=pointer]:
+              - /url: https://www.helsinki.fi/en
+  - alert [ref=e41]
