@@ -1,104 +1,50 @@
+import { z } from 'zod';
 import { Weather, Visibility } from './types.ts';
 import type { NewDiaryEntry } from './types.ts';
 
-// part4 b — Validating requests
-// ⭐ 核心概念: type guard — 函数返回类型用 `param is Type`,让 TS 在调用方 if 分支内把 param 收窄到 Type
-// 写法:        const isString = (text: unknown): text is string => ...
-// 效果:        if (!isString(text)) throw ... 之后,TS 知道 text 是 string(不只是 unknown)
-// 为什么参数用 unknown: req.body 是 any,但传入 any 后我们用 unknown 强制校验,避免 any 把所有类型检查绕过
-// 不用 type guard:  只能用 if (typeof text === 'string') 这种临时判断,函数返回 boolean 不收窄类型,调用方还得再 typeof 一遍
-// 验证: hover 在 parseComment 的 comment 参数上,throw 后的 else 分支看到 string,说明 TS 收窄成功
-// 关联: parseX 系列函数都依赖 type guard
-const isString = (text: unknown): text is string => {
-  return typeof text === 'string' || text instanceof String;
+// part4 c — Using schema validation libraries
+// ⭐ 核心概念: Zod 是什么 — TS-first 的 schema 声明 + 校验库
+// 写法:        z.object({ ... }) 定义期望的字段 + 类型
+// 校验:        schema.parse(unknown) 成功返回收窄后的对象,失败抛 ZodError(带 issues 数组)
+// 类型推导:    z.infer<typeof schema> 反向拿到 TS 类型(详见 types.ts 的 NewDiaryEntry)
+// 关联: README chapter4 "Using schema validation libraries" 段
+export const newEntrySchema = z.object({
+  // ⭐ 核心概念: z.nativeEnum — 接收 TS 原生 enum,运行时校验 + 静态类型同步
+  // 为什么用 nativeEnum(而不是 z.union([z.literal('a'), ...])):
+  //   - 单一事实源:Weather/Visibility 已经是 enum,不需要重复定义字面量 union
+  //   - 改 enum 时校验自动跟上
+  // 验证: POST { weather: 'bogus' } → ZodError,issues 里能看到 path=['weather']
+  // 关联: types.ts 的 Weather/Visibility enum
+  weather: z.nativeEnum(Weather),
+  visibility: z.nativeEnum(Visibility),
+  // ⭐ 核心概念: z.string().date() — Zod 自带的 ISO date 校验
+  // 之前(本节之前): 手写 isDate(date) + Date.parse() + Boolean() 双重判断
+  // 现在:            z.string().date() 一行搞定(等价于校验 string + Date.parse 不为 NaN)
+  // 关联: README chapter4 "Using schema validation libraries" 段
+  date: z.string().date(),
+  // ⭐ 核心概念: z.string().optional() — 字段值可以是 string | undefined
+  // 为什么 optional: 课程原本 comment 必填,后改成可选(因为 type DiaryEntry 改成 comment?: string)
+  // 不用 optional: 校验时缺 comment 抛 ZodError
+  // 关联: types.ts 的 DiaryEntry.comment?: string
+  comment: z.string().optional()
+});
+
+// part4 c — Using schema validation libraries
+// ⭐ 核心概念: 简化版 toNewDiaryEntry — 全部校验交给 Zod,函数体只剩一行
+// 之前(本节之前): 14+ 行手写 type guard + 字段检查 + 错误抛掷
+// 现在:            schema.parse(object) → Zod 内部跑 z.object 校验,任一字段错抛 ZodError
+// 校验顺序: Zod 按 schema 字段顺序逐个校验,weather/visibility/date/comment 任一失败立刻抛
+// 失败时: 抛出的 ZodError.issues 是数组,每项含 path(字段路径)+ message(具体原因)
+// 关联: routes/diaries.ts POST catch 块用 instanceof z.ZodError 拿 issues
+export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+  return newEntrySchema.parse(object);
 };
 
-// part4 b — Validating requests
-// 错误策略: 任何字段校验失败立即抛 Error,让路由层 try/catch 统一处理
-// 不用返回 undefined/null: 课程原文 throw — 抛错让 catch 块统一拼错误消息,避免每个 parseX 都要 if/else 分支
-// 抛什么:   new Error('人类可读消息: ' + 失败值) — 客户端能在响应体看到具体原因
-// 关联: routes/diaries.ts POST 的 try/catch 块 catch 后塞进响应
-const parseComment = (comment: unknown): string => {
-  if (!isString(comment)) {
-    throw new Error('Incorrect or missing comment');
-  }
-
-  return comment;
-};
-
-// part4 b — Validating requests
-// Date.parse 返回 timestamp(ms);非日期字符串返回 NaN
-// Boolean(NaN) = false,Boolean(timestamp) = true
-// 注意: 这种"字符串能否被 Date.parse 解析"的检查比较宽松 — Date.parse('hello') 被拒,Date.parse('2017-01-01') 通过
-// ⚠️ 课程原文如此: 不检查"是否是 YYYY-MM-DD 这种严格格式",能挡住明显非法输入就够了
-const isDate = (date: string): boolean => {
-  return Boolean(Date.parse(date));
-};
-
-const parseDate = (date: unknown): string => {
-  if (!isString(date) || !isDate(date)) {
-      throw new Error('Incorrect date: ' + date);
-  }
-  return date;
-};
-
-// part4 b — Validating requests
-// ⭐ 核心概念: 用 as const 对象 + Object.values 在运行时拿到所有合法值,做白名单校验
-// 写法:       Object.values(Weather).includes(param)
-// 拆解:       Object.values(Weather)  → ['sunny','rainy','cloudy','stormy','windy'](TS 推断为 Weather 字面量数组)
-//             .includes(param)         → 是否在白名单里
-// 对比 enum 版本: enum Weather { Sunny = 'sunny', ... } 的 Object.values 返回 Weather[],TS 类型是 Weather 联合,
-//                课程原本要 .map(v => v.toString()) 兜底(因为 enum 编译产物可能含反向映射键)
-//                as const 对象没有反向映射,值已经是字面量,直接 .includes 即可
-// 返回类型:   param is Weather — type guard,把 param 收窄到 Weather 类型
-// 关联: parseWeather 调用 isWeather 做白名单校验
-const isWeather = (param: string): param is Weather => {
-  return Object.values(Weather).includes(param as Weather);
-};
-
-const parseWeather = (weather: unknown): Weather => {
-  if (!isString(weather) || !isWeather(weather)) {
-    throw new Error('Incorrect weather: ' + weather);
-  }
-  return weather;
-};
-
-const isVisibility = (param: string): param is Visibility => {
-  return Object.values(Visibility).includes(param as Visibility);
-};
-
-const parseVisibility = (visibility: unknown): Visibility => {
-  if (!isString(visibility) || !isVisibility(visibility)) {
-      throw new Error('Incorrect visibility: ' + visibility);
-  }
-  return visibility;
-};
-
-// part4 b — Validating requests
-// ⭐ 核心概念: toNewDiaryEntry — 顶层入口,把 unknown body 收窄到 NewDiaryEntry,任何字段错误抛 Error
-// 第一道门: typeof object === 'object' + truthy(挡掉 null/undefined/字符串/数字等非对象)
-// 第二道门: 'comment' in object && 'date' in object && ... (挡掉字段缺失)
-// 收尾:     每个字段单独 parseX(每个 parseX 内部 type guard + 抛错)
-// 不用 Object.keys: 课程原文用 'field' in object(更宽松,只要字段存在即可,具体内容由 parseX 进一步校验)
-// 验证: POST { "weather":"bogus" } → 抛 'Incorrect weather: bogus' → 路由层 catch 后 400 响应
-// 关联: routes/diaries.ts POST handler 的 try/catch
-const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
-  if ( !object || typeof object !== 'object' ) {
-    throw new Error('Incorrect or missing data');
-  }
-
-  if ('comment' in object && 'date' in object && 'weather' in object && 'visibility' in object)  {
-    const newEntry: NewDiaryEntry = {
-      weather: parseWeather(object.weather),
-      visibility: parseVisibility(object.visibility),
-      date: parseDate(object.date),
-      comment: parseComment(object.comment)
-    };
-
-    return newEntry;
-  }
-
-  throw new Error('Incorrect data: a field missing');
-};
-
-export default toNewDiaryEntry;
+// part4 c — Using schema validation libraries
+// ⭐ 核心概念: z.infer<typeof schema> — 从 schema 反向推导 TS 类型,作为 NewDiaryEntry 单一事实源
+// 之前(本节之前): NewDiaryEntry = Omit<DiaryEntry, 'id'> — 类型和校验各写一遍,改字段两边同步
+// 现在:            NewDiaryEntry = z.infer<typeof newEntrySchema> — schema 改了,类型自动跟上
+// 用 infer 的代价: 课程原文说"觉得这样有点倒置",所以 DiaryEntry 还是用 interface 显式声明
+//                 实际效果:NewDiaryEntry 跟着 schema 走,DiaryEntry 独立定义,二者刚好对齐
+// 验证: hover 在 NewDiaryEntry 上看到 { weather: Weather; visibility: Visibility; date: string; comment?: string }
+// 关联: README chapter4 "Using schema validation libraries" 段,types.ts

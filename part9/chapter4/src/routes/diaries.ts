@@ -1,7 +1,8 @@
 import express, { type Response } from 'express';
 import diaryService from '../services/diaryService.ts';
 import type { NonSensitiveDiaryEntry } from '../types.ts';
-import toNewDiaryEntry from '../utils.ts';
+import { toNewDiaryEntry } from '../utils.ts';
+import { z } from 'zod';
 
 const router = express.Router();
 
@@ -33,29 +34,29 @@ router.get('/:id', (req, res) => {
   }
 });
 
-// part4 b — Adding a new diary
-// part4 b — Validating requests
-// ⭐ 核心概念: POST 端点用 try/catch 统一处理 toNewDiaryEntry 的校验错误
-// 之前(本节之前): 直接 destructure req.body,类型层全开(全是 any),非法 body 也照样写库
-// 现在(本节):     try { toNewDiaryEntry(req.body) } 把 unknown body 收窄到 NewDiaryEntry,任何字段错抛 Error
-// catch 处理:    error: unknown → 用 instanceof Error 守卫再访问 .message,避免访问 undefined 属性
-// 响应:          400 + 'Something went wrong. Error: <具体原因>'(让客户端知道哪儿错了)
-// 不用 try/catch:  校验错会让 Node 进程崩溃(同步抛错未被捕获会触发 uncaughtException,服务挂掉)
-// 关联: utils.ts 的 toNewDiaryEntry + parseX 抛 Error 链路
-// 验证: POST { "weather":"bogus" } → 400 'Something went wrong. Error: Incorrect weather: bogus'
-// 关联: README chapter4 "Validating requests" 段
+// part4 c — Using schema validation libraries
+// ⭐ 核心概念: POST 端点用 instanceof z.ZodError 区分两类错误,返回不同结构的响应体
+// 之前(本节之前): catch 后 instanceof Error → 拼字符串 'Something went wrong. Error: ...'
+// 现在:            catch 后 instanceof z.ZodError → 返回 { error: error.issues }
+//                  其它异常 → 返回 { error: 'unknown error' }
+// 两种响应的区别:
+//   - ZodError 响应带 issues 数组(每项含 path + message + code),客户端能定位到具体哪个字段错
+//   - unknown error 响应是普通字符串兜底,避免暴露服务器内部异常细节
+// 不用 instanceof 区分: 只能返回统一格式,但 Zod 校验错(用户输入问题)和代码错(服务器 bug)性质不同,应该区别对待
+// 验证: POST { weather: 'bogus' } → 400 { error: [{ code: 'invalid_enum_value', ... }] }
+// 关联: utils.ts 的 newEntrySchema.parse 抛 ZodError;README chapter4 "Using schema validation libraries" 段
 router.post('/', (req, res) => {
   try {
-    // 课程原文如此: toNewDiaryEntry 内部已经 type guard 收窄到 NewDiaryEntry(req.body 是 any 但 toNewDiaryEntry 入参是 unknown,合法)
     const newDiaryEntry = toNewDiaryEntry(req.body);
     const addedEntry = diaryService.addDiary(newDiaryEntry);
     res.json(addedEntry);
+
   } catch (error: unknown) {
-    let errorMessage = 'Something went wrong.';
-    if (error instanceof Error) {
-      errorMessage += ' Error: ' + error.message;
+    if (error instanceof z.ZodError) {
+      res.status(400).send({ error: error.issues });
+    } else {
+      res.status(400).send({ error: 'unknown error' });
     }
-    res.status(400).send(errorMessage);
   }
 });
 
