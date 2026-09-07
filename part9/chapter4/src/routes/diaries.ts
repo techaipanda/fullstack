@@ -1,7 +1,7 @@
-import express, { type Response } from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import diaryService from '../services/diaryService.ts';
-import type { NonSensitiveDiaryEntry } from '../types.ts';
-import { toNewDiaryEntry } from '../utils.ts';
+import type { DiaryEntry, NewDiaryEntry, NonSensitiveDiaryEntry } from '../types.ts';
+import { newEntrySchema } from '../utils.ts';
 import { z } from 'zod';
 
 const router = express.Router();
@@ -34,30 +34,57 @@ router.get('/:id', (req, res) => {
   }
 });
 
-// part4 c — Using schema validation libraries
-// ⭐ 核心概念: POST 端点用 instanceof z.ZodError 区分两类错误,返回不同结构的响应体
-// 之前(本节之前): catch 后 instanceof Error → 拼字符串 'Something went wrong. Error: ...'
-// 现在:            catch 后 instanceof z.ZodError → 返回 { error: error.issues }
-//                  其它异常 → 返回 { error: 'unknown error' }
-// 两种响应的区别:
-//   - ZodError 响应带 issues 数组(每项含 path + message + code),客户端能定位到具体哪个字段错
-//   - unknown error 响应是普通字符串兜底,避免暴露服务器内部异常细节
-// 不用 instanceof 区分: 只能返回统一格式,但 Zod 校验错(用户输入问题)和代码错(服务器 bug)性质不同,应该区别对待
-// 验证: POST { weather: 'bogus' } → 400 { error: [{ code: 'invalid_enum_value', ... }] }
-// 关联: utils.ts 的 newEntrySchema.parse 抛 ZodError;README chapter4 "Using schema validation libraries" 段
-router.post('/', (req, res) => {
+// part4 d — Parsing request body in middleware
+// ⭐ 核心概念: newDiaryParser — Express 中间件函数(三参数 req/res/next),只负责"校验 + 放行"
+// 之前(本节之前): 校验逻辑直接写在 POST handler 内,handler 里 try/catch + instanceof z.ZodError
+// 现在:            校验挪到独立中间件,handler 不再 try/catch,只用 next() 传 ZodError 给 errorMiddleware
+// 三参数职责:
+//   - req:  Request<unknown, unknown, unknown> — 默认未知 body 类型,中间件不预设 schema
+//   - res:  Response — 中间件不写响应,校验失败用 next(error) 把 error 传给后续 errorMiddleware
+//   - next: NextFunction — 校验通过调 next() 进入下一个 handler;校验失败调 next(error) 跳过 handler 进入错误处理
+// 为什么 next(error) 不 throw: Express middleware 链必须显式调 next 才能传 error,throw 只会冒泡到 Express 默认错误处理器,自定义 errorMiddleware 接不到
+// 关联: utils.ts 的 newEntrySchema;README chapter4 "Parsing request body in middleware" 段
+const newDiaryParser = (req: Request, _res: Response, next: NextFunction) => {
   try {
-    const newDiaryEntry = toNewDiaryEntry(req.body);
-    const addedEntry = diaryService.addDiary(newDiaryEntry);
-    res.json(addedEntry);
-
+    newEntrySchema.parse(req.body);
+    next();
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      res.status(400).send({ error: error.issues });
-    } else {
-      res.status(400).send({ error: 'unknown error' });
-    }
+    next(error);
   }
+};
+
+// part4 d — Parsing request body in middleware
+// ⭐ 核心概念: Request<P, ResBody, ReqBody> — Express 的 Request 泛型三参数,把"已校验"这个事实写进类型
+// 第三参数 ReqBody = NewDiaryEntry: 中间件成功后 req.body 已被 Zod 收窄,handler 直接用 req.body 不需要再 cast/parse
+// 第一/二参数 unknown: 课程原文写 "we do not need those for now",用 unknown 占位(必须给 <i>some</i> 值才能定位第三参数)
+//                实际语义:第一个 P 是路由 params(如 :id 解析为 P),第二个 ResBody 是 Response 的形状(不需要)
+// 之前(本节之前): handler 写 const newDiaryEntry = toNewDiaryEntry(req.body);diaryService.addDiary(newDiaryEntry)
+// 现在:            handler 直接 diaryService.addDiary(req.body) — 一行,body 类型安全
+// 验证: hover 在 req.body 上看到 NewDiaryEntry 而非 any/unknown
+// 关联: newDiaryParser 中间件校验后 next();README chapter4 "Parsing request body in middleware" 段
+router.post('/', newDiaryParser, (req: Request<unknown, unknown, NewDiaryEntry>, res: Response<DiaryEntry>) => {
+  const addedEntry = diaryService.addDiary(req.body);
+  res.json(addedEntry);
 });
+
+// part4 d — Parsing request body in middleware
+// ⭐ 核心概念: errorMiddleware — Express 错误处理中间件(四参数 error/req/res/next),由 router.use() 装到整个 router
+// 为什么必须是四参数: Express 通过 function arity 区分普通中间件(req/res/next)vs 错误处理(error/req/res/next)
+//                 只有 arity=4 的函数被识别为 error handler,arity=3 的就算签名像 error handler 也不会触发
+// 两种错误路径:
+//   - error instanceof z.ZodError → 客户端输入校验失败 → 自己处理,res.status(400).send({ error: error.issues })
+//   - else → 其它未知错误 → next(error) 传给下一个 error handler(通常是 Express 默认错误处理器,返回 500)
+// 为什么 ZodError 自己处理,其它 next(error): ZodError 是"已知用户错误",返回结构化错误信息对客户端有用;
+//                                          其它错误可能是代码 bug,不要泄露细节,转给默认 500 处理
+// 关联: README chapter4 "Parsing request body in middleware" 段;newDiaryParser 中间件的 next(error)
+const errorMiddleware = (error: unknown, _req: Request, res: Response, next: NextFunction) => {
+  if (error instanceof z.ZodError) {
+    res.status(400).send({ error: error.issues });
+  } else {
+    next(error);
+  }
+};
+
+router.use(errorMiddleware);
 
 export default router;
