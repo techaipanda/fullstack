@@ -1,0 +1,21 @@
+{
+  "notes": [
+    {
+      "id": "1",
+      "content": "pre-existing note from db.json"
+    },
+    {
+      "id": "2",
+      "content": "json-server is running on :3001"
+    },
+    {
+      "content": "verification POST from curl",
+      "id": "PQihFixMAVg"
+    },
+    {
+      "content": "submitted from browser",
+      "id": "KK1uo4UTjyI"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
