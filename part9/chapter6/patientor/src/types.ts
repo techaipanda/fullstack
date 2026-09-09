@@ -1,13 +1,73 @@
-// chapter6 sub-section 2 'Patientor frontend' — Exercise 24 前端类型扩展
-// 课程后端 Exercise 23 给的 Entry 是空接口,前端要 import 同样的端才能引用 Entry[]
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface Entry {
-}
+// chapter6 sub-section 3 'Full entries' — Exercise 26 前端 Entry 联合类型
+// 课程原话:"You can use the same type definition for an Entry in the frontend.
+// For these exercises, it is enough to just copy/paste the definitions from
+// the backend to the frontend."
+// 所以前端 Entry 类型与 backend/src/types.ts 完全一致(verbatim copy/paste)
 
 export interface Diagnosis {
   code: string;
   name: string;
   latin?: string;
+}
+
+export interface BaseEntry {
+  id: string;
+  description: string;
+  date: string;
+  specialist: string;
+  diagnosisCodes?: Array<Diagnosis['code']>;
+}
+
+export const HealthCheckRating = {
+  Healthy: 0,
+  LowRisk: 1,
+  HighRisk: 2,
+  CriticalRisk: 3,
+} as const;
+
+export type HealthCheckRating = typeof HealthCheckRating[keyof typeof HealthCheckRating];
+
+export interface HealthCheckEntry extends BaseEntry {
+  type: "HealthCheck";
+  healthCheckRating: HealthCheckRating;
+}
+
+export interface OccupationalHealthcareEntry extends BaseEntry {
+  type: "OccupationalHealthcare";
+  employerName: string;
+  sickLeave?: {
+    startDate: string;
+    endDate: string;
+  };
+}
+
+export interface HospitalEntry extends BaseEntry {
+  type: "Hospital";
+  discharge: {
+    date: string;
+    criteria: string;
+  };
+}
+
+export type Entry =
+  | HospitalEntry
+  | OccupationalHealthcareEntry
+  | HealthCheckEntry;
+
+// ⭐ 核心概念:前端 Patient 与后端契约对齐
+//  - 课程 sub-section 2 后端 Patient.entries: Entry[] 是必填
+//  - 不用对齐:前端读 patient.entries 时 TS 不会报错,但语义与后端不一致
+//  - 用对齐:前端读 entries 不需要 ?.,switch case 也不需要 narrowing 可选
+//  - 注:之前为了兼容 NonSensitivePatient 用了 entries?:,现在 NonSensitivePatient 仍
+//   通过 Omit 剥离 entries,前端 Patient.entries 必填,与课程契约一致
+export interface Patient {
+  id: string;
+  name: string;
+  occupation: string;
+  gender: Gender;
+  ssn?: string;
+  dateOfBirth?: string;
+  entries: Entry[];
 }
 
 export enum Gender {
@@ -16,28 +76,6 @@ export enum Gender {
   Other = "other"
 }
 
-// ⭐ 核心概念:Patient 加 entries: Entry[] (可选)
-//  - 课程后端 Exercise 23 Patient.entries: Entry[] 是**必填**(后端 GET 永远返回 entries: [])
-//  - 前端这里用 entries?: Entry[] **可选**,是为了兼容 GET /api/patients 的返回类型
-//   NonSensitivePatient = Omit<Patient,'ssn'|'entries'> 没有 entries
-//  - 详情页 GET /api/patients/:id 返回完整 Patient,detail 页组件期望 Patient.entries 必有
-//   所以读 detail 时需要 narrowing 或单独用 PatientForDetail 类型
-//  - 不用 Omit 把 entries 也剥掉:详情页组件 props 类型要单独写
-export interface Patient {
-  id: string;
-  name: string;
-  occupation: string;
-  gender: Gender;
-  ssn?: string;
-  dateOfBirth?: string;
-  // Exercise 24 新增 —— 后端 Patient 必填,前端用可选以兼容列表 NonSensitivePatient 返回
-  entries?: Entry[];
-}
-
-// ⭐ 核心概念:NonSensitivePatient = Omit<Patient, 'ssn' | 'entries'>
-//  - 课程 Exercise 23 后端定义:列表接口剥离 ssn(隐私)+ entries(列表页不需要)
-//  - 不用:GET /api/patients 返回的 Patient[] 与前端 Patient 类型对不齐(后端没 ssn/entries,前端要 ssn/entries)
-//  - 用 NonSensitivePatient:getAll() 显式返回 NonSensitivePatient[],类型契约明确
 export type NonSensitivePatient = Omit<Patient, 'ssn' | 'entries'>;
 
 export type PatientFormValues = Omit<Patient, "id" | "entries">;
