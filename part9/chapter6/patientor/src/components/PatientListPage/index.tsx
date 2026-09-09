@@ -1,17 +1,24 @@
+// chapter6 sub-section 2 'Patientor frontend' — Exercise 24 患者名变可点击 Link
 import { useState } from "react";
 import { Box, Table, Button, TableHead, Typography, TableCell, TableRow, TableBody } from '@mui/material';
+import { Link } from "react-router-dom";
 import axios from 'axios';
 
-import { PatientFormValues, Patient } from "../../types";
+import { PatientFormValues, NonSensitivePatient } from "../../types";
 import AddPatientModal from "../AddPatientModal";
 
 import HealthRatingBar from "../HealthRatingBar";
 
 import patientService from "../../services/patients";
 
+// ⭐ 核心概念:为什么 Props 用 NonSensitivePatient?
+//  - App.tsx 的 state 类型从 Exercise 23 后端契约变 NonSensitivePatient[]
+//  - PatientListPage 接 patients prop,类型必须与 App 对齐,否则 TS 报错
+//  - 不用 NonSensitivePatient:类型不对齐
+//  - 验证:VSCode hover patients prop 能看到 NonSensitivePatient[]
 interface Props {
-  patients : Patient[]
-  setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
+  patients: NonSensitivePatient[];
+  setPatients: React.Dispatch<React.SetStateAction<NonSensitivePatient[]>>;
 }
 
 const PatientListPage = ({ patients, setPatients } : Props ) => {
@@ -64,9 +71,16 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {Object.values(patients).map((patient: Patient) => (
+          {Object.values(patients).map((patient: NonSensitivePatient) => (
             <TableRow key={patient.id}>
-              <TableCell>{patient.name}</TableCell>
+              {/* ⭐ 核心概念:为什么 Name 用 Link 包起来?
+                - 课程 Exercise 24:"The user should be able to access a patient's information by clicking the patient's name"
+                - 不用 Link:点击名字没反应,详情页只能手输 URL
+                - 用 Link:点击名字 → React Router 跳 /patients/:id → PatientDetailPage
+                - 验证:点击 John McClane,URL 变 /patients/d2773336-f723-11e9-8f0b-362b9e155667 */}
+              <TableCell>
+                <Link to={`/patients/${patient.id}`}>{patient.name}</Link>
+              </TableCell>
               <TableCell>{patient.gender}</TableCell>
               <TableCell>{patient.occupation}</TableCell>
               <TableCell>
