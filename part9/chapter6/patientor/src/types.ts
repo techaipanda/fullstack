@@ -54,6 +54,17 @@ export type Entry =
   | OccupationalHealthcareEntry
   | HealthCheckEntry;
 
+// ⭐ 核心概念:EntryWithoutId = UnionOmit<Entry, 'id'>
+//  - 课程 sub-section 4 verbatim:"Define Entry without the 'id' property"
+//  - 用途:POST /api/patients/:id/entries 接收的 body 是 EntryWithoutId(后端生成 id)
+//  - 复制 backend UnionOmit 过来:课程原话"For these exercises, it is enough to just copy/paste
+//   the definitions from the backend to the frontend"
+//  - 不用:前端 services.addEntry(id, body) 的 body 类型是 Entry,客户端可能传 id(可能冲突),
+//   语义不清
+//  - 用:客户端不能传 id,语义明确
+export type UnionOmit<T, K extends string | number | symbol> = T extends unknown ? Omit<T, K> : never;
+export type EntryWithoutId = UnionOmit<Entry, 'id'>;
+
 // ⭐ 核心概念:前端 Patient 与后端契约对齐
 //  - 课程 sub-section 2 后端 Patient.entries: Entry[] 是必填
 //  - 不用对齐:前端读 patient.entries 时 TS 不会报错,但语义与后端不一致

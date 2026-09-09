@@ -1,6 +1,7 @@
 // chapter6 sub-section 2 'Patientor frontend' — Exercise 24 扩展 patientService
+// chapter6 sub-section 4 'Omit with unions' — Exercise 30 增 addEntry
 import axios from "axios";
-import { Patient, PatientFormValues, NonSensitivePatient } from "../types";
+import { Patient, PatientFormValues, NonSensitivePatient, Entry, EntryWithoutId } from "../types";
 
 import { apiBaseUrl } from "../constants";
 
@@ -39,6 +40,19 @@ const create = async (object: PatientFormValues): Promise<NonSensitivePatient> =
   return data;
 };
 
+// ⭐ 核心概念:为什么 addEntry 返回 Entry(完整版)而不是 NonSensitivePatient?
+//  - 后端 Exercise 29 POST /:id/entries 返回新增的 Entry 完整版(只有 id + 5 个字段)
+//  - 不用 Entry:类型"过宽",拿到的对象没有 Patient 的字段,语义不匹配
+//  - 用 Entry:与后端契约对齐,前端把新 entry concat 到 patient.entries
+//  - 验证:PatientDetailPage 拿到 entry 后 setPatient({...patient, entries:[...patient.entries, entry]})
+const addEntry = async (id: string, object: EntryWithoutId): Promise<Entry> => {
+  const { data } = await axios.post<Entry>(
+    `${apiBaseUrl}/patients/${id}/entries`,
+    object
+  );
+  return data;
+};
+
 export default {
-  getAll, getById, create
+  getAll, getById, create, addEntry
 };

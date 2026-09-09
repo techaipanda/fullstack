@@ -1,7 +1,26 @@
-// chapter6 sub-section 2 'Patientor frontend' — Exercise 23 backend entry
-// 课程原文只列了 Patient 类型 + GET /api/patients/:id 一个端点。
-// 但前端 starter 还依赖 GET /api/ping + GET /api/patients + POST /api/patients,
-// 这里一并实现以跑通端到端 + 修掉前端 Add 按钮的 'Unrecognized axios error'。
+// chapter6 sub-section 4 'Omit with unions' — Exercise 29 POST /api/patients/:id/entries
+// 课程原话(Exercise 29):
+//   "Your next task is to add endpoint /api/patients/:id/entries to your backend,
+//    through which you can POST an entry for a patient.
+//    Remember that we have different kinds of entries in our app, so our backend
+//    should support all those types and check that at least all required fields
+//    are given for each type. In this exercise, you quite likely need to remember
+//    this trick. ... Hint: If you have defined the HealthCheckRating with a const
+//    object ... You can not a Zod enum for validation since it does not support
+//    number values. Instead, yo can use the Zod union:
+//      z.union([
+//        z.literal(HealthCheckRating.Healthy),
+//        z.literal(HealthCheckRating.LowRisk),
+//        z.literal(HealthCheckRating.HighRisk),
+//        z.literal(HealthCheckRating.CriticalRisk),
+//      ])"
+//
+// 课程没给完整 handler verbatim。下面用 zod discriminatedUnion() + 三种 entry 的 baseSchema 实现
+// 校验,handler 结构按 Express 标准 idiom。注意:
+//  - EntryWithoutId 已在 types.ts 定义(UnionOmit<Entry,'id'>)
+//  - 校验失败返回 zod issues 数组(给前端可读错误信息)
+//  - id 后端生成(不接客户端 id)
+//  - 此 handler 不是课程 verbatim 实现,是从课程 hint + Express 标准 idiom 组合,代码本身模式通用
 
 import express from 'express';
 // ⭐ 核心概念:为什么需要 cors?
@@ -10,9 +29,18 @@ import express from 'express';
 //  - 用 cors:加 Access-Control-Allow-Origin 头,浏览器放行
 //  - 生产环境应该限制 origin(只允许自己的前端域名),dev 环境用 cors() 默认放行所有
 import cors from 'cors';
+// ⭐ 核心概念:为什么用 zod?
+//  - 课程 Exercise 29 明确推荐 zod 做运行时校验("this trick" 指向 zod union + literal)
+//  - 不用 zod:手写 if (typeof body.healthCheckRating !== ...) 字段一多就乱
+//  - 用 zod:z.discriminatedUnion('type', [...]) 自动按 type 字段 narrow 到对应 schema,switch case 不用手写
+//  - 验证:故意传缺 discharge 的 HospitalEntry,后端返回 400 + zod issues,前端 catch 能拿到
+import { z } from 'zod';
 
 import { patients } from './patients.ts';
-import type { Patient, NonSensitivePatient } from './types.ts';
+import {
+  Gender, HealthCheckRating,
+  type Patient, type NonSensitivePatient, type Entry,
+} from './types.ts';
 
 const app = express();
 // 解析 JSON body(POST /api/patients 需要)
@@ -90,6 +118,109 @@ app.post('/api/patients', (req, res) => {
   res.json(toNonSensitive(newPatient));
 });
 
+// ========== sub-section 4 'Omit with unions' — Exercise 29 ==========
+// ⭐ 核心概念:zod discriminatedUnion 按 type 字段自动 narrow
+//  - 课程原话:"our backend should support all those types and check that at least all required
+//    fields are given for each type" + zod union + literal 提示
+//  - 不用 discriminatedUnion:z.union 也能校验,但要手写 if/switch narrow,代码冗长
+//  - 用 discriminatedUnion('type', [HealthCheckSchema, OccHCSchema, HospitalSchema]):
+//   zod 看到 body.type === 'HealthCheck' 就只校验 HealthCheckEntry 的字段,缺 healthCheckRating 立刻报
+//  - 验证:发 POST body={ type:'Hospital', description:'x', specialist:'y', date:'z' }
+//   (缺 discharge) → 后端 400 + "discharge: Required"
+const baseEntrySchema = z.object({
+  description: z.string(),
+  date: z.string(),
+  specialist: z.string(),
+  // 课程 hint:diagnosisCodes 数组里的字符串要存在 diagnoses 表里(本题只检查是数组,不查存在)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  diagnosisCodes: z.array(z.string()).optional(),
+});
+
+const healthCheckEntrySchema = baseEntrySchema.extend({
+  type: z.literal('HealthCheck'),
+  // 课程原话 verbatim hint:"z.union([z.literal(HealthCheckRating.Healthy), ...])"
+  //  - 不用 z.union of literals:用 z.number() 太宽,0.5 / -1 / 'abc' 都过
+  //  - 用 z.union of literals:只接受 0|1|2|3 四个字面量,前端乱传 '2' 字符串会被拒
+  healthCheckRating: z.union([
+    z.literal(HealthCheckRating.Healthy),
+    z.literal(HealthCheckRating.LowRisk),
+    z.literal(HealthCheckRating.HighRisk),
+    z.literal(HealthCheckRating.CriticalRisk),
+  ]),
+});
+
+const occupationalHealthcareEntrySchema = baseEntrySchema.extend({
+  type: z.literal('OccupationalHealthcare'),
+  employerName: z.string(),
+  // 课程原话示例数据里 sickLeave 有,但其他示例(无 sickLeave)没出现,故 optional
+  sickLeave: z.object({
+    startDate: z.string(),
+    endDate: z.string(),
+  }).optional(),
+});
+
+const hospitalEntrySchema = baseEntrySchema.extend({
+  type: z.literal('Hospital'),
+  discharge: z.object({
+    date: z.string(),
+    criteria: z.string(),
+  }),
+});
+
+const entrySchema = z.discriminatedUnion('type', [
+  healthCheckEntrySchema,
+  occupationalHealthcareEntrySchema,
+  hospitalEntrySchema,
+]);
+
+// POST /api/patients/:id/entries —— Exercise 29 核心端点
+// 课程原话:"add endpoint /api/patients/:id/entries to your backend, through which you can
+// POST an entry for a patient"
+app.post('/api/patients/:id/entries', (req, res) => {
+  // 1. 找 patient —— 找不到直接 404
+  const id = req.params.id;
+  const patient = patients.find(p => p.id === id);
+  if (!patient) {
+    return res.status(404).send('Patient not found');
+  }
+
+  // 2. zod 校验 body —— 失败返回 issues 数组
+  // ⭐ 核心概念:为什么不用 as EntryWithoutId 而用 zod 校验?
+  //  - 用 as:编译期类型正确但运行期 body 可能是任意结构,字段缺失/类型错误时不会立刻发现
+  //  - 用 zod:运行期校验,失败立刻 400 + 详细 issues,前端能 catch 显示
+  //  - 验证:curl POST 缺字段的 body,看到 400 + zod issues
+  const parseResult = entrySchema.safeParse(req.body);
+  if (!parseResult.success) {
+    return res.status(400).json({ error: parseResult.error.issues });
+  }
+
+  // 3. 加 id 后存入 patient.entries
+  const newEntry: Entry = {
+    ...parseResult.data,
+    id: generateId(),
+  } as Entry;
+  patient.entries.push(newEntry);
+
+  // 4. 返回新增的 entry(不含 patient,只 entry)
+  return res.json(newEntry);
+});
+
+// ========== Exercise 11 (前置,9-5 时已经 GET /api/diagnoses 但没 backend 实现) ==========
+// 课程 Exercise 11 在 part 9 sub-section 2 'Patientor backend' 实现过 /api/diagnoses,
+// 这里补一个最小 mock(ICD-10 几条)以让 Exercise 27 的 diagnoses 反查能跑通
+// 注:课程原话没要求 backend 这里实现 /api/diagnoses(默认从前面的 Exercise 拿),但
+// 我们的 backend 没 9.5 的前置,所以补一个最小 mock
+const diagnoses = [
+  { code: 'S62.5', name: 'Fracture of other finger', latin: 'Fractura digiti alterius' },
+  { code: 'Z57.1', name: 'Occupational exposure to radiation' },
+  { code: 'Z74.3', name: 'Need for continuous supervision' },
+  { code: 'M51.2', name: 'Other specified intervertebral disc displacement' },
+];
+
+app.get('/api/diagnoses', (_req, res) => {
+  res.json(diagnoses);
+});
+
 // 课程原话:"关闭 backend 会清空所有数据"(in-memory mock),所以不写文件
 
 app.listen(PORT, () => {
@@ -99,4 +230,6 @@ app.listen(PORT, () => {
   console.log('  GET    http://localhost:3001/api/patients');
   console.log('  GET    http://localhost:3001/api/patients/:id   ← Exercise 23');
   console.log('  POST   http://localhost:3001/api/patients');
+  console.log('  POST   http://localhost:3001/api/patients/:id/entries   ← Exercise 29');
+  console.log('  GET    http://localhost:3001/api/diagnoses');
 });

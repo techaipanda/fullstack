@@ -1,0 +1,16 @@
+# chapter6 sub-section 4 'Omit with unions' — Exercise 33 GitHub Actions E2E workflow
+# 课程原文 verbatim(Exercise 33 头部):
+#   "name: Patientor E2E Tests
+#
+#
+#    on:
+#      push:
+#        branches: [ main, master ]"
+# 课程只给了文件头部,完整 jobs/steps 留空(待补 Playwright tests)。
+# 这里按 sub-section 4 verbatim 复制头部,保留 push 到 main/master 触发器
+
+name: Patientor E2E Tests
+
+on:
+  push:
+    branches: [ main, master ]

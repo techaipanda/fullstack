@@ -135,6 +135,33 @@ export type Entry =
   | OccupationalHealthcareEntry
   | HealthCheckEntry;
 
+// 课程原文 verbatim(sub-section 4 'Omit with unions'):
+//   // Define special omit for unions
+//   type UnionOmit<T, K extends string | number | symbol> = T extends unknown ? Omit<T, K> : never;
+//   // Define Entry without the 'id' property
+//   type EntryWithoutId = UnionOmit<Entry, 'id'>;
+// ⭐ 核心概念:为什么需要 UnionOmit 而不是 Omit<Entry,'id'>?
+//  - 课程原话:"when you use them with Omit to exclude a property, it works in a possibly unexpected way.
+//    Suppose that we want to remove the id from each Entry. We could think of using
+//    Omit<Entry, 'id'> but it wouldn't work as we might expect. In fact, the resulting type
+//    would only contain the common properties, but not the ones they don't share."
+//  - Omit<Entry,'id'>:对**整个 union** 做 Omit,只保留三个子类型的公共字段(id/desc/date/specialist/diagnosisCodes),
+//   HospitalEntry 的 discharge / OccupationalHealthcareEntry 的 employerName+ sickLeave / HealthCheckEntry 的 healthCheckRating 都丢了
+//  - UnionOmit<Entry,'id'>:T extends unknown 把 union **distribute** 到每个成员,每个成员各自 Omit<id>,再合并
+//   三个 Omit 后的 interface 还是 union,所有特化字段保留
+//  - 用 UnionOmit:每个 entry 子类型的特有字段(discharge/employerName/sickLeave/healthCheckRating)都保留
+//  - 不用:POST /api/patients/:id/entries 接 EntryWithoutId 时,后端代码无法判断"discharge 字段是否提供"
+//  - 验证:vscode hover EntryWithoutId 看到 (HospitalEntry|'id' Omit) | (OccHCEntry|'id' Omit) | (HealthCheckEntry|'id' Omit)
+export type UnionOmit<T, K extends string | number | symbol> = T extends unknown ? Omit<T, K> : never;
+
+// ⭐ 核心概念:EntryWithoutId = UnionOmit<Entry, 'id'>
+//  - 课程原话:"Define Entry without the 'id' property"
+//  - 用途:POST /api/patients/:id/entries 接收的 body 是 EntryWithoutId(后端生成 id,不接客户端 id)
+//  - 不用 EntryWithoutId:body 类型是 Entry,客户端可以传 id(可能跟已有 patient 的 entry id 冲突),
+//   后端要么忽略要么报错,语义不清
+//  - 用 EntryWithoutId:客户端不能传 id,语义明确,后端拿到 entry 后 assignId() 加 id 再存
+export type EntryWithoutId = UnionOmit<Entry, 'id'>;
+
 // Patient 在 sub-section 2 'Patientor frontend' 已完整,此处只改 entries 字段类型
 // ⭐ 核心概念:为什么 Patient.entries 是 Entry[] 必填而不是 ?
 //  - 课程后端 Patient.entries 必填(后端 GET /:id 永远返回 entries 数组)
