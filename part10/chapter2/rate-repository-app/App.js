@@ -35,6 +35,39 @@
 // 后续 sub-section 2 'Installing dependencies in Expo project' 会教 expo-constants,
 // 后续 sub-section 3 'Structuring our project' 会教 src/components/ 拆分,这里
 // 故意保持单文件,展示概念即可。
+//
+// ============================================================
+// chapter3 sub-section 2 'Installing dependencies in Expo project'
+// ============================================================
+// 课程原话(verbatim):
+//   "In the earlier parts of the course, we have mainly installed libraries as
+//    project dependencies using the npm install command. However, when installing
+//    Expo and React Native libraries, it is recommended to use the npx expo install
+//    command instead. This allows the Expo CLI to choose a version of the library
+//    that matches the project and its SDK version."
+//   "We will soon need the expo-constants library, which provides the application
+//    with environment information such as the correct status bar height. Install
+//    the library with the command: npx expo install expo-constants"
+//   "If you're not sure whether a library contains Expo or React Native specific
+//    native code, you can always install it using npx expo install command. If Expo
+//    doesn't recognize the package, it will fall back to installing it using the
+//    normal npm install command."
+//
+// 已执行 verbatim 命令:npx expo install expo-constants → package.json 已自动
+// 加入 "expo-constants": "~55.0.17"(由 Expo CLI 选 SDK 55 兼容版本)
+//
+// ⭐ 核心概念:为什么 Expo 项目优先用 `npx expo install` 而非 `npm install`?
+//  不用 expo install:用 npm install expo-constants 时,Expo CLI 不会介入,
+//   你装到最新版(比如 17.x),但 SDK 55 期望 55.0.x,版本不匹配 →
+//   iOS/Android 运行时抛 "Constants.statusBarHeight is undefined" 或
+//   "Native module cannot be null" 之类 native module 错误
+//  用 expo install:Expo CLI 读 SDK 版本表,自动选匹配版本(55.0.17),
+//   保证 native binding 编译通过 + 运行时正确
+//  兜底规则:不确定库是不是 Expo/React Native 的,就先用 npx expo install,
+//   不识别时自动降级 npm install
+//
+// 本节只有命令 + 注释,没有代码改动。后续 sub-section 3 才会用
+// `import Constants from 'expo-constants'` + `marginTop: Constants.statusBarHeight`
 
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
