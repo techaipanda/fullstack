@@ -1,9 +1,9 @@
-// chapter3 sub-section 6 'Style' — verbatim course block 51.
-// 改动:StyleSheet.create + array 合并 + && 短路做条件样式
-// (FancyText isBlue/isBig)。为什么:演示 RN 标准 style 模式
-// (StyleSheet 编译期编数字 ID,inline 每次新建对象,性能 + 复用)。
-// 注:sub-section 3 的 Constants.statusBarHeight + "Rate Repository
-// Application" 硬编码按课程末态移除,theming sub-section 会重建。
+// chapter3-Style
+// 改动:StyleSheet.create 把样式从 inline {{...}} 抽为编译期常量;
+//  style prop 接 array + && 短路做条件样式合并 (FancyText isBlue/isBig)。
+// 为什么:StyleSheet.create 编数字 ID,native 端跨 re-render 复用同一
+//  style 引用,免 inline 每次新建对象的桥接对比;array + && 模式用声明式
+//  表达"基础样式 + 条件覆盖",无需运行时分支判断。
 
 import { Text, StyleSheet } from 'react-native';
 
