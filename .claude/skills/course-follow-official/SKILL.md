@@ -59,7 +59,7 @@ This catches "course says X, your repo has Y" before you write. Do not skip this
 When writing the file, **only add** these two things — nothing else:
 
 1. **Section markers** — e.g. `// part5 a — setToken` placed immediately above the code that implements that section. These let the learner map code → tutorial step.
-2. **Chinese learning comments** — explanations of *what the course line does* in Chinese, because the user is learning and the course itself is in English. **For new concepts (hooks, APIs, syntax patterns), comments must be deep enough that a learner who reads only the code (not the README) can understand the concept.** See `Step 4.5` for the required depth.
+2. **Chinese learning comments** — explanations of *what the course line does* in Chinese, because the user is learning and the course itself is in English. **For new concepts (hooks, APIs, syntax patterns), comments must be deep enough that a learner who reads only the code (not the README) can understand the concept.** See `Step 4.6` for concept-level depth, and `Step 4.5` for the file-level 3-piece header.
 
 **Forbidden additions** (these are "improvement drift"):
 
@@ -71,7 +71,51 @@ When writing the file, **only add** these two things — nothing else:
 - ❌ Reordering state declarations or hooks
 - ❌ Adding any "safety" code (extra try/catch, null checks) not in the course
 
-### Step 4.5 — Comment depth for new concepts (关键概念注释纪律)
+### Step 4.5 — 顶部 3 件套注释 (file-level header)
+
+Every course-driven code modification file MUST start with a 3-piece Chinese comment block at the top summarizing the change:
+
+```
+// <chapter-sub-section, 如 chapter3-Style>
+// 改动:...(代码层理论,描述这次修改在做什么)
+// 为什么:...(代码层理论,描述这种做法的理论依据)
+```
+
+The three pieces:
+
+1. **原文定位** — pinpoint the course position in compact form (e.g. `chapter3-Style`, `chapter3-Structuring`, `part5 a — setToken`). Never write the long English section title verbatim.
+2. **改动** — describe **what changed in code-level terms** (e.g. "StyleSheet.create 把样式从 inline {{...}} 抽为编译期常量"). Not "演示 RN 标准样式".
+3. **为什么** — describe **the mechanism behind this approach** (e.g. "StyleSheet.create 编数字 ID,native 端跨 re-render 复用 style 引用,免 inline 每次新建对象的桥接对比"). Not "性能 + 复用".
+
+**Why** (use case): user feedback — "代码直接的修改可以看作执行"(action layer不需要展开);用户要的是**相对的理论知识**(机制 / 原理). 结论词("性能好""更标准""演示")对学习者没有信息量,机制描述才有。
+
+**Length discipline**:
+- Total lines: 6–10 lines (top comment block)
+- Hard cap at 10 lines unless strictly necessary
+- Concise > verbose
+
+**Anti-patterns** (do NOT do these in 3-piece headers):
+- ❌ `// 为什么:性能 + 复用` — conclusion words, not code theory
+- ❌ `// 为什么:这是 RN 标准 style 模式` — not a mechanism description
+- ❌ `// 演示 StyleSheet.create 的好处` — "演示" is teaching intent, not code theory
+- ❌ `// 课程原话:...(大段 verbatim 引用)` — don't pile up course verbatim, do conversion
+- ❌ `// ⭐ 核心概念:...` 加 4-6 items with "verification methods" — too verbose for a file header (that's `Step 4.6`)
+- ❌ Long English Stack Overflow quotes — translate to Chinese in your own words
+
+**Good example**:
+
+```js
+// chapter3-Style
+// 改动:StyleSheet.create 把样式从 inline {{...}} 抽为编译期常量;
+//  style prop 接 array + && 短路做条件样式合并 (FancyText isBlue/isBig)。
+// 为什么:StyleSheet.create 编数字 ID,native 端跨 re-render 复用同一
+//  style 引用,免 inline 每次新建对象的桥接对比;array + && 模式用声明式
+//  表达"基础样式 + 条件覆盖",无需运行时分支判断。
+```
+
+**Note on scope**: this is the **file-level header**. For **inline comments** explaining new concepts (hooks, APIs, syntax patterns the learner hasn't seen), see `Step 4.6 — 概念深度注释 (concept-level inline)` instead. The two are complementary, not overlapping: file header = "what changed in this file"; concept depth = "what's this concept and why use it".
+
+### Step 4.6 — 概念深度注释 (concept-level inline)
 
 When the course introduces a **new concept** (a hook, an API, a syntax pattern the learner hasn't seen), the comment beside it must include ALL of the following:
 
@@ -143,6 +187,8 @@ Before saying "1:1 done", self-check:
 - [ ] No helpers replaced with idiomatic alternatives
 - [ ] No aliases / wrapper variables added to dodge lints
 - [ ] Section markers and Chinese comments are the **only** additions
+- [ ] Top of file has 3-piece header (`chapter定位` + `改动` + `为什么`) per `Step 4.5`, 6–10 lines
+- [ ] 3-piece body uses mechanism descriptions (e.g. "编数字 ID 复用引用"), not conclusion words ("性能好" / "更标准" / "演示")
 - [ ] Every new concept (hook / API / syntax) has a `⭐ 核心概念:` Chinese comment that explains WHY, not just WHAT
 - [ ] For hook usage, the comment includes a "不用 X / 用 X" comparison so the learner sees the effect
 - [ ] Comments include a verification method (console.log / browser observation) the learner can run to confirm the concept works
@@ -152,3 +198,4 @@ If any item fails, revert and re-apply Step 4's discipline.
 ## Related memory
 
 - See `[[course-follow-official-incident]]` for the original failure mode this skill was written to prevent.
+- See `[[course-comment-3-part-standard]]` for the full 3-piece file header standard (reasons, examples, anti-patterns).
