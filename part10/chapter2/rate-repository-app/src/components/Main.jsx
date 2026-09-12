@@ -1,21 +1,17 @@
-// chapter3-Theming
-// 改动:删 sub-section 6 的 FancyText + 内联 styles,改用自定义 Text 组件
-//  + theme 主题;通过语义 props (color / fontSize / fontWeight) 而非
-//  style 对象表达文本变体。
-// 为什么:把"颜色 / 字号 / 字重"提到 props API 而非 style,组件调用方从
-//  样式细节(blueText / bigText 命名)解耦,只关心"这是次级色正文"。
+// chapter3-Flexbox
+// 改动:删 sub-section 7 (Theming) 的 4 个 <Text> 演示,改为 import FlexboxExample
+//  (default) + FlexboxItemExample (named) 两个组件,通过 fragment 串接渲染。
+// 为什么:Theming 小节演示文本主题(color / fontSize / fontWeight),Flexbox 小节
+//  演示布局主题(flex 容器 / 项目行为),节主题切换对应展示组件切换;Main.jsx 保持
+//  "当前小节 demo 容器"角色,自身不持有演示内容,只调度子组件。
 
-import Text from './Text';
+import FlexboxExample, { FlexboxItemExample } from './FlexboxExample';
 
 const Main = () => {
   return (
     <>
-      <Text>Simple text</Text>
-      <Text style={{ paddingBottom: 10 }}>Text with custom style</Text>
-      <Text fontWeight="bold" fontSize="subheading">
-        Bold subheading
-      </Text>
-      <Text color="textSecondary">Text with secondary color</Text>
+      <FlexboxExample />
+      <FlexboxItemExample />
     </>
   );
 };
