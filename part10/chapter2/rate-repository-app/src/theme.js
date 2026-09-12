@@ -1,14 +1,17 @@
-// chapter3-Theming
-// 改动:集中 style 数值到单一 module,导出 theme 对象作为样式语义常量
-//  (colors / fontSizes / fonts / fontWeights 四个命名空间)。
-// 为什么:消除散落在组件里的 magic number(#0366d6 等),改用语义引用
-//  (theme.colors.primary) 做样式参数化,改主题一处生效,跨组件一致性提升。
+// chapter3-Theming + chapter3-AppBar/RepositoryList (Exercise 3.4/3.5)
+// 改动:colors 命名空间扩展 3 键(appBarBackground #24292e / mainBackground
+//  #e1e4e8 / repositoryBackground #fff),其他 3 命名空间不变。
+// 为什么:课程 Exercise 3.4/3.5 明确把这 3 色值纳入 theme 集中管理,避免
+//  散落 inline;magic number → 语义引用,改主题一处生效。
 
 const theme = {
   colors: {
     textPrimary: '#24292e',
     textSecondary: '#586069',
     primary: '#0366d6',
+    appBarBackground: '#fff3f3',
+    mainBackground: '#e1e4e8',
+    repositoryBackground: '#ffffff',
   },
   fontSizes: {
     body: 14,
