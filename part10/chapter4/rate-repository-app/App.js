@@ -21,7 +21,20 @@
 //
 // 本文件历史:s1 'Core components' / s2 'Installing deps' / s3 'Structuring' /
 // s4 'Status bar style' 见 commit 6ee3fc1 / 7ff7a87 / 06cbe4c / 9ae5cf2;
-// 'Routing' NativeRouter 见 f34de0c;本节起加入 ApolloProvider + createApolloClient。
+// 'Routing' NativeRouter 见 f34de0c;'GraphQL and Apollo client' 加入
+// ApolloProvider + createApolloClient (见 commit 7ccc8f2);
+// 本节 s5 'Environment variables' 加 console.log 验证 .env 注入。
+//
+// ---------- chapter4-Environment variables ----------
+// 改动:App 函数体 return 之前加一行
+//  console.log("env check:", process.env.EXPO_PUBLIC_ENV);
+// 为什么:Expo SDK 49+ 内置 .env 读取,只要变量名以 EXPO_PUBLIC_ 开头
+//  就能在 JS 里通过 process.env 直接访问(无需 dotenv/expo-constants
+//  /app.config.js 这些老套路)。重启 Expo 后生效;打印只是 sanity check,
+//  Exercise 10.12 会让 apolloClient.js 真正读这个变量。
+// ⚠ MOOC 原文用的是 process.env.EXPO_PUBLIC_ENV(用 EXPO_PUBLIC_
+//  前缀),不是老归档的 process.env.ENV。1:1 保留 verbatim。
+// -------------------------------------------------------------------
 
 import { ApolloProvider } from '@apollo/client/react';
 import { StatusBar } from 'expo-status-bar';
@@ -33,6 +46,8 @@ import createApolloClient from './src/utils/apolloClient';
 const apolloClient = createApolloClient();
 
 const App = () => {
+  console.log("env check:", process.env.EXPO_PUBLIC_ENV);
+
   return (
     <>
       <StatusBar style="auto" />
